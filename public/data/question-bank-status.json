@@ -1,6 +1,18 @@
 {
-  "version": 1,
-  "status": "demo-bank",
-  "note": "Esta compilación incluye preguntas de demostración. El banco aprobado de 120 preguntas debe importarse como siguiente integración antes de considerar el juego listo para lanzamiento.",
-  "questionsByDifficulty": {"facil":[],"medio":[],"dificil":[]}
+  "version": 2,
+  "status": "integrated",
+  "questionCount": 120,
+  "distribution": { "facil": 40, "medio": 40, "dificil": 40 },
+  "randomizeQuestionOrder": true,
+  "randomizeAnswerOrder": true,
+  "noRepeatUntilDifficultyPoolExhausted": true,
+  "poolScope": "shared_by_all_players_in_the_same_game",
+  "source": "public/data/question-bank.json.gz.b64",
+  "integrityChecks": [
+    "exactly 120 questions",
+    "40 questions in each difficulty",
+    "four options per question",
+    "valid correctAnswerIndex",
+    "biblicalReference present"
+  ]
 }
