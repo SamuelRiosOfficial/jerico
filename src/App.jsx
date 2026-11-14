@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './style.css';
+import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep } from './gameEngine.js';
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
 const DATA = (name) => `${import.meta.env.BASE_URL}data/${name}`;
@@ -125,12 +126,7 @@ function App() {
         if (!('DecompressionStream' in window)) throw new Error('Este navegador no puede abrir el banco de preguntas comprimido.');
         const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
         const bank = await new Response(stream).json();
-        if (bank.questionCount !== 120 || bank.questions?.length !== 120) throw new Error('El banco debe contener exactamente 120 preguntas.');
-        const counts = { facil: 0, medio: 0, dificil: 0 };
-        bank.questions.forEach((item) => { if (counts[item.difficulty] !== undefined) counts[item.difficulty] += 1; });
-        if (counts.facil !== 40 || counts.medio !== 40 || counts.dificil !== 40) throw new Error('El banco no está distribuido en 40 preguntas por dificultad.');
-        const malformed = bank.questions.find((item) => !item.id || !item.question || !Array.isArray(item.options) || item.options.length !== 4 || item.correctAnswerIndex < 0 || item.correctAnswerIndex > 3 || !item.biblicalReference);
-        if (malformed) throw new Error(`La pregunta ${malformed.id || 'sin ID'} no tiene una estructura válida.`);
+        validateQuestionBank(bank);
         if (alive) { setQuestionBank(bank.questions); setBankError(''); }
       } catch (error) {
         if (alive) setBankError(error.message || 'Error al cargar las preguntas.');
@@ -275,24 +271,20 @@ function App() {
 
   const askQuestion = (selectedLevel) => {
     if (!questionBank || !activePlayer) return;
-    const pool = questionBank.filter((item) => item.difficulty === selectedLevel.id);
-    if (!pool.length) { setBankError(`No hay preguntas disponibles para ${selectedLevel.label.toLowerCase()}.`); return; }
-    let unused = pool.filter((item) => !usedQuestionIds[selectedLevel.id].includes(item.id));
-    if (!unused.length) {
-      unused = pool;
-      setUsedQuestionIds((current) => ({ ...current, [selectedLevel.id]: [] }));
+    let selection;
+    try {
+      selection = selectQuestionForTurn(questionBank, selectedLevel.id, usedQuestionIds);
+    } catch (error) {
+      setBankError(error.message || 'No hay preguntas disponibles.');
+      return;
     }
-    const selected = shuffle(unused)[0];
-    setUsedQuestionIds((current) => ({
-      ...current,
-      [selectedLevel.id]: [...(unused.length === pool.length && usedQuestionIds[selectedLevel.id].length === pool.length ? [] : current[selectedLevel.id]), selected.id]
-    }));
-    const options = shuffle(selected.options.map((text, index) => ({ text, correct: index === selected.correctAnswerIndex })));
+    const selected = selection.question;
+    setUsedQuestionIds(selection.usedIds);
     setLevel(selectedLevel);
     setQuestion({
       id: selected.id,
       text: selected.question,
-      options,
+      options: selection.options,
       reference: selected.biblicalReference,
       steps: selectedLevel.steps
     });
@@ -304,9 +296,10 @@ function App() {
   const submitAnswer = () => {
     if (answer === null || !question || !activePlayer) return;
     const correct = question.options[answer]?.correct === true;
-    const newSteps = Math.min(30, activePlayer.steps + (correct ? question.steps : 0));
+    const outcome = resolveAnswer(activePlayer.steps, correct, question.steps);
+    const newSteps = outcome.steps;
     const nextPlayers = players.map((player, index) => index === turn ? { ...player, steps: newSteps } : player);
-    const hasWon = correct && newSteps >= 30;
+    const hasWon = outcome.won;
     setPlayers(nextPlayers);
     if (hasWon) setWinner(nextPlayers[turn]);
     setFeedback({ correct, steps: correct ? question.steps : 0, winner: hasWon });
@@ -322,9 +315,9 @@ function App() {
     setFeedback(null);
     setQuestion(null);
   };
-  const currentSceneIndex = activePlayer ? Math.min(4, Math.floor(activePlayer.steps / 6)) : 0;
+  const currentSceneIndex = activePlayer ? sceneIndexForStep(activePlayer.steps) : 0;
   const percentByPlayer = useMemo(() => players.map((player) => (player.steps / 30) * 100), [players]);
-  const sceneForSteps = (steps) => SCENES[Math.min(4, Math.floor(steps / 6))];
+  const sceneForSteps = (steps) => SCENES[sceneIndexForStep(steps)];
   const stageMarkers = Array.from({ length: 30 }, (_, index) => index + 1);
 
   return (
