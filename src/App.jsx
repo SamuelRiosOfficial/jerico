@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './style.css';
-import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep } from './gameEngine.js';
+import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep, nextAvailableCharacter } from './gameEngine.js';
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
 const DATA = (name) => `${import.meta.env.BASE_URL}data/${name}`;
@@ -225,13 +225,7 @@ function App() {
         return;
       }
       const direction = event.key === 'ArrowRight' ? 1 : -1;
-      setFocusedCharacter((current) => {
-        for (let offset = 1; offset <= CHARACTERS.length; offset += 1) {
-          const candidate = (current + direction * offset + CHARACTERS.length) % CHARACTERS.length;
-          if (!selections.includes(candidate)) return candidate;
-        }
-        return current;
-      });
+      setFocusedCharacter((current) => nextAvailableCharacter(current, direction, selections));
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -299,7 +293,8 @@ function App() {
       text: selected.question,
       options: selection.options,
       reference: selected.biblicalReference,
-      steps: selectedLevel.steps
+      steps: selectedLevel.steps,
+      previousUsedIds: usedQuestionIds
     });
     setAnswer(null);
     playSound('tap');
@@ -429,14 +424,14 @@ function App() {
             <>
               <p>{t.choose}. Cada jugador debe tener un personaje diferente.</p>
               <div className="character-stage">
-                <button className="carousel-arrow" type="button" aria-label="Personaje anterior" onClick={() => chooseFocus((focusedCharacter + 3) % 4)}>‹</button>
+                <button className="carousel-arrow" type="button" aria-label="Personaje anterior" onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, -1, selections)); playSound('tap'); }}>‹</button>
                 <div className="character-preview">
                   <div className="character-spotlight"><Sprite character={CHARACTERS[focusedCharacter]} /></div>
                   <h3>{CHARACTERS[focusedCharacter].name}</h3>
                   <p>{CHARACTERS[focusedCharacter].description}</p>
                   <div className="character-dots">{CHARACTERS.map((character, index) => <button key={character.id} type="button" className={index === focusedCharacter ? 'dot active' : 'dot'} disabled={selections.includes(index)} onClick={() => chooseFocus(index)} aria-label={character.name} />)}</div>
                 </div>
-                <button className="carousel-arrow" type="button" aria-label="Siguiente personaje" onClick={() => chooseFocus((focusedCharacter + 1) % 4)}>›</button>
+                <button className="carousel-arrow" type="button" aria-label="Siguiente personaje" onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, 1, selections)); playSound('tap'); }}>›</button>
               </div>
               <div className="character-roster">
                 {CHARACTERS.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} /><b>{character.name}</b>{selections.includes(index) && <small>Elegido</small>}</button>)}
@@ -502,7 +497,7 @@ function App() {
             {question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" className={answer === index ? 'answer selected' : 'answer'} onClick={() => { setAnswer(index); playSound('tap'); }}><span>{String.fromCharCode(65 + index)}</span>{option.text}</button>)}
           </div>
           <p className="reference">Referencia bíblica: {question.reference}</p>
-          <div className="question-actions"><button className="text-button" type="button" onClick={() => setScreen('board')}>Cancelar turno</button><button className="primary" type="button" disabled={answer === null} onClick={submitAnswer}>{t.answer}</button></div>
+          <div className="question-actions"><button className="text-button" type="button" onClick={() => { setUsedQuestionIds(question.previousUsedIds); setQuestion(null); setAnswer(null); setScreen('board'); }}>Cancelar turno</button><button className="primary" type="button" disabled={answer === null} onClick={submitAnswer}>{t.answer}</button></div>
         </section>
       )}
 
