@@ -215,7 +215,12 @@ function App() {
     const segmentSteps = Math.max(0, segmentEnd - advanceFromSteps);
     const finishAnimation = () => {
       setMovingPlayerId(null);
-      if (segmentEnd < advancePayload.toSteps) {
+      if (advancePayload.crossedScene && !advancePayload.mapShown) {
+        setAdvanceFromSteps(segmentEnd);
+        setAnimatedStepCount(0);
+        setAdvancePayload((current) => ({ ...current, mapShown: true }));
+        setScreen('routeMap');
+      } else if (segmentEnd < advancePayload.toSteps) {
         setAdvanceFromSteps(segmentEnd);
         setAnimatedStepCount(0);
         setScreen('routeMap');
