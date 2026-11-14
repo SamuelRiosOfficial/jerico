@@ -89,11 +89,12 @@ function Sprite({ character, walking = false, className = '' }) {
     }, 180);
     return () => window.clearInterval(timer);
   }, [walking]);
-  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -60}px`, '--sprite-y': `${character.row * -110}px`, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
+  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -128}px`, '--sprite-y': `${character.row * -200}px`, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
 }
 
 function App() {
   const [screen, setScreen] = useState('menu');
+  const [settingsReturnScreen, setSettingsReturnScreen] = useState('menu');
   const [language, setLanguage] = useState('Español');
   const t = TEXT[language] || TEXT.Español;
   const [soundOn, setSoundOn] = useState(true);
@@ -119,7 +120,18 @@ function App() {
   const [isMapIntro, setIsMapIntro] = useState(false);
   const [keyboardHelp, setKeyboardHelp] = useState(true);
   const [movingPlayerId, setMovingPlayerId] = useState(null);
+  const [advancePayload, setAdvancePayload] = useState(null);
+  const [animatedStepCount, setAnimatedStepCount] = useState(0);
   const activePlayer = players[turn];
+  const openSettings = () => {
+    setSettingsReturnScreen(screen);
+    setSettingsModal('');
+    setScreen('settings');
+  };
+  const closeSettings = () => {
+    setSettingsModal('');
+    setScreen(settingsReturnScreen || 'menu');
+  };
 
   useEffect(() => {
     let alive = true;
@@ -185,25 +197,66 @@ function App() {
   useEffect(() => {
     if (screen !== 'feedback') return undefined;
     const timer = window.setTimeout(() => {
-      const isWinner = feedback?.winner === true;
       setFeedback(null);
-      if (isWinner) {
+      setAnimatedStepCount(0);
+      setMovingPlayerId(advancePayload?.playerId || null);
+      setScreen('advance');
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, [screen, feedback, advancePayload]);
+
+  useEffect(() => {
+    if (screen !== 'advance' || !advancePayload) return undefined;
+    let interval;
+    let finishTimer;
+    let completedSteps = 0;
+    const finishAnimation = () => {
+      setMovingPlayerId(null);
+      if (advancePayload.crossedScene) {
+        setScreen('routeMap');
+      } else if (advancePayload.winner) {
         setWallFrame(1);
         setScreen('collapse');
       } else {
-        if (feedback?.correct) setMovingPlayerId(players[turn]?.id || null);
+        setAdvancePayload(null);
         setTurn((current) => (current + 1) % players.length);
         setScreen('board');
       }
-    }, 4000);
-    return () => window.clearTimeout(timer);
-  }, [screen, feedback, players.length]);
+    };
+    if (!advancePayload.correct || advancePayload.steps <= 0) {
+      finishTimer = window.setTimeout(finishAnimation, 1450);
+    } else {
+      interval = window.setInterval(() => {
+        completedSteps += 1;
+        setAnimatedStepCount(completedSteps);
+        if (completedSteps >= advancePayload.steps) {
+          window.clearInterval(interval);
+          finishTimer = window.setTimeout(finishAnimation, 550);
+        }
+      }, 520);
+    }
+    return () => {
+      if (interval) window.clearInterval(interval);
+      if (finishTimer) window.clearTimeout(finishTimer);
+    };
+  }, [screen, advancePayload, players.length]);
 
   useEffect(() => {
-    if (screen !== 'board' || !movingPlayerId) return undefined;
-    const timer = window.setTimeout(() => setMovingPlayerId(null), 900);
+    if (screen !== 'routeMap') return undefined;
+    const timer = window.setTimeout(() => {
+      setMovingPlayerId(null);
+      if (advancePayload?.winner) {
+        setAdvancePayload(null);
+        setWallFrame(1);
+        setScreen('collapse');
+      } else {
+        setAdvancePayload(null);
+        setTurn((current) => (current + 1) % players.length);
+        setScreen('board');
+      }
+    }, 3200);
     return () => window.clearTimeout(timer);
-  }, [screen, movingPlayerId]);
+  }, [screen, advancePayload, players.length]);
 
   useEffect(() => {
     if (screen !== 'collapse') return undefined;
@@ -272,6 +325,8 @@ function App() {
     setTurn(0);
     setUsedQuestionIds({ facil: [], medio: [], dificil: [] });
     setWinner(null);
+    setAdvancePayload(null);
+    setAnimatedStepCount(0);
     setIsMapIntro(true);
     setScreen('map');
   };
@@ -310,6 +365,15 @@ function App() {
     const hasWon = outcome.won;
     setPlayers(nextPlayers);
     if (hasWon) setWinner(nextPlayers[turn]);
+    setAdvancePayload({
+      playerId: activePlayer.id,
+      fromSteps: activePlayer.steps,
+      toSteps: newSteps,
+      steps: correct ? newSteps - activePlayer.steps : 0,
+      correct,
+      winner: hasWon,
+      crossedScene: correct && sceneIndexForStep(activePlayer.steps) !== sceneIndexForStep(newSteps)
+    });
     setFeedback({ correct, steps: correct ? question.steps : 0, winner: hasWon });
     playSound(correct ? 'correct' : 'wrong');
     setScreen('feedback');
@@ -322,6 +386,8 @@ function App() {
     setSelections([]);
     setFeedback(null);
     setQuestion(null);
+    setAdvancePayload(null);
+    setMovingPlayerId(null);
   };
   const currentSceneIndex = activePlayer ? sceneIndexForStep(activePlayer.steps) : 0;
   const percentByPlayer = useMemo(() => players.map((player) => (player.steps / 30) * 100), [players]);
@@ -329,12 +395,12 @@ function App() {
   const stageMarkers = Array.from({ length: 30 }, (_, index) => index + 1);
 
   return (
-    <main className="game-shell">
+    <main className={`game-shell screen-${screen}`}>
       <header className="topbar">
         <div className="brand-mark">J</div>
         <div><div className="brand">JERICO</div><div className="subtitle">CAMINO A JERICÓ</div></div>
         <div className="top-spacer" />
-        <button className="tiny" type="button" aria-label={t.settings} onClick={() => setScreen('settings')}>⚙</button>
+        <button className="tiny" type="button" aria-label={t.settings} onClick={openSettings}>⚙</button>
       </header>
 
       {screen === 'menu' && (
@@ -347,7 +413,7 @@ function App() {
             <div className="gold-line" />
             <button className="primary" type="button" onClick={startSetup}>{t.start} <span>▶</span></button>
             <button className="secondary" type="button" onClick={() => setScreen('instructions')}>{t.how}</button>
-            <button className="secondary" type="button" onClick={() => setScreen('settings')}>{t.settings}</button>
+            <button className="secondary" type="button" onClick={openSettings}>{t.settings}</button>
             {!isBankReady && <p className="menu-status">{bankError || 'Preparando banco de 120 preguntas...'}</p>}
           </div>
           <div className="hero-bottom">UNA HISTORIA DE FE · VALOR · OBEDIENCIA</div>
@@ -355,7 +421,7 @@ function App() {
       )}
 
       {screen === 'instructions' && (
-        <section className="panel parchment">
+        <section className="panel parchment instruction-panel">
           <p className="eyebrow">JERICO · CAMINO A LA PROMESA</p>
           <h2>Instrucciones</h2>
           <p>¡Prepárate para recorrer el camino hacia Jericó! Responde preguntas bíblicas y avanza por cinco escenarios, con seis pasos en cada uno.</p>
@@ -372,7 +438,7 @@ function App() {
 
       {screen === 'settings' && (
         <section className="panel parchment settings-panel">
-          <button className="settings-close" type="button" aria-label="Cerrar configuración" onClick={() => setScreen('menu')}>×</button>
+          <button className="settings-close" type="button" aria-label="Cerrar configuración" onClick={closeSettings}>×</button>
           <p className="eyebrow">JERICO · PREFERENCIAS</p>
           <h2>{t.settings}</h2>
           <label>Idioma
@@ -388,7 +454,7 @@ function App() {
             <button type="button" onClick={() => setSettingsModal('Créditos')}>Créditos</button>
             <button type="button" onClick={() => setSettingsModal('Términos y privacidad')}>Términos y privacidad</button>
           </div>
-          <button className="primary" type="button" onClick={() => setScreen('menu')}>{t.back}</button>
+          <button className="primary" type="button" onClick={closeSettings}>{t.back}</button>
           {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal}</h3><p>{settingsModal === 'Soporte' ? 'Para reportar un problema, contacta al equipo responsable del proyecto JERICO.' : settingsModal === 'Créditos' ? 'JERICO — Camino a Jericó. Proyecto de juego bíblico educativo. Desarrollo y diseño: equipo del proyecto.' : 'Esta versión no usa cuentas ni sincroniza partidas. Los nombres y avances solo se mantienen durante la partida abierta en este navegador. El sitio se distribuye mediante GitHub Pages.'}</p></div></div>}
         </section>
       )}
@@ -450,15 +516,63 @@ function App() {
         </section>
       )}
 
-      {screen === 'map' && (
-        <section className="map-screen" style={{ backgroundImage: `linear-gradient(180deg, #1a213aaa, #3f2636bb), url("${ASSET('menu.webp')}")` }}>
-          <p className="eyebrow">EL CAMINO A LA PROMESA</p>
-          <h2>{t.map}</h2>
-          <div className="map-route">
-            {SCENES.map((scene, index) => <div className="map-stop" key={scene.name}><span>{['𓂀', '🌊', '⛰', '🌿', '🏰'][index]}</span><b>{scene.name}</b><small>6 pasos</small>{index < 4 && <i />}</div>)}
+      {(screen === 'map' || screen === 'routeMap') && (
+        <section className={`map-screen ${screen === 'routeMap' ? 'map-progress-screen' : 'map-intro-screen'}`}>
+          <div className="map-parchment">
+            <div className="map-title-banner"><span>JERICO · CAMINO A JERICÓ</span><h2>{screen === 'routeMap' ? 'El avance del pueblo' : t.map}</h2><small>{screen === 'routeMap' ? 'Ubicación de cada jugador' : 'De Egipto a la Tierra Prometida'}</small></div>
+            <div className="map-route">
+              {SCENES.map((scene, index) => {
+                const playersHere = players.filter((player) => sceneIndexForStep(player.steps) === index);
+                return <div className={`map-stop ${playersHere.length ? 'has-travelers' : ''}`} key={scene.name}>
+                  <div className="map-stop-medallion">{['𓂀', '≈', '▲', '≋', '▤'][index]}</div>
+                  <b>{scene.name}</b><small>{index === 4 ? 'Meta · 30 pasos' : '6 pasos'}</small>
+                  <div className="map-tokens">{playersHere.map((player) => <div className="map-token" key={player.id}><Sprite character={player.character} /><span>{player.name}</span></div>)}</div>
+                  {index < 4 && <i className="map-connection" />}
+                </div>;
+              })}
+            </div>
+            <div className="map-player-status">
+              {players.map((player) => <div key={player.id} className="map-player-line"><Sprite character={player.character} /><div><b>{player.name}</b><small>{sceneForSteps(player.steps).name} · {player.steps}/30 pasos</small><div className="meter"><i style={{ width: `${(player.steps / 30) * 100}%` }} /></div></div></div>)}
+            </div>
+            <p className="map-caption">{screen === 'routeMap' ? 'El camino continúa. Cada jugador conserva su propio avance.' : 'Acompaña al pueblo de Israel desde Egipto hasta Jericó.'}</p>
           </div>
-          <div className="map-travelers">{players.map((player) => <div key={player.id}><Sprite character={player.character} walking /> <b>{player.name}</b></div>)}</div>
-          <p>{t.startAdventure}</p>
+        </section>
+      )}
+
+      {screen === 'advance' && advancePayload && (
+        <section className="advance-screen">
+          {(() => {
+            const sceneIndex = sceneIndexForStep(advancePayload.fromSteps);
+            const scene = SCENES[sceneIndex];
+            const shownSteps = Math.min(advancePayload.toSteps, advancePayload.fromSteps + animatedStepCount);
+            const localStep = advancePayload.correct ? Math.min(6, (advancePayload.fromSteps % 6) + animatedStepCount) : advancePayload.fromSteps % 6;
+            const pan = Math.max(0, Math.min(100, (localStep / 6) * 100));
+            return <>
+              <div className="advance-heading"><span>JERICO · {scene.name.toUpperCase()}</span><b>{advancePayload.correct ? `AVANZA ${advancePayload.steps} PASO${advancePayload.steps === 1 ? '' : 'S'}` : 'EL CAMINO ESPERA'}</b></div>
+              <div className="advance-playfield" style={{ backgroundImage: `url("${ASSET(scene.asset)}")`, backgroundPosition: `${pan}% center` }}>
+                <div className="advance-sky-vignette" />
+                <div className="advance-road" />
+                {players.map((player, index) => {
+                  const isMoving = player.id === advancePayload.playerId;
+                  const playerStep = isMoving ? shownSteps : player.steps;
+                  const playerScene = sceneIndexForStep(playerStep);
+                  if (playerScene !== sceneIndex && !isMoving) return null;
+                  const positionStep = isMoving ? localStep : playerStep % 6;
+                  const left = 8 + (Math.min(6, Math.max(0, positionStep)) / 6) * 82;
+                  return <div className={`advance-actor ${isMoving ? 'active-actor' : ''}`} key={player.id} style={{ left: `${left}%`, bottom: `${8 + (index % 2) * 2}%` }}>
+                    <Sprite character={player.character} walking={isMoving && advancePayload.correct} className="advance-sprite" />
+                    <b>{player.name}</b>
+                    <small>{isMoving ? shownSteps : player.steps}/30</small>
+                  </div>;
+                })}
+                <div className="advance-step-counter"><span>PASOS</span><b>{shownSteps}/30</b><i><em style={{ width: `${(shownSteps / 30) * 100}%` }} /></i></div>
+              </div>
+              <div className="advance-footer">
+                <div className="advance-active-player"><Sprite character={players.find((p) => p.id === advancePayload.playerId)?.character || CHARACTERS[0]} walking={advancePayload.correct} /><div><b>{players.find((p) => p.id === advancePayload.playerId)?.name}</b><small>{advancePayload.correct ? 'Avanzando por el camino...' : 'No hubo avance en este turno.'}</small></div></div>
+                <div className="advance-roster">{players.map((player) => <div key={player.id}><Sprite character={player.character} /><span>{player.name}</span><b>{player.id === advancePayload.playerId ? shownSteps : player.steps}/30</b></div>)}</div>
+              </div>
+            </>;
+          })()}
         </section>
       )}
 
