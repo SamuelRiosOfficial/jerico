@@ -81,7 +81,12 @@ function Sprite({ character, walking = false, className = '' }) {
   const [frame, setFrame] = useState(0);
   useEffect(() => {
     if (!walking) { setFrame(0); return undefined; }
-    const timer = window.setInterval(() => setFrame((value) => value === 1 ? 2 : 1), 180);
+    const walkCycle = [1, 2, 1, 2, 0];
+    let cycleIndex = 0;
+    const timer = window.setInterval(() => {
+      setFrame(walkCycle[cycleIndex]);
+      cycleIndex = (cycleIndex + 1) % walkCycle.length;
+    }, 180);
     return () => window.clearInterval(timer);
   }, [walking]);
   return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -60}px`, '--sprite-y': `${character.row * -110}px`, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
