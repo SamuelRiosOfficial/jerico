@@ -83,7 +83,7 @@ function Sprite({ character, walking = false, className = '' }) {
     const timer = window.setInterval(() => setFrame((value) => value === 1 ? 2 : 1), 180);
     return () => window.clearInterval(timer);
   }, [walking]);
-  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-row': character.row, '--sprite-frame': frame }} aria-label={character.name} />;
+  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-row': character.row, '--sprite-frame': frame, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
 }
 
 function App() {
@@ -138,6 +138,41 @@ function App() {
     })();
     return () => { alive = false; };
   }, []);
+
+  useEffect(() => {
+    if (!musicOn || screen === 'menu' || screen === 'settings') return undefined;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return undefined;
+    let context;
+    let interval;
+    let index = 0;
+    const notes = [261.63, 329.63, 392.00, 329.63, 293.66, 349.23, 440.00, 392.00];
+    try {
+      context = new AudioContext();
+      context.resume();
+      interval = window.setInterval(() => {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = notes[index % notes.length];
+        const now = context.currentTime;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.012, now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.45);
+        index += 1;
+      }, 520);
+    } catch (error) {
+      return undefined;
+    }
+    return () => {
+      if (interval) window.clearInterval(interval);
+      if (context && context.state !== 'closed') context.close();
+    };
+  }, [musicOn, screen]);
 
   useEffect(() => {
     if (screen !== 'map') return undefined;
@@ -447,7 +482,7 @@ function App() {
           <div className="turn-actions">
             <p>{t.difficulty}</p>
             <div className="difficulty">{LEVELS.map((item) => <button key={item.id} type="button" className={item.color} onClick={() => askQuestion(item)}><b>{item.label}</b><small>+{item.steps} paso{item.steps > 1 ? 's' : ''}</small></button>)}</div>
-            <p className="bank-status">{questionBank?.length === 120 ? '120 preguntas listas · 40 por dificultad' : bankError || 'Cargando banco de preguntas...'}</p>
+            <p className="bank-status" aria-live={notificationsOn ? 'polite' : 'off'}>{notificationsOn ? `Turno de ${activePlayer.name}. ` : ''}{questionBank?.length === 120 ? '120 preguntas listas · 40 por dificultad' : bankError || 'Cargando banco de preguntas...'}</p>
           </div>
         </section>
       )}
