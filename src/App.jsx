@@ -428,6 +428,7 @@ function App() {
             <button className="secondary" type="button" onClick={openSettings}>{t.settings}</button>
             {!isBankReady && <p className="menu-status">{bankError || 'Preparando banco de 120 preguntas...'}</p>}
           </div>
+          <div className="menu-party" aria-hidden="true">{CHARACTERS.map((character) => <Sprite key={character.id} character={character} />)}</div>
           <div className="hero-bottom">UNA HISTORIA DE FE · VALOR · OBEDIENCIA</div>
         </section>
       )}
