@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "status": "demo-bank",
+  "note": "Esta compilación incluye preguntas de demostración. El banco aprobado de 120 preguntas debe importarse como siguiente integración antes de considerar el juego listo para lanzamiento.",
+  "questionsByDifficulty": {"facil":[],"medio":[],"dificil":[]}
+}
