@@ -1200,3 +1200,36 @@ button{image-rendering:pixelated}
 @media(prefers-reduced-motion:reduce){
   .map-intro-countdown i:after{animation-duration:.01ms}
 }
+
+
+/* The journey map uses the same complete 16:9 scene canvases as the game board */
+.screen-map .map-screen,
+.screen-routeMap .map-screen{
+  background-size:100% 100%;
+  background-position:center;
+  image-rendering:pixelated;
+}
+.map-screen{
+  border:0;
+  border-radius:0;
+  overflow:visible;
+}
+.map-parchment,
+.map-stop,
+.map-title-banner,
+.map-player-line,
+.map-intro-countdown{
+  image-rendering:pixelated;
+}
+.scene-track,.advance-playfield,.hero,.map-screen{
+  background-repeat:no-repeat;
+}
+.scene-track,.advance-playfield{
+  background-size:100% 100%;
+  image-rendering:pixelated;
+}
+.sprite{
+  background-image:var(--sprite-image,url('/jerico/assets/characters-sprites-v2.webp'));
+  background-size:300px 624px;
+  image-rendering:pixelated;
+}
