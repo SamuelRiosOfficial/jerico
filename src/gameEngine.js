@@ -16,20 +16,48 @@ export function validateQuestionBank(bank) {
   if (!bank || bank.questionCount !== 120 || !Array.isArray(bank.questions) || bank.questions.length !== 120) {
     throw new Error('El banco debe contener exactamente 120 preguntas.');
   }
+
   const counts = { facil: 0, medio: 0, dificil: 0 };
+  const ids = new Set();
+
   for (const question of bank.questions) {
+    const id = typeof question?.id === 'string' ? question.id.trim() : '';
+    if (!id || ids.has(id)) throw new Error(`La pregunta ${id || 'sin ID'} tiene un identificador vacío o duplicado.`);
+    ids.add(id);
+
     if (!Object.hasOwn(counts, question.difficulty)) throw new Error('Hay una pregunta con dificultad desconocida.');
     counts[question.difficulty] += 1;
-    if (!question.id || !question.question || !Array.isArray(question.options) || question.options.length !== 4 ||
-        !Number.isInteger(question.correctAnswerIndex) || question.correctAnswerIndex < 0 ||
-        question.correctAnswerIndex > 3 || !question.biblicalReference) {
-      throw new Error(`La pregunta ${question.id || 'sin ID'} no tiene una estructura válida.`);
+
+    const validOptions = Array.isArray(question.options) &&
+      question.options.length === 4 &&
+      question.options.every((option) => typeof option === 'string' && option.trim().length > 0) &&
+      new Set(question.options.map((option) => option.trim())).size === 4;
+    const validIndex = Number.isInteger(question.correctAnswerIndex) &&
+      question.correctAnswerIndex >= 0 && question.correctAnswerIndex < 4;
+    const validText = typeof question.question === 'string' && question.question.trim().length > 0;
+    const validReference = typeof question.biblicalReference === 'string' && question.biblicalReference.trim().length > 0;
+    const answerMatches = question.correctAnswer === undefined ||
+      (validIndex && question.correctAnswer === question.options[question.correctAnswerIndex]);
+
+    if (!validText || !validOptions || !validIndex || !validReference || !answerMatches) {
+      throw new Error(`La pregunta ${id} no tiene una estructura válida o su respuesta correcta no coincide.`);
     }
   }
+
   if (counts.facil !== 40 || counts.medio !== 40 || counts.dificil !== 40) {
     throw new Error('El banco debe incluir 40 preguntas por dificultad.');
   }
   return counts;
+}
+
+export function nextAvailableCharacter(currentIndex, direction, selectedIndices, characterCount = 4) {
+  if (!Number.isInteger(characterCount) || characterCount < 1) return currentIndex;
+  const step = direction < 0 ? -1 : 1;
+  for (let offset = 1; offset <= characterCount; offset += 1) {
+    const candidate = (currentIndex + step * offset + characterCount) % characterCount;
+    if (!selectedIndices.includes(candidate)) return candidate;
+  }
+  return currentIndex;
 }
 
 export function selectQuestionForTurn(bank, difficulty, usedIds, random = Math.random) {
