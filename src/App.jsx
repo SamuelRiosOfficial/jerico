@@ -37,7 +37,7 @@ const QUESTIONS = {
   ]
 };
 const LEVELS = [{id:'facil',label:'Fácil',steps:1},{id:'medio',label:'Medio',steps:2},{id:'dificil',label:'Difícil',steps:3}];
-const shuffle = a => [...a].sort(()=>Math.random()-.5);
+const shuffle = a => { const out=[...a]; for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [out[i],out[j]]=[out[j],out[i]];} return out; };
 function App(){
  const [screen,setScreen]=useState('menu');
  const [lang,setLang]=useState('Español');
@@ -53,15 +53,37 @@ function App(){
  const [answer,setAnswer]=useState(null);
  const [feedback,setFeedback]=useState(null);
  const [used,setUsed]=useState({facil:[],medio:[],dificil:[]});
+ const [questionBank,setQuestionBank]=useState(null);
+ const [bankError,setBankError]=useState('');
  const [winner,setWinner]=useState(null);
  const [mapIntro,setMapIntro]=useState(false);
  const [wallFrame,setWallFrame]=useState(0);
  const [showBible,setShowBible]=useState(false);
  const active=players[turn];
+ useEffect(()=>{
+  let alive=true;
+  (async()=>{
+   try{
+    const response=await fetch(import.meta.env.BASE_URL+'data/question-bank.json.gz.b64');
+    if(!response.ok)throw new Error('No se pudo descargar el banco de preguntas');
+    const encoded=(await response.text()).trim();
+    const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+    if(!('DecompressionStream' in window))throw new Error('Este navegador no admite la descompresión del banco');
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const data=await new Response(stream).json();
+    if(data.questionCount!==120||data.questions?.length!==120)throw new Error('El banco no contiene las 120 preguntas esperadas');
+    const counts={facil:0,medio:0,dificil:0};
+    data.questions.forEach(q=>counts[q.difficulty]++);
+    if(Object.values(counts).some(n=>n!==40))throw new Error('La distribución no es de 40 preguntas por dificultad');
+    if(alive){setQuestionBank(data.questions);setBankError('');}
+   }catch(error){if(alive)setBankError(error.message||'Error al cargar las preguntas');}
+  })();
+  return()=>{alive=false};
+ },[]);
  const startSetup=()=>{setNames(['Jugador 1','Jugador 2','Jugador 3','Jugador 4']);setChosen([]);setScreen('setup')};
  const chooseCharacter=(id)=>{if(chosen.includes(id))return;setChosen([...chosen,id]);};
  const begin=()=>{const ps=names.slice(0,count).map((name,i)=>({name:name.trim(),character:CHARACTERS.find(c=>c.id===chosen[i]),steps:0}));setPlayers(ps);setTurn(0);setUsed({facil:[],medio:[],dificil:[]});setWinner(null);setMapIntro(true);setScreen('map');setTimeout(()=>{setMapIntro(false);setScreen('board')},3000)};
- const pickLevel=(l)=>{setLevel(l);const pool=QUESTIONS[l.id];let unused=pool.map((_,i)=>i).filter(i=>!used[l.id].includes(i));if(!unused.length){unused=pool.map((_,i)=>i);setUsed(u=>({...u,[l.id]:[]}));}const idx=shuffle(unused)[0];setUsed(u=>({...u,[l.id]:[...u[l.id],idx]}));const q=pool[idx];const opts=shuffle(q[1].map((v,i)=>({text:v,correct:i===q[2]})));setQuestion({text:q[0],options:opts,reference:q[3],steps:l.steps});setAnswer(null);setScreen('question')};
+ const pickLevel=(l)=>{if(!questionBank){setBankError('El banco de preguntas aún no está disponible. Recarga la página para intentar de nuevo.');return;}setLevel(l);const pool=questionBank.filter(q=>q.difficulty===l.id);let unused=pool.filter(q=>!used[l.id].includes(q.id));if(!unused.length){unused=pool;setUsed(u=>({...u,[l.id]:[]}));}const q=shuffle(unused)[0];setUsed(u=>({...u,[l.id]:[...u[l.id],q.id]}));const opts=shuffle(q.options.map((v,i)=>({text:v,correct:i===q.correctAnswerIndex})));setQuestion({text:q.question,options:opts,reference:q.biblicalReference,steps:l.steps,id:q.id});setAnswer(null);setScreen('question')};
  const respond=()=>{const ok=question.options[answer]?.correct;const next=players.map((p,i)=>i===turn?{...p,steps:Math.min(30,p.steps+(ok?question.steps:0))}:p);setPlayers(next);setFeedback({ok,steps:ok?question.steps:0});setScreen('feedback');setTimeout(()=>{setFeedback(null);if(ok&&next[turn].steps>=30){setWinner(next[turn]);setScreen('collapse');setWallFrame(0);}else{setTurn((turn+1)%players.length);setScreen('board')}},4000)};
  useEffect(()=>{if(screen!=='collapse')return;let f=0;const id=setInterval(()=>{f++;setWallFrame(f);if(f>=5){clearInterval(id);setScreen('story')}},950);return()=>clearInterval(id)},[screen]);
  const reset=()=>{setScreen('menu');setPlayers([]);setWinner(null);setChosen([])};
@@ -74,7 +96,7 @@ function App(){
   {screen==='setup'&&<section className="panel parchment"><p className="eyebrow">PREPARA TU PARTIDA</p><h2>¿Cuántos jugadores?</h2><div className="player-count">{[1,2,3,4].map(n=><button key={n} className={count===n?'count active':'count'} onClick={()=>setCount(n)}>{n}</button>)}</div><h3>Nombres de los jugadores</h3><div className="name-grid">{names.slice(0,count).map((n,i)=><label key={i}>Jugador {i+1}<input maxLength="12" value={n} onChange={e=>setNames(v=>v.map((x,j)=>j===i?e.target.value:x))}/></label>)}</div><button className="primary" disabled={names.slice(0,count).some(n=>!n.trim())} onClick={()=>{setChosen([]);setScreen('characters')}}>Siguiente</button></section>}
   {screen==='characters'&&<section className="panel parchment"><p className="eyebrow">SELECCIÓN DE PERSONAJES</p><h2>{chosen.length<count?names[chosen.length]:'¡Listos para partir!'}</h2><p>Elige un personaje distinto para cada jugador ({chosen.length}/{count}).</p><div className="character-grid">{CHARACTERS.map(c=><button key={c.id} disabled={chosen.includes(c.id)} className={'character '+(chosen.includes(c.id)?'locked':'')} onClick={()=>chooseCharacter(c.id)}><span className="character-emoji">{c.emoji}</span><b>{c.name}</b><small>{c.desc}</small></button>)}</div>{chosen.length===count?<button className="primary" onClick={begin}>Comenzar aventura</button>:<p className="hint">Selecciona {count-chosen.length} personaje(s) más.</p>}<button className="text-button" onClick={()=>setScreen('setup')}>Volver</button></section>}
   {screen==='map'&&<section className="map-screen"><p className="eyebrow">EL CAMINO A LA PROMESA</p><h2>De Egipto a Jericó</h2><div className="map-route">{SCENES.map((s,i)=><div className="map-stop" key={s.name}><span>{s.icon}</span><b>{s.name}</b><small>6 pasos</small>{i<4&&<i/>}</div>)}</div><p>La aventura comienza...</p></section>}
-  {screen==='board'&&<section className="board scene-board"><div className="board-head"><div><p className="eyebrow">TURNO DE {active?.name?.toUpperCase()}</p><h2>{SCENES[Math.min(4,Math.floor(active.steps/6))].name}</h2></div><div className="turn-avatar">{active?.character?.emoji}</div></div><div className="scene-track"><div className="track-sky"/><div className="track-ground"/><div className="track-city">🏰</div><div className="track-path">{SCENES.map((s,i)=><div className="track-stage" key={s.name}><span>{s.icon}</span><b>{s.name}</b><small>0–{(i+1)*6}</small></div>)}</div>{players.map((p,i)=><div className="player-token" key={p.name} style={{left:`calc(${Math.max(2,Math.min(96,positions[i]))}% )`,bottom:`${i*43+16}px`}} title={p.name}><span>{p.character.emoji}</span></div>)}</div><div className="player-progress">{players.map((p,i)=><div className={'progress-card '+(i===turn?'current':'')} key={p.name}><span>{p.character.emoji}</span><div><b>{p.name}</b><small>{p.steps}/30 pasos · {SCENES[Math.min(4,Math.floor(p.steps/6))].name}</small><div className="meter"><i style={{width:positions[i]+'%'}}/></div></div></div>)}</div><div className="turn-actions"><p>Elige la dificultad para responder una pregunta bíblica.</p><div className="difficulty">{LEVELS.map(l=><button key={l.id} onClick={()=>pickLevel(l)}><b>{l.label}</b><small>+{l.steps} paso{l.steps>1?'s':''}</small></button>)}</div></div></section>}
+  {screen==='board'&&<section className="board scene-board"><div className="board-head"><div><p className="eyebrow">TURNO DE {active?.name?.toUpperCase()}</p><h2>{SCENES[Math.min(4,Math.floor(active.steps/6))].name}</h2></div><div className="turn-avatar">{active?.character?.emoji}</div></div><div className="scene-track"><div className="track-sky"/><div className="track-ground"/><div className="track-city">🏰</div><div className="track-path">{SCENES.map((s,i)=><div className="track-stage" key={s.name}><span>{s.icon}</span><b>{s.name}</b><small>6 pasos</small></div>)}</div>{players.map((p,i)=><div className="player-token" key={p.name} style={{left:`calc(${Math.max(2,Math.min(96,positions[i]))}% )`,bottom:`${i*43+16}px`}} title={p.name}><span>{p.character.emoji}</span></div>)}</div><div className="player-progress">{players.map((p,i)=><div className={'progress-card '+(i===turn?'current':'')} key={p.name}><span>{p.character.emoji}</span><div><b>{p.name}</b><small>{p.steps}/30 pasos · {SCENES[Math.min(4,Math.floor(p.steps/6))].name}</small><div className="meter"><i style={{width:positions[i]+'%'}}/></div></div></div>)}</div><div className="turn-actions"><p>Elige la dificultad para responder una pregunta bíblica.</p>{!questionBank&&<p className="hint">{bankError||'Cargando las 120 preguntas bíblicas...'}</p>}<div className="difficulty">{LEVELS.map(l=><button key={l.id} disabled={!questionBank} onClick={()=>pickLevel(l)}><b>{l.label}</b><small>+{l.steps} paso{l.steps>1?'s':''}</small></button>)}</div></div></section>}
   {screen==='question'&&<section className="panel question-panel"><p className="eyebrow">{level.label.toUpperCase()} · {level.steps} PASO(S) EN JUEGO</p><h2>{question.text}</h2><div className="answers">{question.options.map((o,i)=><button key={i} className={answer===i?'answer selected':''} onClick={()=>setAnswer(i)}><span>{String.fromCharCode(65+i)}</span>{o.text}</button>)}</div><p className="reference">Referencia: {question.reference}</p><button className="primary" disabled={answer===null} onClick={respond}>Responder</button></section>}
   {screen==='feedback'&&<div className="modal-backdrop"><div className={'feedback-card '+(feedback?.ok?'good':'bad')}><div className="feedback-icon">{feedback?.ok?'✦':'×'}</div><h2>{feedback?.ok?'¡Respuesta correcta!':'¡Respuesta incorrecta!'}</h2><p>{feedback?.ok?`Avanzas +${feedback.steps} paso(s)`:'No avanzas'}</p></div></div>}
   {screen==='collapse'&&<section className="collapse-screen"><p className="eyebrow">¡EL PUEBLO HA GRITADO!</p><h2>¡Las murallas caen!</h2><div className="wall-scene"><div className="wall-sky"/><div className={'wall wall-'+wallFrame}>🏰</div><div className="celebrators">{players.map(p=><span key={p.name}>{p.character.emoji} 🙌</span>)}</div><div className="dust">✦　·　✧　·　✦</div></div><p>Jericó ha sido conquistada</p></section>}
