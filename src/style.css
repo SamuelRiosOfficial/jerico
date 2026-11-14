@@ -1233,3 +1233,46 @@ button{image-rendering:pixelated}
   background-size:300px 624px;
   image-rendering:pixelated;
 }
+
+
+/* Each lateral stage has its own six clear movement checkpoints */
+.path-markers{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:clamp(5px,1vw,12px);
+  left:7%;
+  right:7%;
+  height:15px;
+}
+.path-markers span{
+  border:2px solid #f3c46b;
+  border-radius:3px;
+  background:#4b2b17;
+  box-shadow:inset 0 1px 0 #9b6330;
+}
+.path-markers span.passed{
+  background:linear-gradient(#fff06a,#f2c51a);
+  border-color:#38200d;
+  box-shadow:0 0 6px #ffe15a,inset 0 1px 0 #fff5ac;
+}
+.track-player{
+  transition:left .35s steps(4,end);
+}
+.track-player .sprite{
+  width:100px;height:156px;
+  background-size:300px 624px;
+  transform:scale(1.05);
+  transform-origin:center bottom;
+}
+.track-player b{
+  padding:4px 8px;
+  font-size:8px;
+}
+.board-head h2{
+  font-size:clamp(25px,3.1vw,40px);
+  letter-spacing:.5px;
+}
+.board-head p:not(.eyebrow){
+  color:#fff5d3;
+  font-size:13px;
+  font-weight:800;
+}
