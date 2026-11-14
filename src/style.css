@@ -731,3 +731,50 @@ button{image-rendering:pixelated}
   .advance-actor{transition:none}
   .is-walking{animation:none}
 }
+
+
+/* Sprite atlas dimensions used by the currently published 3x4 sheet */
+.sprite{
+  width:60px;
+  height:110px;
+  background-size:180px 440px;
+  background-position:var(--sprite-x,0px) var(--sprite-y,0px);
+}
+.instruction-panel:before{
+  width:60px;
+  height:110px;
+  background-size:180px 440px;
+  background-position:0 0;
+  transform:scale(2.35);
+  transform-origin:bottom left;
+  left:42px;
+  bottom:30px;
+}
+.character-spotlight .sprite{transform:scale(1.28);transform-origin:center bottom}
+.roster-item .sprite{transform:scale(.82);transform-origin:center bottom;margin:-11px 0 -15px}
+.selected-players .sprite{transform:scale(.72);transform-origin:left center;margin:-15px -8px -16px -8px}
+.track-player .sprite{width:60px;height:110px;background-size:180px 440px;transform:scale(1.08);transform-origin:center bottom;margin:-4px 0 -7px}
+.advance-sprite{
+  width:60px;
+  height:110px;
+  background-size:180px 440px;
+  transform:scale(2.15);
+  transform-origin:center bottom;
+  margin:0 0 3px;
+}
+.map-token .sprite{
+  width:24px;height:46px;background-size:72px 184px;
+  transform:scale(.95);transform-origin:center bottom;margin:0 0 -3px;
+}
+.map-player-line .sprite{
+  width:28px;height:52px;background-size:84px 208px;
+  transform:scale(.9);transform-origin:center;margin:-3px -2px;
+}
+.advance-active-player .sprite{
+  width:28px;height:52px;background-size:84px 208px;
+  transform:scale(.9);transform-origin:center;margin:-3px -1px;
+}
+.advance-roster .sprite{
+  width:22px;height:40px;background-size:66px 160px;
+  transform:scale(.9);transform-origin:center;margin:-3px -2px;
+}
