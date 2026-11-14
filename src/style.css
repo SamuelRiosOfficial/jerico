@@ -1276,3 +1276,56 @@ button{image-rendering:pixelated}
   font-size:13px;
   font-weight:800;
 }
+
+
+/* Revert to the repository's known-good sprite atlas: 3 columns × 4 rows */
+.sprite{
+  width:60px;
+  height:110px;
+  background-size:180px 440px;
+  background-position:var(--sprite-x,0px) var(--sprite-y,0px);
+  background-image:var(--sprite-image,url('/jerico/assets/characters-sprites.webp'));
+  image-rendering:pixelated;
+}
+.instruction-panel:before{
+  width:60px;height:110px;
+  background-size:180px 440px;
+  background-position:0 0;
+  background-image:url('/jerico/assets/characters-sprites.webp');
+  transform:scale(2.2);
+  transform-origin:bottom left;
+  left:42px;bottom:30px;
+}
+.screen-menu .menu-party .sprite{
+  width:60px;height:110px;background-size:180px 440px;
+  transform:scale(1.45);transform-origin:center bottom;margin:0 8px;
+}
+.character-spotlight .sprite{transform:scale(1.28);transform-origin:center bottom}
+.roster-item .sprite{transform:scale(.82);transform-origin:center bottom;margin:-11px 0 -15px}
+.selected-players .sprite{transform:scale(.72);transform-origin:left center;margin:-15px -8px -16px -8px}
+.turn-avatar .sprite{transform:scale(.8);transform-origin:center bottom;margin:-8px 0 -11px}
+.progress-card .sprite{transform:scale(.48);transform-origin:center center;margin:-32px -18px}
+.track-player .sprite{
+  width:60px;height:110px;background-size:180px 440px;
+  transform:scale(1.45);transform-origin:center bottom;margin:-13px 0 -18px;
+}
+.map-token .sprite{
+  width:60px;height:110px;background-size:180px 440px;
+  transform:scale(.65);transform-origin:center bottom;margin:-18px -10px -20px;
+}
+.map-player-line .sprite{
+  width:60px;height:110px;background-size:180px 440px;
+  transform:scale(.58);transform-origin:center center;margin:-23px -13px;
+}
+.advance-sprite{
+  width:60px;height:110px;background-size:180px 440px;
+  transform:scale(1.6);transform-origin:center bottom;margin:0 0 3px;
+}
+.advance-active-player .sprite{
+  width:60px;height:110px;background-size:180px 440px;
+  transform:scale(.65);transform-origin:center center;margin:-18px -11px;
+}
+.advance-roster .sprite{
+  width:60px;height:110px;background-size:180px 440px;
+  transform:scale(.45);transform-origin:center center;margin:-30px -17px;
+}
