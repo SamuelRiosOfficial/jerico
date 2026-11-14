@@ -2,26 +2,36 @@
 
 Juego bíblico multijugador local para 1–4 participantes, desarrollado con React + Vite.
 
+## Probar la versión publicada
+El despliegue se realiza automáticamente con GitHub Actions y GitHub Pages después de superar las pruebas.
+
 ## Ejecutar localmente
 ```bash
 npm install
 npm run dev
 ``
 
-## Compilar
+## Validar y compilar
 ```bash
+npm test
 npm run build
 npm run preview
 ``
 
-## Reglas implementadas
-- Cinco escenarios de seis pasos cada uno: 30 pasos totales.
-- 1 a 4 jugadores, nombres de hasta 12 caracteres y cuatro personajes únicos.
+## Reglas del juego
+- Cinco escenarios con seis pasos cada uno: 30 pasos totales.
+- De 1 a 4 jugadores; nombres de hasta 12 caracteres y personajes únicos.
+- Los cuatro personajes tienen las mismas condiciones de juego.
 - Dificultad elegida antes de cada turno: Fácil (+1), Medio (+2), Difícil (+3).
-- Respuesta incorrecta: no avanza.
-- Preguntas aleatorias por dificultad, sin repetir hasta agotar el banco compartido de la partida.
-- El primer jugador que alcanza Jericó gana inmediatamente y termina la partida.
-- Secuencia de victoria: derrumbe de murallas, lectura de Josué 6:1–5 y felicitación al ganador.
+- Una respuesta incorrecta no permite avanzar.
+- Banco bíblico aprobado de 120 preguntas: 40 por dificultad.
+- Preguntas aleatorias y opciones mezcladas, manteniendo la respuesta correcta.
+- El grupo de preguntas de cada dificultad es compartido por todos los jugadores y se renueva al agotarse.
+- El primer jugador que alcanza 30 pasos gana inmediatamente y la partida termina para todos.
+- Secuencia de victoria: cinco fotogramas del derrumbe de las murallas, efecto de temblor, lectura de Josué 6:1–5 y felicitación al ganador.
 
-## Estado del desarrollo
-Primera versión funcional del flujo principal. Los recursos artísticos aprobados y el banco completo de 120 preguntas se integrarán en los siguientes commits de producción. El juego utiliza recursos gráficos CSS provisionales cuando aún no hay un archivo de arte integrado.
+## Pruebas automáticas
+La suite `node --test` valida el banco, la estructura de preguntas, la no repetición hasta agotar cada dificultad, la aleatorización de opciones, la puntuación, la victoria y la agrupación de escenarios.
+
+## Recursos visuales
+Los fondos de los cinco escenarios, la ilustración de portada, los sprites de personajes y los cinco fotogramas del derrumbe están en `public/assets/`.
