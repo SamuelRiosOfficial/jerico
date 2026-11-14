@@ -442,7 +442,7 @@ function App() {
       )}
 
       {screen === 'map' && (
-        <section className="map-screen" style={{ backgroundImage: `linear-gradient(180deg, #1a213aaa, #3f2636bb), url("${ASSET('map-reference.webp')}")` }}>
+        <section className="map-screen" style={{ backgroundImage: `linear-gradient(180deg, #1a213aaa, #3f2636bb), url("${ASSET('menu.webp')}")` }}>
           <p className="eyebrow">EL CAMINO A LA PROMESA</p>
           <h2>{t.map}</h2>
           <div className="map-route">
@@ -528,7 +528,7 @@ function App() {
       )}
 
       {screen === 'victory' && (
-        <section className="victory-screen" style={{ backgroundImage: `linear-gradient(180deg, #281c2a50, #281c2aee), url("${ASSET('victory.webp')}")` }}>
+        <section className="victory-screen" style={{ backgroundImage: `linear-gradient(180deg, #281c2a50, #281c2aee), url("${ASSET('stage-jericho.webp')}")` }}>
           <div className="victory-overlay">
             <div className="victory-crown">♛</div>
             <p className="eyebrow">LA CONQUISTA HA TERMINADO</p>
