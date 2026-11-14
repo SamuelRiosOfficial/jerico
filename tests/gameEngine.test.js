@@ -70,3 +70,10 @@ test('cada escenario agrupa seis pasos y Jericó es el quinto', () => {
   assert.equal(sceneIndexForStep(24), 4);
   assert.equal(sceneIndexForStep(30), 4);
 });
+
+test('el selector de personajes salta los que ya eligieron otros jugadores', async () => {
+  const { nextAvailableCharacter } = await import('../src/gameEngine.js');
+  assert.equal(nextAvailableCharacter(0, 1, [1]), 2);
+  assert.equal(nextAvailableCharacter(2, -1, [1]), 0);
+  assert.equal(nextAvailableCharacter(0, 1, [0, 1, 2, 3]), 0);
+});
