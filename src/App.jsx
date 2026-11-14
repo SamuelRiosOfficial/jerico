@@ -377,6 +377,7 @@ function App() {
 
       {screen === 'settings' && (
         <section className="panel parchment settings-panel">
+          <button className="settings-close" type="button" aria-label="Cerrar configuración" onClick={() => setScreen('menu')}>×</button>
           <p className="eyebrow">JERICO · PREFERENCIAS</p>
           <h2>{t.settings}</h2>
           <label>Idioma
