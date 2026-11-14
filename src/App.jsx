@@ -89,7 +89,7 @@ function Sprite({ character, walking = false, className = '' }) {
     }, 180);
     return () => window.clearInterval(timer);
   }, [walking]);
-  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -80}px`, '--sprite-y': `${character.row * -132}px`, '--sprite-image': `url("${ASSET('characters-sprites.png')}")` }} aria-label={character.name} />;
+  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -100}px`, '--sprite-y': `${character.row * -156}px`, '--sprite-image': `url("${ASSET('characters-sprites-v2.webp')}")` }} aria-label={character.name} />;
 }
 
 function App() {
@@ -191,7 +191,7 @@ function App() {
 
   useEffect(() => {
     if (screen !== 'map') return undefined;
-    const timer = window.setTimeout(() => { setIsMapIntro(false); setScreen('board'); }, 3000);
+    const timer = window.setTimeout(() => { setIsMapIntro(false); setScreen('board'); }, 6500);
     return () => window.clearTimeout(timer);
   }, [screen]);
 
@@ -416,7 +416,7 @@ function App() {
       </header>
 
       {screen === 'menu' && (
-        <section className="hero scene-jericho" style={{ backgroundImage: `url("${ASSET('menu.webp')}")` }}>
+        <section className="hero scene-jericho" style={{ backgroundImage: `url("${ASSET('stage-jericho.webp')}")` }}>
           <div className="hero-shade" />
           <div className="hero-content">
             <p className="eyebrow">UNA AVENTURA BÍBLICA</p>
@@ -548,6 +548,7 @@ function App() {
               {players.map((player) => <div key={player.id} className="map-player-line"><Sprite character={player.character} /><div><b>{player.name}</b><small>{sceneForSteps(player.steps).name} · {player.steps}/30 pasos</small><div className="meter"><i style={{ width: `${(player.steps / 30) * 100}%` }} /></div></div></div>)}
             </div>
             <p className="map-caption">{screen === 'routeMap' ? 'El camino continúa. Cada jugador conserva su propio avance.' : 'Acompaña al pueblo de Israel desde Egipto hasta Jericó.'}</p>
+            {screen === 'map' && <div className="map-intro-countdown"><span>La aventura comenzará automáticamente</span><i /></div>}
           </div>
         </section>
       )}
@@ -563,7 +564,7 @@ function App() {
             const pan = Math.max(0, Math.min(100, (localStep / 6) * 100));
             return <>
               <div className="advance-heading"><span>JERICO · {scene.name.toUpperCase()}</span><b>{advancePayload.correct ? `AVANZA ${advancePayload.steps} PASO${advancePayload.steps === 1 ? '' : 'S'}` : 'EL CAMINO ESPERA'}</b></div>
-              <div className="advance-playfield" style={{ backgroundImage: `url("${ASSET(scene.asset)}")`, backgroundPosition: `${pan}% center` }}>
+              <div className="advance-playfield" style={{ backgroundImage: `url("${ASSET(scene.asset)}")`, backgroundPosition: 'center center', backgroundSize: '100% 100%' }}>
                 <div className="advance-sky-vignette" />
                 <div className="advance-road" />
                 {players.map((player, index) => {
@@ -596,7 +597,7 @@ function App() {
             <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{SCENES[currentSceneIndex].name}</h2><p>{SCENES[currentSceneIndex].detail}</p></div>
             <div className="turn-avatar"><Sprite character={activePlayer.character} /></div>
           </div>
-          <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")` }}>
+          <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")`, backgroundSize: '100% 100%' }}>
             <div className="scene-overlay" />
             <div className="scene-labels">{SCENES.map((scene, index) => <span key={scene.name} className={index === currentSceneIndex ? 'active' : ''}>{scene.name}</span>)}</div>
             <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= activePlayer.steps ? 'passed' : ''} />)}</div>
