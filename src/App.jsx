@@ -1,107 +1,519 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import './style.css';
+
+const ASSET = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
+const DATA = (name) => `${import.meta.env.BASE_URL}data/${name}`;
 
 const SCENES = [
-  {name:'Egipto', icon:'𓂀', tone:'egypt', detail:'Las tierras del faraón'},
-  {name:'Mar Rojo', icon:'🌊', tone:'sea', detail:'El camino entre las aguas'},
-  {name:'Monte Sinaí', icon:'⛰', tone:'sinai', detail:'La montaña de Dios'},
-  {name:'Río Jordán', icon:'🌿', tone:'jordan', detail:'Cruza hacia la promesa'},
-  {name:'Jericó', icon:'🏰', tone:'jericho', detail:'La ciudad fortificada'}
+  { name: 'Egipto', asset: 'stage-egypt.webp', detail: 'Las tierras del faraón' },
+  { name: 'Mar Rojo', asset: 'stage-red-sea.webp', detail: 'El camino entre las aguas' },
+  { name: 'Monte Sinaí', asset: 'stage-sinai.webp', detail: 'La montaña de Dios' },
+  { name: 'Río Jordán', asset: 'stage-jordan.webp', detail: 'Cruza hacia la promesa' },
+  { name: 'Jericó', asset: 'stage-jericho.webp', detail: 'La ciudad fortificada' }
 ];
 const CHARACTERS = [
-  {id:'warrior',name:'Guerrero',emoji:'🛡️',desc:'Túnica y escudo'},
-  {id:'soldier',name:'Soldado',emoji:'⚔️',desc:'Armadura y escudo'},
-  {id:'trumpeter',name:'Trompetista',emoji:'📯',desc:'Túnica y shofar'},
-  {id:'woman',name:'Mujer israelita',emoji:'🏺',desc:'Vestido y cántaro'}
+  { id: 'warrior', name: 'Guerrero', description: 'Túnica, lanza y escudo', row: 0 },
+  { id: 'soldier', name: 'Soldado', description: 'Armadura y escudo', row: 1 },
+  { id: 'trumpeter', name: 'Trompetista', description: 'Túnica y shofar', row: 2 },
+  { id: 'woman', name: 'Mujer israelita', description: 'Vestido y cántaro', row: 3 }
 ];
-const QUESTIONS = {
-  facil:[
-    ['¿Quién construyó el arca por mandato de Dios?',['Abraham','Noé','Moisés','David'],1,'Génesis 6:13-14'],
-    ['¿Quién fue tragado por un gran pez?',['Jonás','Pedro','Elías','Pablo'],0,'Jonás 1:17'],
-    ['¿Quién derrotó al gigante Goliat?',['Saúl','Salomón','David','Josué'],2,'1 Samuel 17:49-50'],
-    ['¿En qué ciudad nació Jesús?',['Nazaret','Belén','Jerusalén','Jericó'],1,'Mateo 2:1'],
-    ['¿Quién recibió los Diez Mandamientos?',['Aarón','Josué','Moisés','Noé'],2,'Éxodo 31:18']
-  ],
-  medio:[
-    ['¿Cuántos hombres escogió Gedeón para su ejército?',['100','300','500','1.000'],1,'Jueces 7:7'],
-    ['¿Qué reina visitó a Salomón para probarlo con preguntas?',['Ester','La reina de Sabá','Jezabel','Vasti'],1,'1 Reyes 10:1'],
-    ['¿Quién interpretó los sueños del faraón?',['Daniel','José','Moisés','Aarón'],1,'Génesis 41:15-16'],
-    ['¿En qué isla naufragó Pablo?',['Creta','Chipre','Malta','Patmos'],2,'Hechos 28:1'],
-    ['¿Quién sucedió a Moisés como líder de Israel?',['Caleb','Aarón','Josué','Eleazar'],2,'Josué 1:1-2']
-  ],
-  dificil:[
-    ['¿Qué juez hizo un voto imprudente antes de luchar contra los amonitas?',['Sansón','Jefté','Gedeón','Barac'],1,'Jueces 11:30-35'],
-    ['¿Cómo se llamaba el padre de Betsabé?',['Ahitofel','Eliam','Abner','Sadoc'],1,'2 Samuel 11:3'],
-    ['¿Qué rey de Judá encontró el libro de la ley durante la reparación del templo?',['Ezequías','Josías','Uzías','Manasés'],1,'2 Reyes 22:8'],
-    ['¿Quién era el sumo sacerdote cuando Samuel era niño?',['Elí','Abiatar','Sadoc','Aarón'],0,'1 Samuel 1:9'],
-    ['¿En qué ciudad estaban Pablo y Silas cuando cantaron en la cárcel?',['Éfeso','Corinto','Filipos','Tesalónica'],2,'Hechos 16:12,25']
-  ]
+const LEVELS = [
+  { id: 'facil', label: 'Fácil', steps: 1, color: 'easy' },
+  { id: 'medio', label: 'Medio', steps: 2, color: 'medium' },
+  { id: 'dificil', label: 'Difícil', steps: 3, color: 'hard' }
+];
+const STORY = [
+  'Las puertas de Jericó estaban bien aseguradas por temor a los israelitas; nadie podía salir o entrar.',
+  'Pero el Señor dijo a Josué: «¡He entregado en tus manos a Jericó y a su rey con sus guerreros!',
+  'Tú y tus soldados marcharán una vez alrededor de la ciudad; así lo harán durante seis días.',
+  'Siete sacerdotes llevarán trompetas y marcharán frente al arca. El séptimo día ustedes marcharán siete veces alrededor de la ciudad, mientras los sacerdotes tocan las trompetas.',
+  'Cuando todos escuchen el toque de trompeta, el pueblo deberá gritar a voz en cuello. Entonces los muros de la ciudad se derrumbarán y cada uno entrará sin impedimento».'
+];
+const TEXT = {
+  Español: { start:'Iniciar juego', how:'Cómo jugar', settings:'Configuración', back:'Volver al menú', next:'Siguiente', choose:'Elige un personaje', confirm:'Confirmar personaje', choosePlayers:'¿Cuántos jugadores?', names:'Nombres de los jugadores', ready:'¡Listos para partir!', turn:'Turno de', difficulty:'Elige la dificultad para responder una pregunta bíblica.', answer:'Responder', correct:'¡Respuesta correcta!', incorrect:'¡Respuesta incorrecta!', noMove:'No avanzas', move:'Avanzas', win:'¡Felicidades!', conquered:'Has conquistado Jericó', thank:'Gracias por participar.', bible:'Te invitamos a ti y a todos los jugadores a seguir conociendo la Biblia, leyendo cada día la Palabra de Dios.', map:'De Egipto a Jericó', startAdventure:'La aventura comienza...', victory:'¡Las murallas caen!', continue:'Continuar', return:'Volver al menú'
+  },
+  Português: { start:'Iniciar jogo', how:'Como jogar', settings:'Configurações', back:'Voltar ao menu', next:'Avançar', choose:'Escolha um personagem', confirm:'Confirmar personagem', choosePlayers:'Quantos jogadores?', names:'Nomes dos jogadores', ready:'Prontos para partir!', turn:'Vez de', difficulty:'Escolha a dificuldade para responder uma pergunta bíblica.', answer:'Responder', correct:'Resposta correta!', incorrect:'Resposta incorreta!', noMove:'Você não avança', move:'Você avança', win:'Parabéns!', conquered:'Você conquistou Jericó', thank:'Obrigado por participar.', bible:'Convidamos você e todos os jogadores a continuarem conhecendo a Bíblia e lendo a Palavra de Deus todos os dias.', map:'Do Egito a Jericó', startAdventure:'A aventura começa...', victory:'As muralhas estão caindo!', continue:'Continuar', return:'Voltar ao menu'
+  },
+  English: { start:'Start game', how:'How to play', settings:'Settings', back:'Back to menu', next:'Next', choose:'Choose a character', confirm:'Confirm character', choosePlayers:'How many players?', names:'Player names', ready:'Ready to go!', turn:"It's", difficulty:'Choose a difficulty to answer a Bible question.', answer:'Answer', correct:'Correct answer!', incorrect:'Incorrect answer!', noMove:'No movement', move:'You advance', win:'Congratulations!', conquered:'You conquered Jericho', thank:'Thank you for playing.', bible:'We invite you and all players to keep discovering the Bible and reading God’s Word every day.', map:'From Egypt to Jericho', startAdventure:'The adventure begins...', victory:'The walls are falling!', continue:'Continue', return:'Back to menu'
+  }
 };
-const LEVELS = [{id:'facil',label:'Fácil',steps:1},{id:'medio',label:'Medio',steps:2},{id:'dificil',label:'Difícil',steps:3}];
-const shuffle = a => { const out=[...a]; for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [out[i],out[j]]=[out[j],out[i]];} return out; };
-function App(){
- const [screen,setScreen]=useState('menu');
- const [lang,setLang]=useState('Español');
- const [sound,setSound]=useState(true);
- const [music,setMusic]=useState(true);
- const [count,setCount]=useState(2);
- const [names,setNames]=useState(['Jugador 1','Jugador 2','Jugador 3','Jugador 4']);
- const [chosen,setChosen]=useState([]);
- const [players,setPlayers]=useState([]);
- const [turn,setTurn]=useState(0);
- const [level,setLevel]=useState(null);
- const [question,setQuestion]=useState(null);
- const [answer,setAnswer]=useState(null);
- const [feedback,setFeedback]=useState(null);
- const [used,setUsed]=useState({facil:[],medio:[],dificil:[]});
- const [questionBank,setQuestionBank]=useState(null);
- const [bankError,setBankError]=useState('');
- const [winner,setWinner]=useState(null);
- const [mapIntro,setMapIntro]=useState(false);
- const [wallFrame,setWallFrame]=useState(0);
- const [showBible,setShowBible]=useState(false);
- const active=players[turn];
- useEffect(()=>{
-  let alive=true;
-  (async()=>{
-   try{
-    const response=await fetch(import.meta.env.BASE_URL+'data/question-bank.json.gz.b64');
-    if(!response.ok)throw new Error('No se pudo descargar el banco de preguntas');
-    const encoded=(await response.text()).trim();
-    const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
-    if(!('DecompressionStream' in window))throw new Error('Este navegador no admite la descompresión del banco');
-    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-    const data=await new Response(stream).json();
-    if(data.questionCount!==120||data.questions?.length!==120)throw new Error('El banco no contiene las 120 preguntas esperadas');
-    const counts={facil:0,medio:0,dificil:0};
-    data.questions.forEach(q=>counts[q.difficulty]++);
-    if(Object.values(counts).some(n=>n!==40))throw new Error('La distribución no es de 40 preguntas por dificultad');
-    if(alive){setQuestionBank(data.questions);setBankError('');}
-   }catch(error){if(alive)setBankError(error.message||'Error al cargar las preguntas');}
-  })();
-  return()=>{alive=false};
- },[]);
- const startSetup=()=>{setNames(['Jugador 1','Jugador 2','Jugador 3','Jugador 4']);setChosen([]);setScreen('setup')};
- const chooseCharacter=(id)=>{if(chosen.includes(id))return;setChosen([...chosen,id]);};
- const begin=()=>{const ps=names.slice(0,count).map((name,i)=>({name:name.trim(),character:CHARACTERS.find(c=>c.id===chosen[i]),steps:0}));setPlayers(ps);setTurn(0);setUsed({facil:[],medio:[],dificil:[]});setWinner(null);setMapIntro(true);setScreen('map');setTimeout(()=>{setMapIntro(false);setScreen('board')},3000)};
- const pickLevel=(l)=>{if(!questionBank){setBankError('El banco de preguntas aún no está disponible. Recarga la página para intentar de nuevo.');return;}setLevel(l);const pool=questionBank.filter(q=>q.difficulty===l.id);let unused=pool.filter(q=>!used[l.id].includes(q.id));if(!unused.length){unused=pool;setUsed(u=>({...u,[l.id]:[]}));}const q=shuffle(unused)[0];setUsed(u=>({...u,[l.id]:[...u[l.id],q.id]}));const opts=shuffle(q.options.map((v,i)=>({text:v,correct:i===q.correctAnswerIndex})));setQuestion({text:q.question,options:opts,reference:q.biblicalReference,steps:l.steps,id:q.id});setAnswer(null);setScreen('question')};
- const respond=()=>{const ok=question.options[answer]?.correct;const next=players.map((p,i)=>i===turn?{...p,steps:Math.min(30,p.steps+(ok?question.steps:0))}:p);setPlayers(next);setFeedback({ok,steps:ok?question.steps:0});setScreen('feedback');setTimeout(()=>{setFeedback(null);if(ok&&next[turn].steps>=30){setWinner(next[turn]);setScreen('collapse');setWallFrame(0);}else{setTurn((turn+1)%players.length);setScreen('board')}},4000)};
- useEffect(()=>{if(screen!=='collapse')return;let f=0;const id=setInterval(()=>{f++;setWallFrame(f);if(f>=5){clearInterval(id);setScreen('story')}},950);return()=>clearInterval(id)},[screen]);
- const reset=()=>{setScreen('menu');setPlayers([]);setWinner(null);setChosen([])};
- const positions=useMemo(()=>players.map(p=>Math.min(100,p.steps/30*100)),[players]);
- return <main className="game-shell">
-  <header className="topbar"><div className="brand-mark">J</div><div><div className="brand">JERICO</div><div className="subtitle">CAMINO A JERICÓ</div></div><div className="top-spacer"/><button className="tiny" onClick={()=>setScreen('settings')}>⚙</button></header>
-  {screen==='menu'&&<section className="hero scene-jericho"><div className="hero-shade"/><div className="hero-content"><p className="eyebrow">UNA AVENTURA BÍBLICA</p><h1>JERICO</h1><p className="hero-sub">Camino a Jericó</p><div className="gold-line"/><button className="primary" onClick={startSetup}>Iniciar juego <span>▶</span></button><button className="secondary" onClick={()=>setScreen('instructions')}>Cómo jugar</button><button className="secondary" onClick={()=>setScreen('settings')}>Configuración</button></div><div className="hero-bottom">UNA HISTORIA DE FE · VALOR · OBEDIENCIA</div></section>}
-  {screen==='instructions'&&<section className="panel parchment"><h2>Cómo jugar</h2><p>¡Prepárate para recorrer el camino hacia Jericó! Responde preguntas bíblicas para avanzar por cinco escenarios.</p><ol><li>Participan de 1 a 4 jugadores.</li><li>Cada jugador elige un personaje diferente.</li><li>En cada turno elige la dificultad: Fácil avanza 1 paso, Medio 2 y Difícil 3.</li><li>Si respondes incorrectamente, no avanzas.</li><li>El primer jugador que llegue a 30 pasos conquista Jericó y gana la partida.</li></ol><button className="primary" onClick={()=>setScreen('menu')}>Volver al menú</button></section>}
-  {screen==='settings'&&<section className="panel parchment"><h2>Configuración</h2><label>Idioma<select value={lang} onChange={e=>setLang(e.target.value)}><option>Español</option><option>Português</option><option>English</option></select></label><label className="switch-row">Efectos de sonido <input type="checkbox" checked={sound} onChange={e=>setSound(e.target.checked)}/></label><label className="switch-row">Música <input type="checkbox" checked={music} onChange={e=>setMusic(e.target.checked)}/></label><p className="small">JERICO — Camino a Jericó · Proyecto educativo</p><button className="primary" onClick={()=>setScreen('menu')}>Guardar y volver</button></section>}
-  {screen==='setup'&&<section className="panel parchment"><p className="eyebrow">PREPARA TU PARTIDA</p><h2>¿Cuántos jugadores?</h2><div className="player-count">{[1,2,3,4].map(n=><button key={n} className={count===n?'count active':'count'} onClick={()=>setCount(n)}>{n}</button>)}</div><h3>Nombres de los jugadores</h3><div className="name-grid">{names.slice(0,count).map((n,i)=><label key={i}>Jugador {i+1}<input maxLength="12" value={n} onChange={e=>setNames(v=>v.map((x,j)=>j===i?e.target.value:x))}/></label>)}</div><button className="primary" disabled={names.slice(0,count).some(n=>!n.trim())} onClick={()=>{setChosen([]);setScreen('characters')}}>Siguiente</button></section>}
-  {screen==='characters'&&<section className="panel parchment"><p className="eyebrow">SELECCIÓN DE PERSONAJES</p><h2>{chosen.length<count?names[chosen.length]:'¡Listos para partir!'}</h2><p>Elige un personaje distinto para cada jugador ({chosen.length}/{count}).</p><div className="character-grid">{CHARACTERS.map(c=><button key={c.id} disabled={chosen.includes(c.id)} className={'character '+(chosen.includes(c.id)?'locked':'')} onClick={()=>chooseCharacter(c.id)}><span className="character-emoji">{c.emoji}</span><b>{c.name}</b><small>{c.desc}</small></button>)}</div>{chosen.length===count?<button className="primary" onClick={begin}>Comenzar aventura</button>:<p className="hint">Selecciona {count-chosen.length} personaje(s) más.</p>}<button className="text-button" onClick={()=>setScreen('setup')}>Volver</button></section>}
-  {screen==='map'&&<section className="map-screen"><p className="eyebrow">EL CAMINO A LA PROMESA</p><h2>De Egipto a Jericó</h2><div className="map-route">{SCENES.map((s,i)=><div className="map-stop" key={s.name}><span>{s.icon}</span><b>{s.name}</b><small>6 pasos</small>{i<4&&<i/>}</div>)}</div><p>La aventura comienza...</p></section>}
-  {screen==='board'&&<section className="board scene-board"><div className="board-head"><div><p className="eyebrow">TURNO DE {active?.name?.toUpperCase()}</p><h2>{SCENES[Math.min(4,Math.floor(active.steps/6))].name}</h2></div><div className="turn-avatar">{active?.character?.emoji}</div></div><div className="scene-track"><div className="track-sky"/><div className="track-ground"/><div className="track-city">🏰</div><div className="track-path">{SCENES.map((s,i)=><div className="track-stage" key={s.name}><span>{s.icon}</span><b>{s.name}</b><small>6 pasos</small></div>)}</div>{players.map((p,i)=><div className="player-token" key={p.name} style={{left:`calc(${Math.max(2,Math.min(96,positions[i]))}% )`,bottom:`${i*43+16}px`}} title={p.name}><span>{p.character.emoji}</span></div>)}</div><div className="player-progress">{players.map((p,i)=><div className={'progress-card '+(i===turn?'current':'')} key={p.name}><span>{p.character.emoji}</span><div><b>{p.name}</b><small>{p.steps}/30 pasos · {SCENES[Math.min(4,Math.floor(p.steps/6))].name}</small><div className="meter"><i style={{width:positions[i]+'%'}}/></div></div></div>)}</div><div className="turn-actions"><p>Elige la dificultad para responder una pregunta bíblica.</p>{!questionBank&&<p className="hint">{bankError||'Cargando las 120 preguntas bíblicas...'}</p>}<div className="difficulty">{LEVELS.map(l=><button key={l.id} disabled={!questionBank} onClick={()=>pickLevel(l)}><b>{l.label}</b><small>+{l.steps} paso{l.steps>1?'s':''}</small></button>)}</div></div></section>}
-  {screen==='question'&&<section className="panel question-panel"><p className="eyebrow">{level.label.toUpperCase()} · {level.steps} PASO(S) EN JUEGO</p><h2>{question.text}</h2><div className="answers">{question.options.map((o,i)=><button key={i} className={answer===i?'answer selected':''} onClick={()=>setAnswer(i)}><span>{String.fromCharCode(65+i)}</span>{o.text}</button>)}</div><p className="reference">Referencia: {question.reference}</p><button className="primary" disabled={answer===null} onClick={respond}>Responder</button></section>}
-  {screen==='feedback'&&<div className="modal-backdrop"><div className={'feedback-card '+(feedback?.ok?'good':'bad')}><div className="feedback-icon">{feedback?.ok?'✦':'×'}</div><h2>{feedback?.ok?'¡Respuesta correcta!':'¡Respuesta incorrecta!'}</h2><p>{feedback?.ok?`Avanzas +${feedback.steps} paso(s)`:'No avanzas'}</p></div></div>}
-  {screen==='collapse'&&<section className="collapse-screen"><p className="eyebrow">¡EL PUEBLO HA GRITADO!</p><h2>¡Las murallas caen!</h2><div className="wall-scene"><div className="wall-sky"/><div className={'wall wall-'+wallFrame}>🏰</div><div className="celebrators">{players.map(p=><span key={p.name}>{p.character.emoji} 🙌</span>)}</div><div className="dust">✦　·　✧　·　✦</div></div><p>Jericó ha sido conquistada</p></section>}
-  {screen==='story'&&<section className="panel parchment story-panel"><p className="eyebrow">LA PROMESA SE CUMPLIÓ</p><h2>La conquista de Jericó</h2><div className="scripture"><p><strong>1</strong> Las puertas de Jericó estaban bien aseguradas por temor a los israelitas; nadie podía salir o entrar.</p><p><strong>2</strong> Pero el Señor dijo a Josué: «¡He entregado en tus manos a Jericó y a su rey con sus guerreros! <strong>3</strong> Tú y tus soldados marcharán una vez alrededor de la ciudad; así lo harán durante seis días. <strong>4</strong> Siete sacerdotes llevarán trompetas y marcharán frente al arca. El séptimo día ustedes marcharán siete veces alrededor de la ciudad, mientras los sacerdotes tocan las trompetas. <strong>5</strong> Cuando todos escuchen el toque de trompeta, el pueblo deberá gritar a voz en cuello. Entonces los muros de la ciudad se derrumbarán y cada uno entrará sin impedimento».</p></div><b className="scripture-ref">Josué 6:1–5</b><button className="primary" onClick={()=>setScreen('victory')}>Continuar</button></section>}
-  {screen==='victory'&&<section className="victory-screen"><div className="victory-crown">♛</div><p className="eyebrow">LA CONQUISTA HA TERMINADO</p><h1>¡Felicidades!</h1><h2>{winner?.name}</h2><p className="winner-copy">Has conquistado Jericó</p><div className="bible-art">📖</div><div className="invite"><b>Gracias por participar.</b><p>Te invitamos a ti y a todos los jugadores a seguir conociendo la Biblia, leyendo cada día la Palabra de Dios.</p></div><button className="primary" onClick={reset}>Volver al menú</button></section>}
- </main>
+const shuffle = (items) => {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
+const useSound = (enabled) => {
+  const contextRef = useRef(null);
+  return (type = 'tap') => {
+    if (!enabled || typeof window === 'undefined') return;
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = contextRef.current || new AudioContext();
+      contextRef.current = ctx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const notes = type === 'correct' ? [523.25, 659.25, 783.99] : type === 'wrong' ? [220, 164.81] : [440];
+      const now = ctx.currentTime;
+      notes.forEach((frequency, index) => {
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = 'square';
+        oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(0.0001, now + index * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.045, now + index * 0.09 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.09 + 0.12);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start(now + index * 0.09);
+        oscillator.stop(now + index * 0.09 + 0.13);
+      });
+    } catch (error) {
+      // Audio is optional; gameplay remains available when the browser blocks it.
+    }
+  };
+};
+
+function Sprite({ character, walking = false, className = '' }) {
+  const [frame, setFrame] = useState(0);
+  useEffect(() => {
+    if (!walking) { setFrame(0); return undefined; }
+    const timer = window.setInterval(() => setFrame((value) => value === 1 ? 2 : 1), 180);
+    return () => window.clearInterval(timer);
+  }, [walking]);
+  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-row': character.row, '--sprite-frame': frame }} aria-label={character.name} />;
 }
+
+function App() {
+  const [screen, setScreen] = useState('menu');
+  const [language, setLanguage] = useState('Español');
+  const t = TEXT[language] || TEXT.Español;
+  const [soundOn, setSoundOn] = useState(true);
+  const [musicOn, setMusicOn] = useState(true);
+  const [notificationsOn, setNotificationsOn] = useState(true);
+  const playSound = useSound(soundOn);
+  const [settingsModal, setSettingsModal] = useState('');
+  const [playerCount, setPlayerCount] = useState(2);
+  const [names, setNames] = useState(['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4']);
+  const [selections, setSelections] = useState([]);
+  const [focusedCharacter, setFocusedCharacter] = useState(0);
+  const [players, setPlayers] = useState([]);
+  const [turn, setTurn] = useState(0);
+  const [level, setLevel] = useState(null);
+  const [question, setQuestion] = useState(null);
+  const [answer, setAnswer] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [usedQuestionIds, setUsedQuestionIds] = useState({ facil: [], medio: [], dificil: [] });
+  const [questionBank, setQuestionBank] = useState(null);
+  const [bankError, setBankError] = useState('');
+  const [winner, setWinner] = useState(null);
+  const [wallFrame, setWallFrame] = useState(1);
+  const [isMapIntro, setIsMapIntro] = useState(false);
+  const [keyboardHelp, setKeyboardHelp] = useState(true);
+  const activePlayer = players[turn];
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const response = await fetch(DATA('question-bank.json.gz.b64'));
+        if (!response.ok) throw new Error('No fue posible cargar el banco de preguntas.');
+        const encoded = (await response.text()).trim();
+        const compressed = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
+        if (!('DecompressionStream' in window)) throw new Error('Este navegador no puede abrir el banco de preguntas comprimido.');
+        const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
+        const bank = await new Response(stream).json();
+        if (bank.questionCount !== 120 || bank.questions?.length !== 120) throw new Error('El banco debe contener exactamente 120 preguntas.');
+        const counts = { facil: 0, medio: 0, dificil: 0 };
+        bank.questions.forEach((item) => { if (counts[item.difficulty] !== undefined) counts[item.difficulty] += 1; });
+        if (counts.facil !== 40 || counts.medio !== 40 || counts.dificil !== 40) throw new Error('El banco no está distribuido en 40 preguntas por dificultad.');
+        const malformed = bank.questions.find((item) => !item.id || !item.question || !Array.isArray(item.options) || item.options.length !== 4 || item.correctAnswerIndex < 0 || item.correctAnswerIndex > 3 || !item.biblicalReference);
+        if (malformed) throw new Error(`La pregunta ${malformed.id || 'sin ID'} no tiene una estructura válida.`);
+        if (alive) { setQuestionBank(bank.questions); setBankError(''); }
+      } catch (error) {
+        if (alive) setBankError(error.message || 'Error al cargar las preguntas.');
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    if (screen !== 'map') return undefined;
+    const timer = window.setTimeout(() => { setIsMapIntro(false); setScreen('board'); }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [screen]);
+
+  useEffect(() => {
+    if (screen !== 'feedback') return undefined;
+    const timer = window.setTimeout(() => {
+      const isWinner = feedback?.winner === true;
+      setFeedback(null);
+      if (isWinner) {
+        setWallFrame(1);
+        setScreen('collapse');
+      } else {
+        setTurn((current) => (current + 1) % players.length);
+        setScreen('board');
+      }
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, [screen, feedback, players.length]);
+
+  useEffect(() => {
+    if (screen !== 'collapse') return undefined;
+    setWallFrame(1);
+    const timers = [1, 2, 3, 4, 5].map((frame) => window.setTimeout(() => {
+      setWallFrame(frame);
+      if (frame === 5) window.setTimeout(() => setScreen('story'), 1100);
+    }, (frame - 1) * 1050));
+    return () => timers.forEach(window.clearTimeout);
+  }, [screen]);
+
+  useEffect(() => {
+    if (screen !== 'characters') return undefined;
+    const onKeyDown = (event) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'Enter') return;
+      event.preventDefault();
+      if (event.key === 'Enter') {
+        confirmCharacter();
+        return;
+      }
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      setFocusedCharacter((current) => {
+        for (let offset = 1; offset <= CHARACTERS.length; offset += 1) {
+          const candidate = (current + direction * offset + CHARACTERS.length) % CHARACTERS.length;
+          if (!selections.includes(candidate)) return candidate;
+        }
+        return current;
+      });
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [screen, focusedCharacter, selections, playerCount]);
+
+  const currentPlayerName = names[selections.length] || names[0];
+  const isBankReady = Boolean(questionBank);
+  const startSetup = () => {
+    setPlayerCount(2);
+    setNames(['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4']);
+    setSelections([]);
+    setFocusedCharacter(0);
+    setPlayers([]);
+    setWinner(null);
+    setUsedQuestionIds({ facil: [], medio: [], dificil: [] });
+    setScreen('setup');
+  };
+
+  const chooseFocus = (index) => {
+    if (selections.includes(index)) return;
+    setFocusedCharacter(index);
+    playSound('tap');
+  };
+  const confirmCharacter = () => {
+    if (screen !== 'characters' || selections.length >= playerCount || selections.includes(focusedCharacter)) return;
+    const next = [...selections, focusedCharacter];
+    setSelections(next);
+    playSound('correct');
+    if (next.length < playerCount) {
+      const nextAvailable = CHARACTERS.findIndex((character, index) => !next.includes(index));
+      setFocusedCharacter(nextAvailable < 0 ? 0 : nextAvailable);
+    }
+  };
+
+  const beginAdventure = () => {
+    if (!isBankReady || selections.length !== playerCount) return;
+    const nextPlayers = names.slice(0, playerCount).map((name, index) => ({
+      id: `player-${index + 1}`,
+      name: name.trim().slice(0, 12),
+      character: CHARACTERS[selections[index]],
+      steps: 0
+    }));
+    setPlayers(nextPlayers);
+    setTurn(0);
+    setUsedQuestionIds({ facil: [], medio: [], dificil: [] });
+    setWinner(null);
+    setIsMapIntro(true);
+    setScreen('map');
+  };
+
+  const askQuestion = (selectedLevel) => {
+    if (!questionBank || !activePlayer) return;
+    const pool = questionBank.filter((item) => item.difficulty === selectedLevel.id);
+    if (!pool.length) { setBankError(`No hay preguntas disponibles para ${selectedLevel.label.toLowerCase()}.`); return; }
+    let unused = pool.filter((item) => !usedQuestionIds[selectedLevel.id].includes(item.id));
+    if (!unused.length) {
+      unused = pool;
+      setUsedQuestionIds((current) => ({ ...current, [selectedLevel.id]: [] }));
+    }
+    const selected = shuffle(unused)[0];
+    setUsedQuestionIds((current) => ({
+      ...current,
+      [selectedLevel.id]: [...(unused.length === pool.length && usedQuestionIds[selectedLevel.id].length === pool.length ? [] : current[selectedLevel.id]), selected.id]
+    }));
+    const options = shuffle(selected.options.map((text, index) => ({ text, correct: index === selected.correctAnswerIndex })));
+    setLevel(selectedLevel);
+    setQuestion({
+      id: selected.id,
+      text: selected.question,
+      options,
+      reference: selected.biblicalReference,
+      steps: selectedLevel.steps
+    });
+    setAnswer(null);
+    playSound('tap');
+    setScreen('question');
+  };
+
+  const submitAnswer = () => {
+    if (answer === null || !question || !activePlayer) return;
+    const correct = question.options[answer]?.correct === true;
+    const newSteps = Math.min(30, activePlayer.steps + (correct ? question.steps : 0));
+    const nextPlayers = players.map((player, index) => index === turn ? { ...player, steps: newSteps } : player);
+    const hasWon = correct && newSteps >= 30;
+    setPlayers(nextPlayers);
+    if (hasWon) setWinner(nextPlayers[turn]);
+    setFeedback({ correct, steps: correct ? question.steps : 0, winner: hasWon });
+    playSound(correct ? 'correct' : 'wrong');
+    setScreen('feedback');
+  };
+
+  const resetGame = () => {
+    setScreen('menu');
+    setPlayers([]);
+    setWinner(null);
+    setSelections([]);
+    setFeedback(null);
+    setQuestion(null);
+  };
+  const currentSceneIndex = activePlayer ? Math.min(4, Math.floor(activePlayer.steps / 6)) : 0;
+  const percentByPlayer = useMemo(() => players.map((player) => (player.steps / 30) * 100), [players]);
+  const sceneForSteps = (steps) => SCENES[Math.min(4, Math.floor(steps / 6))];
+  const stageMarkers = Array.from({ length: 30 }, (_, index) => index + 1);
+
+  return (
+    <main className="game-shell">
+      <header className="topbar">
+        <div className="brand-mark">J</div>
+        <div><div className="brand">JERICO</div><div className="subtitle">CAMINO A JERICÓ</div></div>
+        <div className="top-spacer" />
+        <button className="tiny" type="button" aria-label={t.settings} onClick={() => setScreen('settings')}>⚙</button>
+      </header>
+
+      {screen === 'menu' && (
+        <section className="hero scene-jericho" style={{ backgroundImage: `url("${ASSET('menu.webp')}")` }}>
+          <div className="hero-shade" />
+          <div className="hero-content">
+            <p className="eyebrow">UNA AVENTURA BÍBLICA</p>
+            <h1>JERICO</h1>
+            <p className="hero-sub">Camino a Jericó</p>
+            <div className="gold-line" />
+            <button className="primary" type="button" onClick={startSetup}>{t.start} <span>▶</span></button>
+            <button className="secondary" type="button" onClick={() => setScreen('instructions')}>{t.how}</button>
+            <button className="secondary" type="button" onClick={() => setScreen('settings')}>{t.settings}</button>
+            {!isBankReady && <p className="menu-status">{bankError || 'Preparando banco de 120 preguntas...'}</p>}
+          </div>
+          <div className="hero-bottom">UNA HISTORIA DE FE · VALOR · OBEDIENCIA</div>
+        </section>
+      )}
+
+      {screen === 'instructions' && (
+        <section className="panel parchment">
+          <p className="eyebrow">JERICO · CAMINO A LA PROMESA</p>
+          <h2>Instrucciones</h2>
+          <p>¡Prepárate para recorrer el camino hacia Jericó! Responde preguntas bíblicas y avanza por cinco escenarios, con seis pasos en cada uno.</p>
+          <ol>
+            <li>Participan de 1 a 4 jugadores. Cada participante escribe su nombre y elige un personaje diferente.</li>
+            <li>En cada turno, elige la dificultad: Fácil avanza 1 paso, Medio 2 pasos y Difícil 3 pasos.</li>
+            <li>Si respondes incorrectamente, no avanzas. Si respondes correctamente, tu personaje avanza la cantidad indicada.</li>
+            <li>Las preguntas se seleccionan al azar y no se repiten hasta agotar las 40 preguntas de esa dificultad.</li>
+            <li>El primer jugador que alcance los 30 pasos conquista Jericó. La partida termina inmediatamente.</li>
+          </ol>
+          <button className="primary" type="button" onClick={() => setScreen('menu')}>{t.back}</button>
+        </section>
+      )}
+
+      {screen === 'settings' && (
+        <section className="panel parchment settings-panel">
+          <p className="eyebrow">JERICO · PREFERENCIAS</p>
+          <h2>{t.settings}</h2>
+          <label>Idioma
+            <select value={language} onChange={(event) => setLanguage(event.target.value)}>
+              <option>Español</option><option>Português</option><option>English</option>
+            </select>
+          </label>
+          <label className="switch-row">Efectos de sonido <input type="checkbox" checked={soundOn} onChange={(event) => setSoundOn(event.target.checked)} /></label>
+          <label className="switch-row">Música ambiental <input type="checkbox" checked={musicOn} onChange={(event) => setMusicOn(event.target.checked)} /></label>
+          <label className="switch-row">Notificaciones <input type="checkbox" checked={notificationsOn} onChange={(event) => setNotificationsOn(event.target.checked)} /></label>
+          <div className="settings-links">
+            <button type="button" onClick={() => setSettingsModal('Soporte')}>Soporte</button>
+            <button type="button" onClick={() => setSettingsModal('Créditos')}>Créditos</button>
+            <button type="button" onClick={() => setSettingsModal('Términos y privacidad')}>Términos y privacidad</button>
+          </div>
+          <button className="primary" type="button" onClick={() => setScreen('menu')}>{t.back}</button>
+          {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal}</h3><p>{settingsModal === 'Soporte' ? 'Para reportar un problema, contacta al equipo responsable del proyecto JERICO.' : settingsModal === 'Créditos' ? 'JERICO — Camino a Jericó. Proyecto de juego bíblico educativo. Desarrollo y diseño: equipo del proyecto.' : 'Este juego se ofrece con fines educativos. No recopila datos personales ni envía información de los jugadores a servidores.'}</p></div></div>}
+        </section>
+      )}
+
+      {screen === 'setup' && (
+        <section className="panel parchment">
+          <p className="eyebrow">PREPARA TU PARTIDA</p>
+          <h2>{t.choosePlayers}</h2>
+          <div className="player-count">
+            {[1, 2, 3, 4].map((number) => <button key={number} type="button" className={playerCount === number ? 'count active' : 'count'} onClick={() => setPlayerCount(number)}>{number}</button>)}
+          </div>
+          <h3>{t.names}</h3>
+          <div className="name-grid">
+            {names.slice(0, playerCount).map((name, index) => (
+              <label key={index}>Jugador {index + 1}
+                <input maxLength={12} value={name} onChange={(event) => setNames((current) => current.map((value, i) => i === index ? event.target.value.slice(0, 12) : value))} />
+                <small className="char-counter">{name.length}/12</small>
+              </label>
+            ))}
+          </div>
+          <button className="primary" type="button" disabled={names.slice(0, playerCount).some((name) => !name.trim()) || !isBankReady} onClick={() => { setSelections([]); setFocusedCharacter(0); setScreen('characters'); }}>
+            {t.next}
+          </button>
+          {!isBankReady && <p className="hint">{bankError || 'Cargando las 120 preguntas bíblicas...'}</p>}
+        </section>
+      )}
+
+      {screen === 'characters' && (
+        <section className="panel parchment character-panel">
+          <p className="eyebrow">SELECCIÓN DE PERSONAJES · {selections.length + 1}/{playerCount}</p>
+          <h2>{selections.length < playerCount ? names[selections.length] : t.ready}</h2>
+          {selections.length < playerCount ? (
+            <>
+              <p>{t.choose}. Cada jugador debe tener un personaje diferente.</p>
+              <div className="character-stage">
+                <button className="carousel-arrow" type="button" aria-label="Personaje anterior" onClick={() => chooseFocus((focusedCharacter + 3) % 4)}>‹</button>
+                <div className="character-preview">
+                  <div className="character-spotlight"><Sprite character={CHARACTERS[focusedCharacter]} /></div>
+                  <h3>{CHARACTERS[focusedCharacter].name}</h3>
+                  <p>{CHARACTERS[focusedCharacter].description}</p>
+                  <div className="character-dots">{CHARACTERS.map((character, index) => <button key={character.id} type="button" className={index === focusedCharacter ? 'dot active' : 'dot'} disabled={selections.includes(index)} onClick={() => chooseFocus(index)} aria-label={character.name} />)}</div>
+                </div>
+                <button className="carousel-arrow" type="button" aria-label="Siguiente personaje" onClick={() => chooseFocus((focusedCharacter + 1) % 4)}>›</button>
+              </div>
+              <div className="character-roster">
+                {CHARACTERS.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} /><b>{character.name}</b>{selections.includes(index) && <small>Elegido</small>}</button>)}
+              </div>
+              <div className="keyboard-hint">Usa ← → para elegir y ENTER para confirmar.</div>
+              <button className="primary" type="button" disabled={selections.includes(focusedCharacter)} onClick={confirmCharacter}>{t.confirm}</button>
+            </>
+          ) : (
+            <>
+              <div className="selected-players">{players.length ? null : names.slice(0, playerCount).map((name, index) => <div key={name}><Sprite character={CHARACTERS[selections[index]]} /> <b>{name}</b></div>)}</div>
+              <p>Todos tienen un personaje único. El orden de juego seguirá el orden de los jugadores.</p>
+              <button className="primary" type="button" onClick={beginAdventure}>Comenzar aventura</button>
+            </>
+          )}
+          <button className="text-button" type="button" onClick={() => setScreen('setup')}>Volver</button>
+        </section>
+      )}
+
+      {screen === 'map' && (
+        <section className="map-screen" style={{ backgroundImage: `linear-gradient(180deg, #1a213aaa, #3f2636bb), url("${ASSET('map-reference.webp')}")` }}>
+          <p className="eyebrow">EL CAMINO A LA PROMESA</p>
+          <h2>{t.map}</h2>
+          <div className="map-route">
+            {SCENES.map((scene, index) => <div className="map-stop" key={scene.name}><span>{['𓂀', '🌊', '⛰', '🌿', '🏰'][index]}</span><b>{scene.name}</b><small>6 pasos</small>{index < 4 && <i />}</div>)}
+          </div>
+          <div className="map-travelers">{players.map((player) => <div key={player.id}><Sprite character={player.character} walking /> <b>{player.name}</b></div>)}</div>
+          <p>{t.startAdventure}</p>
+        </section>
+      )}
+
+      {screen === 'board' && activePlayer && (
+        <section className="board">
+          <div className="board-head">
+            <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{SCENES[currentSceneIndex].name}</h2><p>{SCENES[currentSceneIndex].detail}</p></div>
+            <div className="turn-avatar"><Sprite character={activePlayer.character} walking /></div>
+          </div>
+          <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")` }}>
+            <div className="scene-overlay" />
+            <div className="scene-labels">{SCENES.map((scene, index) => <span key={scene.name} className={index === currentSceneIndex ? 'active' : ''}>{scene.name}</span>)}</div>
+            <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= activePlayer.steps ? 'passed' : ''} />)}</div>
+            {players.map((player, index) => {
+              const left = Math.max(1.5, Math.min(98, (player.steps / 30) * 100));
+              return <div className="track-player" key={player.id} style={{ left: `${left}%`, bottom: `${14 + index * 46}px` }}><Sprite character={player.character} walking={index === turn} /><b>{player.name}</b></div>;
+            })}
+            <div className="path-line" />
+          </div>
+          <div className="player-progress">
+            {players.map((player, index) => <div className={`progress-card ${index === turn ? 'current' : ''}`} key={player.id}><Sprite character={player.character} /><div className="progress-details"><b>{player.name}</b><small>{player.steps}/30 pasos · {sceneForSteps(player.steps).name}</small><div className="meter"><i style={{ width: `${percentByPlayer[index]}%` }} /></div></div></div>)}
+          </div>
+          <div className="turn-actions">
+            <p>{t.difficulty}</p>
+            <div className="difficulty">{LEVELS.map((item) => <button key={item.id} type="button" className={item.color} onClick={() => askQuestion(item)}><b>{item.label}</b><small>+{item.steps} paso{item.steps > 1 ? 's' : ''}</small></button>)}</div>
+            <p className="bank-status">{questionBank?.length === 120 ? '120 preguntas listas · 40 por dificultad' : bankError || 'Cargando banco de preguntas...'}</p>
+          </div>
+        </section>
+      )}
+
+      {screen === 'question' && question && level && (
+        <section className="panel question-panel">
+          <p className="eyebrow">{level.label.toUpperCase()} · AVANZAS {level.steps} PASO{level.steps > 1 ? 'S' : ''}</p>
+          <h2>{question.text}</h2>
+          <div className="answers">
+            {question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" className={answer === index ? 'answer selected' : 'answer'} onClick={() => { setAnswer(index); playSound('tap'); }}><span>{String.fromCharCode(65 + index)}</span>{option.text}</button>)}
+          </div>
+          <p className="reference">Referencia bíblica: {question.reference}</p>
+          <div className="question-actions"><button className="text-button" type="button" onClick={() => setScreen('board')}>Cancelar turno</button><button className="primary" type="button" disabled={answer === null} onClick={submitAnswer}>{t.answer}</button></div>
+        </section>
+      )}
+
+      {screen === 'feedback' && feedback && (
+        <div className="modal-backdrop">
+          <div className={`feedback-card ${feedback.correct ? 'good' : 'bad'}`}>
+            <div className="feedback-icon">{feedback.correct ? '✦' : '×'}</div>
+            <h2>{feedback.correct ? t.correct : t.incorrect}</h2>
+            <p>{feedback.correct ? `${t.move} +${feedback.steps} paso(s)` : t.noMove}</p>
+            {feedback.winner && <p className="winner-note">¡{winner?.name} ha llegado primero a Jericó!</p>}
+          </div>
+        </div>
+      )}
+
+      {screen === 'collapse' && (
+        <section className={`collapse-screen ${wallFrame === 3 || wallFrame === 4 ? 'heavy-shake' : 'light-shake'}`}>
+          <p className="eyebrow">¡EL PUEBLO HA GRITADO!</p>
+          <h2>{t.victory}</h2>
+          <div className="wall-frame">
+            <img src={ASSET(`wall-${wallFrame}.webp`)} alt={`Derrumbe de las murallas de Jericó, imagen ${wallFrame} de 5`} />
+          </div>
+          <p>Jericó ha sido conquistada</p>
+        </section>
+      )}
+
+      {screen === 'story' && (
+        <section className="panel parchment story-panel">
+          <p className="eyebrow">LA PROMESA SE CUMPLIÓ</p>
+          <h2>La conquista de Jericó</h2>
+          <div className="scripture">
+            <p><strong>1</strong> {STORY[0]}</p>
+            <p><strong>2</strong> {STORY[1]} <strong>3</strong> {STORY[2]} <strong>4</strong> {STORY[3]} <strong>5</strong> {STORY[4]}</p>
+          </div>
+          <b className="scripture-ref">Josué 6:1–5</b>
+          <button className="primary" type="button" onClick={() => setScreen('victory')}>{t.continue}</button>
+        </section>
+      )}
+
+      {screen === 'victory' && (
+        <section className="victory-screen" style={{ backgroundImage: `linear-gradient(180deg, #281c2a50, #281c2aee), url("${ASSET('victory.webp')}")` }}>
+          <div className="victory-overlay">
+            <div className="victory-crown">♛</div>
+            <p className="eyebrow">LA CONQUISTA HA TERMINADO</p>
+            <h1>{t.win}</h1>
+            <h2>{winner?.name}</h2>
+            <p className="winner-copy">{t.conquered}</p>
+            <div className="invite"><b>{t.thank}</b><p>{t.bible}</p></div>
+            <button className="primary" type="button" onClick={resetGame}>{t.return}</button>
+          </div>
+        </section>
+      )}
+    </main>
+  );
+}
+
 export default App;
