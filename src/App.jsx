@@ -84,7 +84,7 @@ function Sprite({ character, walking = false, className = '' }) {
     const timer = window.setInterval(() => setFrame((value) => value === 1 ? 2 : 1), 180);
     return () => window.clearInterval(timer);
   }, [walking]);
-  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-row': character.row, '--sprite-frame': frame, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
+  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -60}px`, '--sprite-y': `${character.row * -110}px`, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
 }
 
 function App() {
@@ -113,6 +113,7 @@ function App() {
   const [wallFrame, setWallFrame] = useState(1);
   const [isMapIntro, setIsMapIntro] = useState(false);
   const [keyboardHelp, setKeyboardHelp] = useState(true);
+  const [movingPlayerId, setMovingPlayerId] = useState(null);
   const activePlayer = players[turn];
 
   useEffect(() => {
@@ -185,12 +186,19 @@ function App() {
         setWallFrame(1);
         setScreen('collapse');
       } else {
+        if (feedback?.correct) setMovingPlayerId(players[turn]?.id || null);
         setTurn((current) => (current + 1) % players.length);
         setScreen('board');
       }
     }, 4000);
     return () => window.clearTimeout(timer);
   }, [screen, feedback, players.length]);
+
+  useEffect(() => {
+    if (screen !== 'board' || !movingPlayerId) return undefined;
+    const timer = window.setTimeout(() => setMovingPlayerId(null), 900);
+    return () => window.clearTimeout(timer);
+  }, [screen, movingPlayerId]);
 
   useEffect(() => {
     if (screen !== 'collapse') return undefined;
@@ -457,7 +465,7 @@ function App() {
         <section className="board">
           <div className="board-head">
             <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{SCENES[currentSceneIndex].name}</h2><p>{SCENES[currentSceneIndex].detail}</p></div>
-            <div className="turn-avatar"><Sprite character={activePlayer.character} walking /></div>
+            <div className="turn-avatar"><Sprite character={activePlayer.character} /></div>
           </div>
           <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")` }}>
             <div className="scene-overlay" />
@@ -465,7 +473,7 @@ function App() {
             <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= activePlayer.steps ? 'passed' : ''} />)}</div>
             {players.map((player, index) => {
               const left = Math.max(1.5, Math.min(98, (player.steps / 30) * 100));
-              return <div className="track-player" key={player.id} style={{ left: `${left}%`, bottom: `${14 + index * 46}px` }}><Sprite character={player.character} walking={index === turn} /><b>{player.name}</b></div>;
+              return <div className="track-player" key={player.id} style={{ left: `${left}%`, bottom: `${14 + index * 46}px` }}><Sprite character={player.character} walking={player.id === movingPlayerId} /><b>{player.name}</b></div>;
             })}
             <div className="path-line" />
           </div>
