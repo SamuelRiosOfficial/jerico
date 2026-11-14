@@ -89,7 +89,7 @@ function Sprite({ character, walking = false, className = '' }) {
     }, 180);
     return () => window.clearInterval(timer);
   }, [walking]);
-  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -128}px`, '--sprite-y': `${character.row * -200}px`, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
+  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -60}px`, '--sprite-y': `${character.row * -110}px`, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
 }
 
 function App() {
