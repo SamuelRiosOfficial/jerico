@@ -121,6 +121,7 @@ function App() {
   const [keyboardHelp, setKeyboardHelp] = useState(true);
   const [movingPlayerId, setMovingPlayerId] = useState(null);
   const [advancePayload, setAdvancePayload] = useState(null);
+  const [advanceFromSteps, setAdvanceFromSteps] = useState(0);
   const [animatedStepCount, setAnimatedStepCount] = useState(0);
   const activePlayer = players[turn];
   const openSettings = () => {
@@ -210,11 +211,16 @@ function App() {
     let interval;
     let finishTimer;
     let completedSteps = 0;
+    const segmentEnd = Math.min(advancePayload.toSteps, (Math.floor(advanceFromSteps / 6) + 1) * 6);
+    const segmentSteps = Math.max(0, segmentEnd - advanceFromSteps);
     const finishAnimation = () => {
       setMovingPlayerId(null);
-      if (advancePayload.crossedScene) {
+      if (segmentEnd < advancePayload.toSteps) {
+        setAdvanceFromSteps(segmentEnd);
+        setAnimatedStepCount(0);
         setScreen('routeMap');
       } else if (advancePayload.winner) {
+        setAdvancePayload(null);
         setWallFrame(1);
         setScreen('collapse');
       } else {
@@ -223,13 +229,13 @@ function App() {
         setScreen('board');
       }
     };
-    if (!advancePayload.correct || advancePayload.steps <= 0) {
+    if (!advancePayload.correct || segmentSteps <= 0) {
       finishTimer = window.setTimeout(finishAnimation, 1450);
     } else {
       interval = window.setInterval(() => {
         completedSteps += 1;
         setAnimatedStepCount(completedSteps);
-        if (completedSteps >= advancePayload.steps) {
+        if (completedSteps >= segmentSteps) {
           window.clearInterval(interval);
           finishTimer = window.setTimeout(finishAnimation, 550);
         }
@@ -239,13 +245,17 @@ function App() {
       if (interval) window.clearInterval(interval);
       if (finishTimer) window.clearTimeout(finishTimer);
     };
-  }, [screen, advancePayload, players.length]);
+  }, [screen, advancePayload, advanceFromSteps, players.length]);
 
   useEffect(() => {
     if (screen !== 'routeMap') return undefined;
     const timer = window.setTimeout(() => {
       setMovingPlayerId(null);
-      if (advancePayload?.winner) {
+      if (advancePayload && advanceFromSteps < advancePayload.toSteps) {
+        setAnimatedStepCount(0);
+        setMovingPlayerId(advancePayload.playerId);
+        setScreen('advance');
+      } else if (advancePayload?.winner) {
         setAdvancePayload(null);
         setWallFrame(1);
         setScreen('collapse');
@@ -256,7 +266,7 @@ function App() {
       }
     }, 3200);
     return () => window.clearTimeout(timer);
-  }, [screen, advancePayload, players.length]);
+  }, [screen, advancePayload, advanceFromSteps, players.length]);
 
   useEffect(() => {
     if (screen !== 'collapse') return undefined;
@@ -365,6 +375,8 @@ function App() {
     const hasWon = outcome.won;
     setPlayers(nextPlayers);
     if (hasWon) setWinner(nextPlayers[turn]);
+    setAdvanceFromSteps(activePlayer.steps);
+    setAnimatedStepCount(0);
     setAdvancePayload({
       playerId: activePlayer.id,
       fromSteps: activePlayer.steps,
@@ -542,10 +554,11 @@ function App() {
       {screen === 'advance' && advancePayload && (
         <section className="advance-screen">
           {(() => {
-            const sceneIndex = sceneIndexForStep(advancePayload.fromSteps);
+            const sceneIndex = sceneIndexForStep(advanceFromSteps);
             const scene = SCENES[sceneIndex];
-            const shownSteps = Math.min(advancePayload.toSteps, advancePayload.fromSteps + animatedStepCount);
-            const localStep = advancePayload.correct ? Math.min(6, (advancePayload.fromSteps % 6) + animatedStepCount) : advancePayload.fromSteps % 6;
+            const segmentEnd = Math.min(advancePayload.toSteps, (Math.floor(advanceFromSteps / 6) + 1) * 6);
+            const shownSteps = Math.min(segmentEnd, advanceFromSteps + animatedStepCount);
+            const localStep = advancePayload.correct ? Math.min(6, (advanceFromSteps % 6) + animatedStepCount) : advanceFromSteps % 6;
             const pan = Math.max(0, Math.min(100, (localStep / 6) * 100));
             return <>
               <div className="advance-heading"><span>JERICO · {scene.name.toUpperCase()}</span><b>{advancePayload.correct ? `AVANZA ${advancePayload.steps} PASO${advancePayload.steps === 1 ? '' : 'S'}` : 'EL CAMINO ESPERA'}</b></div>
