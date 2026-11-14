@@ -820,3 +820,34 @@ button{image-rendering:pixelated}
   width:22px;height:36px;background-size:66px 145px;
   transform:scale(1);transform-origin:center;margin:-3px -2px;
 }
+
+
+.menu-party{
+  position:absolute;
+  z-index:3;
+  right:clamp(18px,5vw,76px);
+  bottom:clamp(24px,7vh,72px);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:clamp(0px,1vw,14px);
+  padding:0 16px;
+  pointer-events:none;
+  filter:drop-shadow(3px 5px 1px #4b280f88);
+}
+.menu-party .sprite{
+  width:80px;height:132px;background-size:240px 528px;
+  transform:scale(clamp(.9,1.5vw,1.45));
+  transform-origin:center bottom;
+  margin:0 -2px;
+}
+@media(max-width:760px){
+  .menu-party{
+    right:50%;
+    transform:translateX(50%);
+    bottom:clamp(16px,4vh,34px);
+    gap:0;
+  }
+  .menu-party .sprite{transform:scale(.85);margin:0 -10px}
+  .hero-bottom{bottom:4px}
+}
