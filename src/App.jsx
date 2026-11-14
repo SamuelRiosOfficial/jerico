@@ -404,7 +404,7 @@ function App() {
   const currentSceneIndex = activePlayer ? sceneIndexForStep(activePlayer.steps) : 0;
   const percentByPlayer = useMemo(() => players.map((player) => (player.steps / 30) * 100), [players]);
   const sceneForSteps = (steps) => SCENES[sceneIndexForStep(steps)];
-  const stageMarkers = Array.from({ length: 30 }, (_, index) => index + 1);
+  const stageMarkers = Array.from({ length: 6 }, (_, index) => index + 1);
 
   return (
     <main className={`game-shell screen-${screen}`}>
@@ -594,15 +594,17 @@ function App() {
       {screen === 'board' && activePlayer && (
         <section className="board">
           <div className="board-head">
-            <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{SCENES[currentSceneIndex].name}</h2><p>{SCENES[currentSceneIndex].detail}</p></div>
+            <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{SCENES[currentSceneIndex].name}</h2><p>{SCENES[currentSceneIndex].detail} · {activePlayer.steps % 6}/6 pasos en esta región</p></div>
             <div className="turn-avatar"><Sprite character={activePlayer.character} /></div>
           </div>
           <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")`, backgroundSize: '100% 100%' }}>
             <div className="scene-overlay" />
             <div className="scene-labels">{SCENES.map((scene, index) => <span key={scene.name} className={index === currentSceneIndex ? 'active' : ''}>{scene.name}</span>)}</div>
-            <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= activePlayer.steps ? 'passed' : ''} />)}</div>
+            <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= (activePlayer.steps % 6) ? 'passed' : ''} />)}</div>
             {players.map((player, index) => {
-              const left = Math.max(1.5, Math.min(98, (player.steps / 30) * 100));
+              if (sceneIndexForStep(player.steps) !== currentSceneIndex) return null;
+              const localStep = player.steps % 6;
+              const left = 8 + (localStep / 6) * 82;
               return <div className="track-player" key={player.id} style={{ left: `${left}%`, bottom: `${14 + index * 46}px` }}><Sprite character={player.character} walking={player.id === movingPlayerId} /><b>{player.name}</b></div>;
             })}
             <div className="path-line" />
