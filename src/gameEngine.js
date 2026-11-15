@@ -60,8 +60,16 @@ export function validateQuestionBank(bank) {
     const validReference = typeof question.biblicalReference === 'string' && question.biblicalReference.trim().length > 0;
     const answerMatches = question.correctAnswer === undefined ||
       (validIndex && question.correctAnswer === question.options[question.correctAnswerIndex]);
-
-    if (!validText || !validOptions || !validIndex || !validReference || !answerMatches) {
+    const validTranslations = !bank.languages?.includes('pt') ||
+      ['pt', 'en'].every((language) => {
+        const translation = question.translations?.[language];
+        return typeof translation?.question === 'string' && translation.question.trim().length > 0 &&
+          typeof translation?.biblicalReference === 'string' && translation.biblicalReference.trim().length > 0 &&
+          Array.isArray(translation.options) && translation.options.length === 4 &&
+          translation.options.every((option) => typeof option === 'string' && option.trim().length > 0) &&
+          new Set(translation.options.map((option) => option.trim())).size === 4;
+      });
+    if (!validText || !validOptions || !validIndex || !validReference || !answerMatches || !validTranslations) {
       throw new Error(`La pregunta ${id} no tiene una estructura válida o su respuesta correcta no coincide.`);
     }
   }
@@ -82,7 +90,7 @@ export function nextAvailableCharacter(currentIndex, direction, selectedIndices,
   return currentIndex;
 }
 
-export function selectQuestionForTurn(bank, difficulty, usedIds, random = Math.random) {
+export function selectQuestionForTurn(bank, difficulty, usedIds, random = Math.random, language = 'es') {
   const pool = bank.filter((question) => question.difficulty === difficulty);
   if (!pool.length) throw new Error(`No hay preguntas para la dificultad ${difficulty}.`);
   const alreadyUsed = usedIds[difficulty] || [];
@@ -93,11 +101,17 @@ export function selectQuestionForTurn(bank, difficulty, usedIds, random = Math.r
     ...usedIds,
     [difficulty]: [...(cycleRestarted ? [] : alreadyUsed), selected.id]
   };
-  const options = shuffle(selected.options.map((text, index) => ({
-    text,
-    correct: index === selected.correctAnswerIndex
+  const localized = language === 'es' ? selected : selected.translations?.[language];
+  if (!localized) throw new Error(`No existe traducción para el idioma ${language}.`);
+  const displayQuestion = language === 'es' ? selected : {
+    ...selected, question: localized.question, options: localized.options,
+    correctAnswer: localized.options[selected.correctAnswerIndex],
+    biblicalReference: localized.biblicalReference
+  };
+  const options = shuffle(displayQuestion.options.map((text, index) => ({
+    text, correct: index === selected.correctAnswerIndex
   })), random);
-  return { question: selected, options, usedIds: nextUsedIds, cycleRestarted };
+  return { question: displayQuestion, options, usedIds: nextUsedIds, cycleRestarted };
 }
 
 export function resolveAnswer(currentSteps, isCorrect, awardedSteps) {

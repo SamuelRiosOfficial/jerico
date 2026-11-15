@@ -1,18 +1,34 @@
 {
-  "version": 2,
+  "version": 3,
   "status": "integrated",
   "questionCount": 120,
-  "distribution": { "facil": 40, "medio": 40, "dificil": 40 },
+  "distribution": {
+    "facil": 40,
+    "medio": 40,
+    "dificil": 40
+  },
+  "languages": [
+    "es",
+    "pt",
+    "en"
+  ],
+  "bibleVersions": {
+    "es": "Banco original aprovado em espanhol",
+    "pt": "Almeida 1911 (ortografia atualizada)",
+    "en": "World English Bible (WEB)"
+  },
   "randomizeQuestionOrder": true,
   "randomizeAnswerOrder": true,
   "noRepeatUntilDifficultyPoolExhausted": true,
   "poolScope": "shared_by_all_players_in_the_same_game",
-  "source": "public/data/question-bank.json.gz.b64",
+  "source": "public/data/question-bank.json.gz.b64 + src/questionTranslations.js",
+  "generatedAsset": "public/data/question-bank.multilingual.json",
   "integrityChecks": [
     "exactly 120 questions",
     "40 questions in each difficulty",
     "four options per question",
     "valid correctAnswerIndex",
-    "biblicalReference present"
+    "biblicalReference present in each language",
+    "Portuguese and English translation present for all 120 questions"
   ]
 }

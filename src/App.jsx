@@ -31,11 +31,11 @@ const STORY = [
   'Cuando todos escuchen el toque de trompeta, el pueblo deberá gritar a voz en cuello. Entonces los muros de la ciudad se derrumbarán y cada uno entrará sin impedimento».'
 ];
 const TEXT = {
-  Español: { start:'Iniciar juego', how:'Cómo jugar', settings:'Configuración', back:'Volver al menú', next:'Siguiente', choose:'Elige un personaje', confirm:'Confirmar personaje', choosePlayers:'¿Cuántos jugadores?', names:'Nombres de los jugadores', ready:'¡Listos para partir!', turn:'Turno de', difficulty:'Elige la dificultad para responder una pregunta bíblica.', answer:'Responder', correct:'¡Respuesta correcta!', incorrect:'¡Respuesta incorrecta!', noMove:'No avanzas', move:'Avanzas', win:'¡Felicidades!', conquered:'Has conquistado Jericó', thank:'Gracias por participar.', bible:'Te invitamos a ti y a todos los jugadores a seguir conociendo la Biblia, leyendo cada día la Palabra de Dios.', map:'De Egipto a Jericó', startAdventure:'La aventura comienza...', victory:'¡Las murallas caen!', continue:'Continuar', return:'Volver al menú'
+  Español: { start:'Iniciar juego', how:'Cómo jugar', settings:'Configuración', back:'Volver al menú', next:'Siguiente', choose:'Elige un personaje', confirm:'Confirmar personaje', choosePlayers:'¿Cuántos jugadores?', names:'Nombres de los jugadores', ready:'¡Listos para partir!', turn:'Turno de', difficulty:'Elige la dificultad para responder una pregunta bíblica.', answer:'Responder', correct:'¡Respuesta correcta!', incorrect:'¡Respuesta incorrecta!', noMove:'No avanzas', move:'Avanzas', win:'¡Felicidades!', conquered:'Has conquistado Jericó', thank:'Gracias por participar.', bible:'Te invitamos a ti y a todos los jugadores a seguir conociendo la Biblia, leyendo cada día la Palabra de Dios.', map:'De Egipto a Jericó', startAdventure:'La aventura comienza...', victory:'¡Las murallas caen!', continue:'Continuar', return:'Volver al menú', reference:'Referencia bíblica'
   },
-  Português: { start:'Iniciar jogo', how:'Como jogar', settings:'Configurações', back:'Voltar ao menu', next:'Avançar', choose:'Escolha um personagem', confirm:'Confirmar personagem', choosePlayers:'Quantos jogadores?', names:'Nomes dos jogadores', ready:'Prontos para partir!', turn:'Vez de', difficulty:'Escolha a dificuldade para responder uma pergunta bíblica.', answer:'Responder', correct:'Resposta correta!', incorrect:'Resposta incorreta!', noMove:'Você não avança', move:'Você avança', win:'Parabéns!', conquered:'Você conquistou Jericó', thank:'Obrigado por participar.', bible:'Convidamos você e todos os jogadores a continuarem conhecendo a Bíblia e lendo a Palavra de Deus todos os dias.', map:'Do Egito a Jericó', startAdventure:'A aventura começa...', victory:'As muralhas estão caindo!', continue:'Continuar', return:'Voltar ao menu'
+  Português: { start:'Iniciar jogo', how:'Como jogar', settings:'Configurações', back:'Voltar ao menu', next:'Avançar', choose:'Escolha um personagem', confirm:'Confirmar personagem', choosePlayers:'Quantos jogadores?', names:'Nomes dos jogadores', ready:'Prontos para partir!', turn:'Vez de', difficulty:'Escolha a dificuldade para responder uma pergunta bíblica.', answer:'Responder', correct:'Resposta correta!', incorrect:'Resposta incorreta!', noMove:'Você não avança', move:'Você avança', win:'Parabéns!', conquered:'Você conquistou Jericó', thank:'Obrigado por participar.', bible:'Convidamos você e todos os jogadores a continuarem conhecendo a Bíblia e lendo a Palavra de Deus todos os dias.', map:'Do Egito a Jericó', startAdventure:'A aventura começa...', victory:'As muralhas estão caindo!', continue:'Continuar', return:'Voltar ao menu', reference:'Referência bíblica'
   },
-  English: { start:'Start game', how:'How to play', settings:'Settings', back:'Back to menu', next:'Next', choose:'Choose a character', confirm:'Confirm character', choosePlayers:'How many players?', names:'Player names', ready:'Ready to go!', turn:"It's", difficulty:'Choose a difficulty to answer a Bible question.', answer:'Answer', correct:'Correct answer!', incorrect:'Incorrect answer!', noMove:'No movement', move:'You advance', win:'Congratulations!', conquered:'You conquered Jericho', thank:'Thank you for playing.', bible:'We invite you and all players to keep discovering the Bible and reading God’s Word every day.', map:'From Egypt to Jericho', startAdventure:'The adventure begins...', victory:'The walls are falling!', continue:'Continue', return:'Back to menu'
+  English: { start:'Start game', how:'How to play', settings:'Settings', back:'Back to menu', next:'Next', choose:'Choose a character', confirm:'Confirm character', choosePlayers:'How many players?', names:'Player names', ready:'Ready to go!', turn:"It's", difficulty:'Choose a difficulty to answer a Bible question.', answer:'Answer', correct:'Correct answer!', incorrect:'Incorrect answer!', noMove:'No movement', move:'You advance', win:'Congratulations!', conquered:'You conquered Jericho', thank:'Thank you for playing.', bible:'We invite you and all players to keep discovering the Bible and reading God’s Word every day.', map:'From Egypt to Jericho', startAdventure:'The adventure begins...', victory:'The walls are falling!', continue:'Continue', return:'Back to menu', reference:'Bible reference'
   }
 };
 const shuffle = (items) => {
@@ -138,13 +138,9 @@ function App() {
     let alive = true;
     (async () => {
       try {
-        const response = await fetch(DATA('question-bank.json.gz.b64'));
-        if (!response.ok) throw new Error('No fue posible cargar el banco de preguntas.');
-        const encoded = (await response.text()).trim();
-        const compressed = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
-        if (!('DecompressionStream' in window)) throw new Error('Este navegador no puede abrir el banco de preguntas comprimido.');
-        const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
-        const bank = await new Response(stream).json();
+        const response = await fetch(DATA('question-bank.multilingual.json'));
+        if (!response.ok) throw new Error('No fue posible cargar el banco multilingüe de preguntas.');
+        const bank = await response.json();
         validateQuestionBank(bank);
         if (alive) { setQuestionBank(bank.questions); setBankError(''); }
       } catch (error) {
@@ -350,7 +346,7 @@ function App() {
     if (!questionBank || !activePlayer) return;
     let selection;
     try {
-      selection = selectQuestionForTurn(questionBank, selectedLevel.id, usedQuestionIds);
+      selection = selectQuestionForTurn(questionBank, selectedLevel.id, usedQuestionIds, Math.random, ({ Español: 'es', Português: 'pt', English: 'en' })[language] || 'es');
     } catch (error) {
       setBankError(error.message || 'No hay preguntas disponibles.');
       return;
@@ -733,7 +729,7 @@ function App() {
           <div className="answers">
             {question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" className={answer === index ? 'answer selected' : 'answer'} onClick={() => { setAnswer(index); playSound('tap'); }}><span>{String.fromCharCode(65 + index)}</span>{option.text}</button>)}
           </div>
-          <p className="reference">Referencia bíblica: {question.reference}</p>
+          <p className="reference">{t.reference}: {question.reference}</p>
           <div className="question-actions"><button className="text-button" type="button" onClick={() => { setUsedQuestionIds(question.previousUsedIds); setQuestion(null); setAnswer(null); setScreen('board'); }}>Cancelar turno</button><button className="primary" type="button" disabled={answer === null} onClick={submitAnswer}>{t.answer}</button></div>
         </section>
       )}

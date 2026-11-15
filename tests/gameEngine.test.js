@@ -91,3 +91,13 @@ test('la posición del jugador sigue la ruta ilustrada de Egipto a Jericó', () 
   assert.deepEqual(getJourneyMapPosition(-10), getJourneyMapPosition(0));
   assert.deepEqual(getJourneyMapPosition(100), getJourneyMapPosition(30));
 });
+
+test('la selección de preguntas conserva la respuesta correcta al usar traducciones',()=>{
+ const q={...sampleBank.questions[0],translations:{
+  pt:{question:'Quem criou este teste?',options:['A','B','C','D'],biblicalReference:'Gênesis 1:1'},
+  en:{question:'Who created this test?',options:['Alpha','Beta','Gamma','Delta'],biblicalReference:'Genesis 1:1'}
+ }};
+ const r=selectQuestionForTurn([q],'facil',{facil:[],medio:[],dificil:[]},()=>0,'en');
+ assert.equal(r.question.question,'Who created this test?');
+ assert.equal(r.options.find(x=>x.correct).text,'Alpha');
+});
