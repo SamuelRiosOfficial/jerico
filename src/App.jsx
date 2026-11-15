@@ -11,7 +11,7 @@ const SCENES = [
   { id: 'redSea', asset: 'stage-red-sea.webp' },
   { id: 'sinai', asset: 'stage-sinai.webp' },
   { id: 'jordan', asset: 'stage-jordan.webp' },
-  { id: 'jericho', asset: 'stage-jericho-scene.webp' }
+  { id: 'jericho', asset: 'stage-jericho.webp' }
 ];
 const CHARACTERS = [
   { id: 'warrior', row: 0 },
