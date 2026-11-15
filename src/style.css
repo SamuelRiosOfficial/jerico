@@ -2161,3 +2161,132 @@ button{image-rendering:pixelated}
     touch-action: manipulation;
   }
 }
+
+
+/* Main menu video: silent loop behind the interface */
+.screen-menu .hero{isolation:isolate;background-size:cover;background-position:center}
+.screen-menu .hero-video{
+  position:absolute;inset:0;z-index:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;background:#1c70d9;
+}
+.screen-menu .hero-shade{z-index:1}
+.screen-menu .hero-content{z-index:2}
+.screen-menu .menu-party{z-index:3}
+@media(prefers-reduced-motion:reduce){.screen-menu .hero-video{display:none}}
+
+/* Illustrated route map with independent player sprites */
+.screen-map,.screen-routeMap{
+  width:100%;min-height:100svh;padding:12px clamp(8px,2vw,24px) 22px;
+  background:linear-gradient(180deg,#2074e8 0%,#92c0ed 38%,#f5c77a 38%,#df9949 100%);
+}
+.screen-map .map-screen,.screen-routeMap .map-screen{
+  min-height:0;width:100%;padding:0;border:0;border-radius:0;
+  background:transparent;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;gap:12px;
+}
+.journey-map-artboard{
+  position:relative;width:min(1500px,100%);aspect-ratio:16/9;flex:none;overflow:hidden;
+  background-size:100% 100%;background-position:center;background-repeat:no-repeat;
+  border:5px solid #241407;border-radius:4px;
+  box-shadow:7px 8px 0 #75451c,inset 0 0 0 3px #ffdf69;
+  image-rendering:pixelated;
+}
+.journey-map-markers{position:absolute;inset:0;pointer-events:none}
+.journey-map-marker{
+  position:absolute;z-index:4;display:flex;flex-direction:column;align-items:center;
+  transform:translate(-50%,-100%);
+  transition:left .8s steps(12,end),top .8s steps(12,end);
+  filter:drop-shadow(2px 3px 1px #44220a99);
+}
+.journey-map-marker b{
+  max-width:124px;padding:3px 6px;margin-bottom:-1px;
+  border:2px solid #2b1909;border-radius:3px;background:#ffdc44;color:#281607;
+  font-family:'Press Start 2P',Georgia,serif;font-size:clamp(6px,.55vw,8px);
+  line-height:1.5;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  box-shadow:2px 3px 0 #7b4519;
+}
+.journey-map-marker .sprite{
+  width:100px;height:156px;background-size:300px 624px;
+  transform:scale(.56);transform-origin:center bottom;margin:-33px -21px -36px;
+}
+.journey-map-dock{
+  position:absolute;z-index:5;left:2.5%;right:2.5%;bottom:1.7%;height:24%;
+  padding:9px 14px 8px;display:flex;flex-direction:column;justify-content:center;gap:6px;
+  border:4px solid #2a1708;outline:2px solid #e7b44e;
+  background:
+    repeating-linear-gradient(0deg,#9a61220c 0 2px,transparent 2px 6px),
+    linear-gradient(110deg,#ffe9b2,#f3cf88 55%,#ffe5a8);
+  box-shadow:5px 6px 0 #6d3d17,inset 0 0 0 2px #fff2bd;
+}
+.journey-map-dock-heading{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  color:#44270f;font-family:'Press Start 2P',Georgia,serif;font-size:clamp(7px,.65vw,9px);
+}
+.journey-map-dock-heading span{
+  font-family:'Roboto Slab',Georgia,serif;font-size:clamp(9px,.8vw,12px);
+  font-weight:700;color:#76431c;
+}
+.journey-map-player-list{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
+  align-items:center;gap:8px;min-height:0;
+}
+.journey-map-player-card{
+  min-width:0;height:56px;padding:4px 9px;
+  display:flex;align-items:center;gap:8px;
+  border:2px solid #7e4c21;border-radius:3px;
+  background:#fff0c6e8;box-shadow:2px 3px 0 #9b642c;
+}
+.journey-map-player-card>.sprite{
+  width:100px;height:156px;background-size:300px 624px;
+  flex:0 0 34px;transform:scale(.34);transform-origin:center center;margin:-48px -33px;
+}
+.journey-map-player-info{min-width:0;flex:1;text-align:left;color:#3c240f}
+.journey-map-player-info b{display:block;font-size:clamp(10px,.9vw,13px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.journey-map-player-info small{display:block;margin-top:2px;color:#7b542c;font-size:clamp(8px,.65vw,10px);white-space:nowrap}
+.journey-map-player-info .meter{height:5px;margin-top:4px;background:#b98d55}
+.journey-map-player-info .meter i{background:#e4ac16}
+.journey-map-footer{
+  width:min(940px,100%);display:flex;flex-direction:column;align-items:center;gap:5px;
+  text-align:center;color:#3e260f;font-weight:800;
+}
+.journey-map-footer p{margin:0;font-size:clamp(11px,1vw,14px)}
+.journey-map-footer>small{font-size:10px;color:#68401d}
+.journey-map-footer .map-intro-countdown{
+  width:min(480px,95%);margin:2px auto 0;padding:5px 10px;
+  border:3px solid #281708;border-radius:3px;
+  background:linear-gradient(#fff0bd,#f4d38d);
+  color:#492a0e;box-shadow:3px 4px 0 #774418;font-size:10px;
+}
+.journey-map-footer .map-intro-countdown i{height:7px;border:1px solid #45240e;background:#b98b52}
+.journey-map-footer .map-intro-countdown i:after{background:#ffd827}
+
+@media(max-width:760px){
+  .screen-map,.screen-routeMap{padding:8px 7px 14px;overflow-x:hidden}
+  .screen-map .map-screen,.screen-routeMap .map-screen{gap:10px}
+  .journey-map-artboard{width:100%;aspect-ratio:16/9;border-width:3px;box-shadow:4px 5px 0 #75451c,inset 0 0 0 2px #ffdf69}
+  .journey-map-marker b{max-width:68px;padding:2px 3px;font-size:5px;border-width:1px}
+  .journey-map-marker .sprite{
+    width:100px;height:156px;background-size:300px 624px;
+    transform:scale(.39);transform-origin:center bottom;margin:-47px -30px -51px;
+  }
+  .journey-map-dock{left:2%;right:2%;bottom:1.4%;height:24%;padding:4px 5px;gap:3px;border-width:2px;box-shadow:2px 3px 0 #6d3d17,inset 0 0 0 1px #fff2bd}
+  .journey-map-dock-heading{font-size:5px;gap:3px}
+  .journey-map-dock-heading span{font-size:7px}
+  .journey-map-player-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
+  .journey-map-player-card{height:35px;padding:2px 4px;gap:2px;border-width:1px;box-shadow:1px 2px 0 #9b642c}
+  .journey-map-player-card>.sprite{transform:scale(.23);margin:-59px -38px;flex-basis:23px}
+  .journey-map-player-info b{font-size:8px}
+  .journey-map-player-info small{font-size:6px;margin-top:0}
+  .journey-map-player-info .meter{height:3px;margin-top:2px}
+  .journey-map-footer p{font-size:10px}
+  .journey-map-footer .map-intro-countdown{font-size:9px;width:100%}
+}
+@media(max-width:420px){
+  .journey-map-marker b{max-width:55px;font-size:4px}
+  .journey-map-marker .sprite{transform:scale(.31);margin:-54px -34px -59px}
+  .journey-map-dock-heading{font-size:4px}
+  .journey-map-dock-heading span{font-size:6px}
+  .journey-map-player-card{height:32px}
+  .journey-map-player-info b{font-size:7px}
+  .journey-map-player-info small{font-size:5px}
+}
