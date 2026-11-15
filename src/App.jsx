@@ -11,7 +11,7 @@ const SCENES = [
   { id: 'redSea', asset: 'stage-red-sea.webp' },
   { id: 'sinai', asset: 'stage-sinai.webp' },
   { id: 'jordan', asset: 'stage-jordan.webp' },
-  { id: 'jericho', asset: 'stage-jericho.webp' }
+  { id: 'jericho', asset: 'stage-jericho-scene.webp' }
 ];
 const CHARACTERS = [
   { id: 'warrior', row: 0 },
@@ -736,7 +736,7 @@ function App() {
             <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{sceneForSteps(activePlayer.steps).name}</h2><p>{sceneForSteps(activePlayer.steps).detail} · {t.regionProgress.replace('{current}', activePlayer.steps % 6)}</p></div>
             <div className="turn-avatar"><Sprite character={activePlayer.character} /></div>
           </div>
-          <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")`, backgroundSize: '100% 100%' }}>
+          <div className={`scene-track ${SCENES[currentSceneIndex].id === 'jericho' ? 'scene-track-jericho' : ''}`} style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")`, backgroundSize: SCENES[currentSceneIndex].id === 'jericho' ? 'cover' : '100% 100%' }}>
             <div className="scene-overlay" />
             <div className="scene-labels">{localizedScenes.map((scene, index) => <span key={scene.id} className={index === currentSceneIndex ? 'active' : ''}>{scene.name}</span>)}</div>
             <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= (activePlayer.steps % 6) ? 'passed' : ''} />)}</div>
