@@ -2305,3 +2305,18 @@ button{image-rendering:pixelated}
   background-repeat:no-repeat;background-position:center bottom;background-size:contain;
   image-rendering:auto;filter:drop-shadow(2px 3px 1px #5e3518);
 }
+
+
+/* Responsive instruction soldier: compact size, anchored to the lower-left corner. */
+.instruction-panel:before{
+  left:16px !important;
+  right:auto !important;
+  bottom:16px !important;
+  width:clamp(48px, 15vw, 60px) !important;
+  height:clamp(100px, 31vw, 124px) !important;
+  transform:none !important;
+  transform-origin:bottom left !important;
+  background-size:contain !important;
+  background-position:left bottom !important;
+  background-repeat:no-repeat !important;
+}
