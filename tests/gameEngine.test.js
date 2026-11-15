@@ -4,7 +4,8 @@ import {
   selectQuestionForTurn,
   resolveAnswer,
   sceneIndexForStep,
-  validateQuestionBank
+  validateQuestionBank,
+  getJourneyMapPosition
 } from '../src/gameEngine.js';
 
 const sampleBank = {
@@ -76,4 +77,17 @@ test('el selector de personajes salta los que ya eligieron otros jugadores', asy
   assert.equal(nextAvailableCharacter(0, 1, [1]), 2);
   assert.equal(nextAvailableCharacter(2, -1, [1]), 0);
   assert.equal(nextAvailableCharacter(0, 1, [0, 1, 2, 3]), 0);
+});
+
+
+test('la posición del jugador sigue la ruta ilustrada de Egipto a Jericó', () => {
+  assert.deepEqual(getJourneyMapPosition(0), { x: 10.8, y: 50.2 });
+  assert.deepEqual(getJourneyMapPosition(30), { x: 85, y: 35.2 });
+  const first = getJourneyMapPosition(5);
+  const second = getJourneyMapPosition(6);
+  const third = getJourneyMapPosition(12);
+  assert.ok(second.x > first.x);
+  assert.ok(third.x > second.x);
+  assert.deepEqual(getJourneyMapPosition(-10), getJourneyMapPosition(0));
+  assert.deepEqual(getJourneyMapPosition(100), getJourneyMapPosition(30));
 });

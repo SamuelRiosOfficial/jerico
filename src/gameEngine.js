@@ -3,6 +3,28 @@ export const TOTAL_STEPS = 30;
 export const STEPS_PER_SCENE = 6;
 export const SCENE_COUNT = 5;
 
+const JOURNEY_MAP_NODES = Object.freeze([
+  Object.freeze({ x: 10.8, y: 50.2 }),
+  Object.freeze({ x: 30.5, y: 53.5 }),
+  Object.freeze({ x: 49.4, y: 49.4 }),
+  Object.freeze({ x: 69.1, y: 45.7 }),
+  Object.freeze({ x: 80.5, y: 40.6 }),
+  Object.freeze({ x: 85.0, y: 35.2 })
+]);
+
+/** Returns an independently animated position along the illustrated route (0–30 steps). */
+export function getJourneyMapPosition(steps) {
+  const safeSteps = Number.isFinite(steps) ? Math.max(0, Math.min(TOTAL_STEPS, steps)) : 0;
+  const segment = Math.min(SCENE_COUNT - 1, Math.floor(safeSteps / STEPS_PER_SCENE));
+  const progress = (safeSteps - segment * STEPS_PER_SCENE) / STEPS_PER_SCENE;
+  const start = JOURNEY_MAP_NODES[segment];
+  const end = JOURNEY_MAP_NODES[segment + 1];
+  return {
+    x: Number((start.x + (end.x - start.x) * progress).toFixed(2)),
+    y: Number((start.y + (end.y - start.y) * progress).toFixed(2))
+  };
+}
+
 export function shuffle(items, random = Math.random) {
   const result = [...items];
   for (let index = result.length - 1; index > 0; index -= 1) {
