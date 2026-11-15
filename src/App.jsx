@@ -422,6 +422,9 @@ function App() {
 
       {screen === 'menu' && (
         <section className="hero scene-jericho" style={{ backgroundImage: `url("${ASSET('stage-jericho.webp')}")` }}>
+          <video className="hero-video" autoPlay muted loop playsInline preload="auto" poster={ASSET('stage-jericho.webp')} aria-hidden="true">
+            <source src={ASSET('jerico-menu-loop.mp4')} type="video/mp4" />
+          </video>
           <div className="hero-shade" />
           <div className="hero-content">
             <p className="eyebrow">UNA AVENTURA BÍBLICA</p>
@@ -621,7 +624,7 @@ function App() {
                 const spread = (index - (players.length - 1) / 2) * 2;
                 return (
                   <div className="journey-map-marker" key={player.id}
-                    style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y + (index % 2 ? 1.8 : 0))}%` }}
+                    style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y + (index % 2 ? 1.8 : 0)))}%` }}
                     title={`${player.name}: ${player.steps} de 30 pasos`}>
                     <b>{player.name}</b>
                     <Sprite character={player.character} />

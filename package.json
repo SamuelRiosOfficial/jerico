@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
+    "build": "node scripts/assembleMenuVideo.mjs && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node --test"
+    "test": "node --test",
+    "pretest": "node scripts/assembleMenuVideo.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

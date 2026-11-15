@@ -2172,7 +2172,7 @@ button{image-rendering:pixelated}
 .screen-menu .hero-shade{z-index:1}
 .screen-menu .hero-content{z-index:2}
 .screen-menu .menu-party{z-index:3}
-@media(prefers-reduced-motion:reduce){.screen-menu .hero-video{display:none}}
+
 
 /* Illustrated route map with independent player sprites */
 .screen-map,.screen-routeMap{
@@ -2293,6 +2293,5 @@ button{image-rendering:pixelated}
 
 .journey-map-artboard{background-image:none!important;background-color:#e6b66e}
 .journey-map-illustration{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
-.screen-menu .hero{animation:menu-scene-drift 28s ease-in-out infinite alternate}
-@keyframes menu-scene-drift{from{background-size:100% 100%;background-position:48% 50%}to{background-size:110% 110%;background-position:53% 48%}}
-@media(prefers-reduced-motion:reduce){.screen-menu .hero{animation:none}}
+.screen-menu .hero{animation:none!important}
+.screen-menu .hero-video{display:block!important;pointer-events:none}

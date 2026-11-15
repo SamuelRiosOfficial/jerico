@@ -1,2 +1,4 @@
 node_modules/
 dist/
+# Generated from checked-in, ordered media parts during test/build
+public/assets/jerico-menu-loop.mp4
