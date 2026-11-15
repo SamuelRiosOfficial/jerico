@@ -1,1 +1,0 @@
-Los archivos multimedia binarios se reconstruyen desde media-source/*.b64 al compilar el proyecto.
