@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './style.css';
-import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep, nextAvailableCharacter } from './gameEngine.js';
+import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep, nextAvailableCharacter, getJourneyMapPosition } from './gameEngine.js';
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
 const DATA = (name) => `${import.meta.env.BASE_URL}data/${name}`;
@@ -422,6 +422,9 @@ function App() {
 
       {screen === 'menu' && (
         <section className="hero scene-jericho" style={{ backgroundImage: `url("${ASSET('stage-jericho.webp')}")` }}>
+          <video className="hero-video" autoPlay muted loop playsInline preload="metadata" poster={ASSET('stage-jericho.webp')} aria-hidden="true">
+            <source src={ASSET('jerico-menu-loop.mp4')} type="video/mp4" />
+          </video>
           <div className="hero-shade" />
           <div className="hero-content">
             <p className="eyebrow">UNA AVENTURA BÍBLICA</p>
@@ -536,24 +539,44 @@ function App() {
 
       {(screen === 'map' || screen === 'routeMap') && (
         <section className={`map-screen ${screen === 'routeMap' ? 'map-progress-screen' : 'map-intro-screen'}`}>
-          <div className="map-parchment">
-            <div className="map-title-banner"><span>JERICO · CAMINO A JERICÓ</span><h2>{screen === 'routeMap' ? 'El avance del pueblo' : t.map}</h2><small>{screen === 'routeMap' ? 'Ubicación de cada jugador' : 'De Egipto a la Tierra Prometida'}</small></div>
-            <div className="map-route">
-              {SCENES.map((scene, index) => {
-                const playersHere = players.filter((player) => sceneIndexForStep(player.steps) === index);
-                return <div className={`map-stop ${playersHere.length ? 'has-travelers' : ''}`} key={scene.name}>
-                  <div className="map-stop-medallion">{['𓂀', '≈', '▲', '≋', '▤'][index]}</div>
-                  <b>{scene.name}</b><small>{index === 4 ? 'Meta · 30 pasos' : '6 pasos'}</small>
-                  <div className="map-tokens">{playersHere.map((player) => <div className="map-token" key={player.id}><Sprite character={player.character} /><span>{player.name}</span></div>)}</div>
-                  {index < 4 && <i className="map-connection" />}
-                </div>;
+          <div className="journey-map-artboard" style={{ backgroundImage: `url("${ASSET('journey-map.webp')}")` }}>
+            <div className="journey-map-markers" aria-label="Posición actual de los jugadores">
+              {players.map((player, index) => {
+                const position = getJourneyMapPosition(player.steps);
+                const spread = (index - (players.length - 1) / 2) * 2;
+                return (
+                  <div className="journey-map-marker" key={player.id}
+                    style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y + (index % 2 ? 1.8 : 0))}%` }}
+                    title={`${player.name}: ${player.steps} de 30 pasos`}>
+                    <b>{player.name}</b>
+                    <Sprite character={player.character} />
+                  </div>
+                );
               })}
             </div>
-            <div className="map-player-status">
-              {players.map((player) => <div key={player.id} className="map-player-line"><Sprite character={player.character} /><div><b>{player.name}</b><small>{sceneForSteps(player.steps).name} · {player.steps}/30 pasos</small><div className="meter"><i style={{ width: `${(player.steps / 30) * 100}%` }} /></div></div></div>)}
+            <div className="journey-map-dock">
+              <div className="journey-map-dock-heading">
+                <strong>{screen === 'routeMap' ? 'AVANCE DE LOS JUGADORES' : 'JUGADORES EN EL PUNTO DE PARTIDA'}</strong>
+                <span>{screen === 'routeMap' ? 'Cada personaje avanza por su propia ruta' : 'Todos comienzan en Egipto'}</span>
+              </div>
+              <div className="journey-map-player-list">
+                {players.map((player) => (
+                  <div className="journey-map-player-card" key={player.id}>
+                    <Sprite character={player.character} />
+                    <div className="journey-map-player-info">
+                      <b>{player.name}</b>
+                      <small>{SCENES[sceneIndexForStep(player.steps)].name} · {player.steps}/30 pasos</small>
+                      <div className="meter"><i style={{ width: `${(player.steps / 30) * 100}%` }} /></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="map-caption">{screen === 'routeMap' ? 'El camino continúa. Cada jugador conserva su propio avance.' : 'Acompaña al pueblo de Israel desde Egipto hasta Jericó.'}</p>
+          </div>
+          <div className="journey-map-footer">
+            <p>{screen === 'routeMap' ? 'El recorrido continúa. Observa cómo cambia la posición de cada jugador.' : 'Acompaña al pueblo de Israel desde Egipto hasta Jericó.'}</p>
             {screen === 'map' && <div className="map-intro-countdown"><span>La aventura comenzará automáticamente</span><i /></div>}
+            {screen === 'routeMap' && <small>El siguiente turno comenzará automáticamente.</small>}
           </div>
         </section>
       )}
