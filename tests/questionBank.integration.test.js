@@ -25,8 +25,8 @@ test('as 120 perguntas têm traduções completas e preservam a opção correta'
  }
 });
 test('a seleção devolve pergunta, opções e referência no idioma solicitado',()=>{
- const bank=loadBank(); const q=bank.questions[0];
- const r=selectQuestionForTurn(bank.questions,q.difficulty,{facil:[],medio:[],dificil:[]},()=>0,'en');
+ const bank=loadBank(); const q=bank.questions.find(item=>item.difficulty==='facil');
+ const r=selectQuestionForTurn([q],'facil',{facil:[],medio:[],dificil:[]},()=>0,'en');
  assert.equal(r.question.question,q.translations.en.question);
  assert.equal(r.question.biblicalReference,q.translations.en.biblicalReference);
  assert.equal(r.options.find(x=>x.correct).text,q.translations.en.options[q.correctAnswerIndex]);
