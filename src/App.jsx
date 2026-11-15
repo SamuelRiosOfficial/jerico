@@ -703,9 +703,9 @@ function App() {
             const pan = Math.max(0, Math.min(100, (localStep / 6) * 100));
             return <>
               <div className="advance-heading"><span>JERICO · {scene.name.toUpperCase()}</span><b>{advancePayload.correct ? `${t.advance} ${advancePayload.steps} ${advancePayload.steps === 1 ? t.stepUnit : t.stepsUnit}` : t.pathWait}</b></div>
-              <div className="advance-playfield" style={{ backgroundImage: `url("${ASSET(scene.asset)}")`, backgroundPosition: 'center center', backgroundSize: '100% 100%' }}>
+              <div className={`advance-playfield ${scene.id === 'jericho' ? 'advance-playfield-jericho' : ''}`} style={{ backgroundImage: `url("${ASSET(scene.asset)}")`, backgroundPosition: 'center center', backgroundSize: scene.id === 'jericho' ? 'cover' : '100% 100%' }}>
                 <div className="advance-sky-vignette" />
-                <div className="advance-road" />
+                {scene.id !== 'jericho' && <div className="advance-road" />}
                 {players.map((player, index) => {
                   const isMoving = player.id === advancePayload.playerId;
                   const playerStep = isMoving ? shownSteps : player.steps;
@@ -736,7 +736,7 @@ function App() {
             <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{sceneForSteps(activePlayer.steps).name}</h2><p>{sceneForSteps(activePlayer.steps).detail} · {t.regionProgress.replace('{current}', activePlayer.steps % 6)}</p></div>
             <div className="turn-avatar"><Sprite character={activePlayer.character} /></div>
           </div>
-          <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")`, backgroundSize: '100% 100%' }}>
+          <div className={`scene-track ${SCENES[currentSceneIndex].id === 'jericho' ? 'scene-track-jericho' : ''}`} style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")`, backgroundSize: SCENES[currentSceneIndex].id === 'jericho' ? 'cover' : '100% 100%' }}>
             <div className="scene-overlay" />
             <div className="scene-labels">{localizedScenes.map((scene, index) => <span key={scene.id} className={index === currentSceneIndex ? 'active' : ''}>{scene.name}</span>)}</div>
             <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= (activePlayer.steps % 6) ? 'passed' : ''} />)}</div>
