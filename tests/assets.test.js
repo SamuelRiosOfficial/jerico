@@ -29,7 +29,8 @@ test('todos los recursos gráficos llamados por la interfaz están en public/ass
 test('el tablero utiliza el recurso limpio y proporcional para Jericó', () => {
   const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
   const css = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8');
-  assert.match(app, /id: 'jericho', asset: 'stage-jericho-scene\\.webp'/);
-  assert.match(app, /scene-track-jericho/);
-  assert.match(css, /\\.scene-track-jericho\\s*\\{[^}]*background-size:\\s*cover\\s*!important/s);
+  assert.ok(app.includes("id: 'jericho', asset: 'stage-jericho-scene.webp'"));
+  assert.ok(app.includes('scene-track-jericho'));
+  assert.ok(css.includes('.scene-track-jericho {'));
+  assert.ok(css.includes('background-size: cover !important;'));
 });
