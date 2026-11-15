@@ -97,6 +97,13 @@ function App() {
       return 'Español';
     }
   });
+  const t = TEXT[language] || TEXT.Español;
+  const localeCode = ({ Español: 'es', Português: 'pt', English: 'en' })[language] || 'es';
+  const playerDefault = (locale, number) => ({ Español: 'Jugador', Português: 'Jogador', English: 'Player' }[locale] || 'Player') + ' ' + number;
+  const defaultNames = (locale) => Array.from({ length: 4 }, (_, index) => playerDefault(locale, index + 1));
+  const localizedCharacters = CHARACTERS.map((character) => ({ ...character, ...t.characters[character.id] }));
+  const localizedLevels = LEVELS.map((item) => ({ ...item, label: t.levels[item.id] }));
+  const localizedScenes = SCENES.map((scene, index) => ({ ...scene, ...t.scenes[index] }));
   useEffect(() => {
     try { window.localStorage.setItem('jerico-language', language); } catch { /* Settings still work for this session. */ }
   }, [language]);
@@ -108,17 +115,20 @@ function App() {
           ? playerDefault(language, index + 1)
           : name
       ));
+      setPlayers((current) => current.map((player) => ({
+        ...player, character: { ...player.character, ...TEXT[language].characters[player.character.id] }
+      })));
+      setWinner((current) => current ? ({
+        ...current, character: { ...current.character, ...TEXT[language].characters[current.character.id] }
+      }) : current);
       previousLanguage.current = language;
     }
   }, [language]);
-  useEffect(() => { document.documentElement.lang = localeCode; }, [localeCode]);
-  const t = TEXT[language] || TEXT.Español;
-  const localeCode = ({ Español: 'es', Português: 'pt', English: 'en' })[language] || 'es';
-  const playerDefault = (locale, number) => ({ Español: 'Jugador', Português: 'Jogador', English: 'Player' }[locale] || 'Player') + ' ' + number;
-  const defaultNames = (locale) => Array.from({ length: 4 }, (_, index) => playerDefault(locale, index + 1));
-  const localizedCharacters = CHARACTERS.map((character) => ({ ...character, ...t.characters[character.id] }));
-  const localizedLevels = LEVELS.map((item) => ({ ...item, label: t.levels[item.id] }));
-  const localizedScenes = SCENES.map((scene, index) => ({ ...scene, ...t.scenes[index] }));
+  useEffect(() => {
+    document.documentElement.lang = localeCode;
+    document.title = t.pageTitle;
+  }, [localeCode, t.pageTitle]);
+
   const [soundOn, setSoundOn] = useState(true);
   const [musicOn, setMusicOn] = useState(true);
   const [notificationsOn, setNotificationsOn] = useState(true);
@@ -506,7 +516,7 @@ function App() {
             <button type="button" onClick={() => setSettingsModal('privacy')}>{t.termsPrivacy}</button>
           </div>
           <button className="primary" type="button" onClick={closeSettings}>{t.back}</button>
-          {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal === 'support' ? t.support : settingsModal === 'credits' ? t.credits : t.termsPrivacy}</h3><p>{settingsModal === 'support' ? t.supportText : settingsModal === 'credits' ? t.creditsText : t.privacyText}</p></div></div>}
+          {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" aria-label={t.settingsClose} onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal === 'support' ? t.support : settingsModal === 'credits' ? t.credits : t.termsPrivacy}</h3><p>{settingsModal === 'support' ? t.supportText : settingsModal === 'credits' ? t.creditsText : t.privacyText}</p></div></div>}
         </section>
       )}
 
@@ -543,22 +553,22 @@ function App() {
               <div className="character-stage">
                 <button className="carousel-arrow" type="button" aria-label={t.previousCharacter} onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, -1, selections)); playSound('tap'); }}>‹</button>
                 <div className="character-preview">
-                  <div className="character-spotlight"><Sprite character={CHARACTERS[focusedCharacter]} /></div>
-                  <h3>{CHARACTERS[focusedCharacter].name}</h3>
-                  <p>{CHARACTERS[focusedCharacter].description}</p>
-                  <div className="character-dots">{CHARACTERS.map((character, index) => <button key={character.id} type="button" className={index === focusedCharacter ? 'dot active' : 'dot'} disabled={selections.includes(index)} onClick={() => chooseFocus(index)} aria-label={character.name} />)}</div>
+                  <div className="character-spotlight"><Sprite character={localizedCharacters[focusedCharacter]} /></div>
+                  <h3>{localizedCharacters[focusedCharacter].name}</h3>
+                  <p>{localizedCharacters[focusedCharacter].description}</p>
+                  <div className="character-dots">{localizedCharacters.map((character, index) => <button key={character.id} type="button" className={index === focusedCharacter ? 'dot active' : 'dot'} disabled={selections.includes(index)} onClick={() => chooseFocus(index)} aria-label={character.name} />)}</div>
                 </div>
                 <button className="carousel-arrow" type="button" aria-label={t.nextCharacter} onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, 1, selections)); playSound('tap'); }}>›</button>
               </div>
               <div className="character-roster">
-                {CHARACTERS.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} /><b>{character.name}</b>{selections.includes(index) && <small>{t.chosen}</small>}</button>)}
+                {localizedCharacters.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} /><b>{character.name}</b>{selections.includes(index) && <small>{t.chosen}</small>}</button>)}
               </div>
               <div className="keyboard-hint">{t.keyboardHint}</div>
               <button className="primary" type="button" disabled={selections.includes(focusedCharacter)} onClick={confirmCharacter}>{t.confirm}</button>
             </>
           ) : (
             <>
-              <div className="selected-players">{players.length ? null : names.slice(0, playerCount).map((name, index) => <div key={name}><Sprite character={CHARACTERS[selections[index]]} /> <b>{name}</b></div>)}</div>
+              <div className="selected-players">{players.length ? null : names.slice(0, playerCount).map((name, index) => <div key={name}><Sprite character={localizedCharacters[selections[index]]} /> <b>{name}</b></div>)}</div>
               <p>{t.allHaveCharacter}</p>
               <button className="primary" type="button" onClick={beginAdventure}>{t.begin}</button>
             </>
@@ -719,7 +729,7 @@ function App() {
                 <div className="advance-step-counter"><span>{t.steps}</span><b>{shownSteps}/30</b><i><em style={{ width: `${(shownSteps / 30) * 100}%` }} /></i></div>
               </div>
               <div className="advance-footer">
-                <div className="advance-active-player"><Sprite character={players.find((p) => p.id === advancePayload.playerId)?.character || CHARACTERS[0]} walking={advancePayload.correct} /><div><b>{players.find((p) => p.id === advancePayload.playerId)?.name}</b><small>{advancePayload.correct ? t.advancing : t.noAdvance}</small></div></div>
+                <div className="advance-active-player"><Sprite character={players.find((p) => p.id === advancePayload.playerId)?.character || localizedCharacters[0]} walking={advancePayload.correct} /><div><b>{players.find((p) => p.id === advancePayload.playerId)?.name}</b><small>{advancePayload.correct ? t.advancing : t.noAdvance}</small></div></div>
                 <div className="advance-roster">{players.map((player) => <div key={player.id}><Sprite character={player.character} /><span>{player.name}</span><b>{player.id === advancePayload.playerId ? shownSteps : player.steps}/30</b></div>)}</div>
               </div>
             </>;
@@ -798,7 +808,7 @@ function App() {
             <p><strong>1</strong> {t.story[0]}</p>
             <p><strong>2</strong> {t.story[1]} <strong>3</strong> {t.story[2]} <strong>4</strong> {t.story[3]} <strong>5</strong> {t.story[4]}</p>
           </div>
-          <b className="scripture-ref">Josué 6:1–5</b>
+          <b className="scripture-ref">{t.storyReference}</b>
           <button className="primary" type="button" onClick={() => setScreen('victory')}>{t.continue}</button>
         </section>
       )}
