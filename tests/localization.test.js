@@ -38,10 +38,10 @@ test('no hay etiquetas vacías en los textos de la interfaz', () => {
 
 test('la interfaz consume el catálogo y actualiza el idioma del documento y el título', () => {
   const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
-  assert.match(app, /import { TEXT } from './gameLocales.js'/);
+  assert.ok(app.includes("import { TEXT } from './gameLocales.js'"));
   assert.match(app, /document.documentElement.lang = localeCode/);
   assert.match(app, /document.title = t.pageTitle/);
-  assert.match(app, /localizedCharacters/);
-  assert.match(app, /localizedScenes/);
-  assert.match(app, /localizedLevels/);
+  assert.ok(app.includes("localizedCharacters"));
+  assert.ok(app.includes("localizedScenes"));
+  assert.ok(app.includes("localizedLevels"));
 });
