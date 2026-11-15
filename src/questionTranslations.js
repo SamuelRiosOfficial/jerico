@@ -1,4 +1,4 @@
-const pt = \`
+const pt = `
 Quem construiu a arca por ordem de Deus?
 Como se chamava o primeiro homem?
 Como se chamava a primeira mulher?
@@ -119,9 +119,9 @@ Que mulher escondeu os espias em Jericó e pediu proteção para sua família?
 Que profeta interpretou a visão do carneiro e do bode?
 Que discípulo foi escolhido junto com Matias como candidato para substituir Judas?
 Que rei queimou o rolo que continha as palavras ditadas por Jeremias?
-\`.trim().split("\\n");
+`.trim().split(/\r?\n/);
 
-const en = \`
+const en = `
 Who built the ark at God's command?
 What was the name of the first man?
 What was the name of the first woman?
@@ -242,7 +242,7 @@ Which woman hid the spies in Jericho and asked for protection for her family?
 Which prophet interpreted the vision of the ram and the goat?
 Which disciple was chosen along with Matthias as a candidate to replace Judas?
 Which king burned the scroll containing the words dictated by Jeremiah?
-\`.trim().split("\\n");
+`.trim().split(/\r?\n/);
 
 const maps = {
 pt: {
