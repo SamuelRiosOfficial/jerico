@@ -509,7 +509,7 @@ function App() {
             <button type="button" onClick={() => setSettingsModal('privacy')}>{t.termsPrivacy}</button>
           </div>
           <button className="primary" type="button" onClick={closeSettings}>{t.back}</button>
-          {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" aria-label={t.settingsClose} onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal === 'support' ? t.support : settingsModal === 'credits' ? t.credits : t.termsPrivacy}</h3><p>{settingsModal === 'support' ? t.supportText : settingsModal === 'credits' ? t.creditsText : t.privacyText}</p></div></div>}
+          {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" aria-label={t.settingsClose} onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal === 'support' ? t.support : settingsModal === 'credits' ? t.credits : t.termsPrivacy}</h3><p>{settingsModal === 'support' ? <>{t.supportText} <a href="mailto:Samuel.Ihad@gmail.com">Samuel.Ihad@gmail.com</a></> : settingsModal === 'credits' ? t.creditsText : t.privacyText}</p></div></div>}
         </section>
       )}
 
