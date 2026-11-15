@@ -7,29 +7,22 @@ const ASSET = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
 const DATA = (name) => `${import.meta.env.BASE_URL}data/${name}`;
 
 const SCENES = [
-  { name: 'Egipto', asset: 'stage-egypt.webp', detail: 'Las tierras del faraón' },
-  { name: 'Mar Rojo', asset: 'stage-red-sea.webp', detail: 'El camino entre las aguas' },
-  { name: 'Monte Sinaí', asset: 'stage-sinai.webp', detail: 'La montaña de Dios' },
-  { name: 'Río Jordán', asset: 'stage-jordan.webp', detail: 'Cruza hacia la promesa' },
-  { name: 'Jericó', asset: 'stage-jericho.webp', detail: 'La ciudad fortificada' }
+  { id: 'egypt', asset: 'stage-egypt.webp' },
+  { id: 'redSea', asset: 'stage-red-sea.webp' },
+  { id: 'sinai', asset: 'stage-sinai.webp' },
+  { id: 'jordan', asset: 'stage-jordan.webp' },
+  { id: 'jericho', asset: 'stage-jericho.webp' }
 ];
 const CHARACTERS = [
-  { id: 'warrior', name: 'Guerrero', description: 'Túnica, lanza y escudo', row: 0 },
-  { id: 'soldier', name: 'Soldado', description: 'Armadura y escudo', row: 1 },
-  { id: 'trumpeter', name: 'Trompetista', description: 'Túnica y shofar', row: 2 },
-  { id: 'woman', name: 'Mujer israelita', description: 'Vestido y cántaro', row: 3 }
+  { id: 'warrior', row: 0 },
+  { id: 'soldier', row: 1 },
+  { id: 'trumpeter', row: 2 },
+  { id: 'woman', row: 3 }
 ];
 const LEVELS = [
-  { id: 'facil', label: 'Fácil', steps: 1, color: 'easy' },
-  { id: 'medio', label: 'Medio', steps: 2, color: 'medium' },
-  { id: 'dificil', label: 'Difícil', steps: 3, color: 'hard' }
-];
-const STORY = [
-  'Las puertas de Jericó estaban bien aseguradas por temor a los israelitas; nadie podía salir o entrar.',
-  'Pero el Señor dijo a Josué: «¡He entregado en tus manos a Jericó y a su rey con sus guerreros!',
-  'Tú y tus soldados marcharán una vez alrededor de la ciudad; así lo harán durante seis días.',
-  'Siete sacerdotes llevarán trompetas y marcharán frente al arca. El séptimo día ustedes marcharán siete veces alrededor de la ciudad, mientras los sacerdotes tocan las trompetas.',
-  'Cuando todos escuchen el toque de trompeta, el pueblo deberá gritar a voz en cuello. Entonces los muros de la ciudad se derrumbarán y cada uno entrará sin impedimento».'
+  { id: 'facil', steps: 1, color: 'easy' },
+  { id: 'medio', steps: 2, color: 'medium' },
+  { id: 'dificil', steps: 3, color: 'hard' }
 ];
 
 const shuffle = (items) => {
