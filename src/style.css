@@ -2295,3 +2295,16 @@ button{image-rendering:pixelated}
 .journey-map-illustration{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
 .screen-menu .hero{animation:none!important}
 .screen-menu .hero-video{display:block!important;pointer-events:none}
+
+
+/* Jericho: use the complete illustrated city art as the movement background.
+   Do not paint the generic foreground road over the artwork. */
+.advance-playfield-jericho {
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  image-rendering: auto;
+}
+.advance-playfield-jericho .advance-sky-vignette {
+  background: linear-gradient(180deg, #18345c10 0%, transparent 62%, #43200c10 100%);
+}
