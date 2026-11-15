@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { TEXT } from './gameLocales.js';
 import './style.css';
 import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep, nextAvailableCharacter, getJourneyMapPosition } from './gameEngine.js';
 
@@ -30,14 +31,7 @@ const STORY = [
   'Siete sacerdotes llevarán trompetas y marcharán frente al arca. El séptimo día ustedes marcharán siete veces alrededor de la ciudad, mientras los sacerdotes tocan las trompetas.',
   'Cuando todos escuchen el toque de trompeta, el pueblo deberá gritar a voz en cuello. Entonces los muros de la ciudad se derrumbarán y cada uno entrará sin impedimento».'
 ];
-const TEXT = {
-  Español: { start:'Iniciar juego', how:'Cómo jugar', settings:'Configuración', back:'Volver al menú', next:'Siguiente', choose:'Elige un personaje', confirm:'Confirmar personaje', choosePlayers:'¿Cuántos jugadores?', names:'Nombres de los jugadores', ready:'¡Listos para partir!', turn:'Turno de', difficulty:'Elige la dificultad para responder una pregunta bíblica.', answer:'Responder', correct:'¡Respuesta correcta!', incorrect:'¡Respuesta incorrecta!', noMove:'No avanzas', move:'Avanzas', win:'¡Felicidades!', conquered:'Has conquistado Jericó', thank:'Gracias por participar.', bible:'Te invitamos a ti y a todos los jugadores a seguir conociendo la Biblia, leyendo cada día la Palabra de Dios.', map:'De Egipto a Jericó', startAdventure:'La aventura comienza...', victory:'¡Las murallas caen!', continue:'Continuar', return:'Volver al menú', reference:'Referencia bíblica'
-  },
-  Português: { start:'Iniciar jogo', how:'Como jogar', settings:'Configurações', back:'Voltar ao menu', next:'Avançar', choose:'Escolha um personagem', confirm:'Confirmar personagem', choosePlayers:'Quantos jogadores?', names:'Nomes dos jogadores', ready:'Prontos para partir!', turn:'Vez de', difficulty:'Escolha a dificuldade para responder uma pergunta bíblica.', answer:'Responder', correct:'Resposta correta!', incorrect:'Resposta incorreta!', noMove:'Você não avança', move:'Você avança', win:'Parabéns!', conquered:'Você conquistou Jericó', thank:'Obrigado por participar.', bible:'Convidamos você e todos os jogadores a continuarem conhecendo a Bíblia e lendo a Palavra de Deus todos os dias.', map:'Do Egito a Jericó', startAdventure:'A aventura começa...', victory:'As muralhas estão caindo!', continue:'Continuar', return:'Voltar ao menu', reference:'Referência bíblica'
-  },
-  English: { start:'Start game', how:'How to play', settings:'Settings', back:'Back to menu', next:'Next', choose:'Choose a character', confirm:'Confirm character', choosePlayers:'How many players?', names:'Player names', ready:'Ready to go!', turn:"It's", difficulty:'Choose a difficulty to answer a Bible question.', answer:'Answer', correct:'Correct answer!', incorrect:'Incorrect answer!', noMove:'No movement', move:'You advance', win:'Congratulations!', conquered:'You conquered Jericho', thank:'Thank you for playing.', bible:'We invite you and all players to keep discovering the Bible and reading God’s Word every day.', map:'From Egypt to Jericho', startAdventure:'The adventure begins...', victory:'The walls are falling!', continue:'Continue', return:'Back to menu', reference:'Bible reference'
-  }
-};
+
 const shuffle = (items) => {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i -= 1) {
@@ -106,14 +100,32 @@ function App() {
   useEffect(() => {
     try { window.localStorage.setItem('jerico-language', language); } catch { /* Settings still work for this session. */ }
   }, [language]);
+  const previousLanguage = useRef(language);
+  useEffect(() => {
+    if (previousLanguage.current !== language) {
+      setNames((current) => current.map((name, index) =>
+        ['Español', 'Português', 'English'].some((locale) => name === playerDefault(locale, index + 1))
+          ? playerDefault(language, index + 1)
+          : name
+      ));
+      previousLanguage.current = language;
+    }
+  }, [language]);
+  useEffect(() => { document.documentElement.lang = localeCode; }, [localeCode]);
   const t = TEXT[language] || TEXT.Español;
+  const localeCode = ({ Español: 'es', Português: 'pt', English: 'en' })[language] || 'es';
+  const playerDefault = (locale, number) => ({ Español: 'Jugador', Português: 'Jogador', English: 'Player' }[locale] || 'Player') + ' ' + number;
+  const defaultNames = (locale) => Array.from({ length: 4 }, (_, index) => playerDefault(locale, index + 1));
+  const localizedCharacters = CHARACTERS.map((character) => ({ ...character, ...t.characters[character.id] }));
+  const localizedLevels = LEVELS.map((item) => ({ ...item, label: t.levels[item.id] }));
+  const localizedScenes = SCENES.map((scene, index) => ({ ...scene, ...t.scenes[index] }));
   const [soundOn, setSoundOn] = useState(true);
   const [musicOn, setMusicOn] = useState(true);
   const [notificationsOn, setNotificationsOn] = useState(true);
   const playSound = useSound(soundOn);
   const [settingsModal, setSettingsModal] = useState('');
   const [playerCount, setPlayerCount] = useState(2);
-  const [names, setNames] = useState(['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4']);
+  const [names, setNames] = useState(() => defaultNames(language));
   const [selections, setSelections] = useState([]);
   const [focusedCharacter, setFocusedCharacter] = useState(0);
   const [players, setPlayers] = useState([]);
@@ -149,12 +161,12 @@ function App() {
     (async () => {
       try {
         const response = await fetch(DATA('question-bank.multilingual.json'));
-        if (!response.ok) throw new Error('No fue posible cargar el banco multilingüe de preguntas.');
+        if (!response.ok) throw new Error('question-bank-load');
         const bank = await response.json();
         validateQuestionBank(bank);
         if (alive) { setQuestionBank(bank.questions); setBankError(''); }
       } catch (error) {
-        if (alive) setBankError(error.message || 'Error al cargar las preguntas.');
+        if (alive) setBankError('load');
       }
     })();
     return () => { alive = false; };
@@ -327,7 +339,7 @@ function App() {
   const isBankReady = Boolean(questionBank);
   const startSetup = () => {
     setPlayerCount(2);
-    setNames(['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4']);
+    setNames(defaultNames(language));
     setSelections([]);
     setFocusedCharacter(0);
     setPlayers([]);
@@ -357,7 +369,7 @@ function App() {
     const nextPlayers = names.slice(0, playerCount).map((name, index) => ({
       id: `player-${index + 1}`,
       name: name.trim().slice(0, 12),
-      character: CHARACTERS[selections[index]],
+      character: localizedCharacters[selections[index]],
       steps: 0
     }));
     setPlayers(nextPlayers);
@@ -376,7 +388,7 @@ function App() {
     try {
       selection = selectQuestionForTurn(questionBank, selectedLevel.id, usedQuestionIds, Math.random, ({ Español: 'es', Português: 'pt', English: 'en' })[language] || 'es');
     } catch (error) {
-      setBankError(error.message || 'No hay preguntas disponibles.');
+      setBankError('selection');
       return;
     }
     const selected = selection.question;
@@ -432,14 +444,14 @@ function App() {
   };
   const currentSceneIndex = activePlayer ? sceneIndexForStep(activePlayer.steps) : 0;
   const percentByPlayer = useMemo(() => players.map((player) => (player.steps / 30) * 100), [players]);
-  const sceneForSteps = (steps) => SCENES[sceneIndexForStep(steps)];
+  const sceneForSteps = (steps) => localizedScenes[sceneIndexForStep(steps)];
   const stageMarkers = Array.from({ length: 6 }, (_, index) => index + 1);
 
   return (
-    <main className={`game-shell screen-${screen}`}>
+    <main lang={localeCode} className={`game-shell screen-${screen}`}>
       <header className="topbar">
         <div className="brand-mark">J</div>
-        <div><div className="brand">JERICO</div><div className="subtitle">CAMINO A JERICÓ</div></div>
+        <div><div className="brand">JERICO</div><div className="subtitle">{t.brandSubtitle}</div></div>
         <div className="top-spacer" />
         <button className="tiny" type="button" aria-label={t.settings} onClick={openSettings}>⚙</button>
       </header>
@@ -451,62 +463,56 @@ function App() {
           </video>
           <div className="hero-shade" />
           <div className="hero-content">
-            <p className="eyebrow">UNA AVENTURA BÍBLICA</p>
+            <p className="eyebrow">{t.heroEyebrow}</p>
             <h1>JERICO</h1>
-            <p className="hero-sub">Camino a Jericó</p>
+            <p className="hero-sub">{t.heroSubtitle}</p>
             <div className="gold-line" />
             <button className="primary" type="button" onClick={startSetup}>{t.start} <span>▶</span></button>
             <button className="secondary" type="button" onClick={() => setScreen('instructions')}>{t.how}</button>
             <button className="secondary" type="button" onClick={openSettings}>{t.settings}</button>
-            {!isBankReady && <p className="menu-status">{bankError || 'Preparando banco de 300 preguntas...'}</p>}
+            {!isBankReady && <p className="menu-status">{bankError === 'load' ? t.bankError : t.bankLoading}</p>}
           </div>
-          <div className="menu-party" aria-hidden="true">{CHARACTERS.map((character) => <Sprite key={character.id} character={character} />)}</div>
-          <div className="hero-bottom">UNA HISTORIA DE FE · VALOR · OBEDIENCIA</div>
+          <div className="menu-party" aria-hidden="true">{localizedCharacters.map((character) => <Sprite key={character.id} character={character} />)}</div>
+          <div className="hero-bottom">{t.heroBottom}</div>
         </section>
       )}
 
       {screen === 'instructions' && (
         <section className="panel parchment instruction-panel">
-          <p className="eyebrow">JERICO · CAMINO A LA PROMESA</p>
-          <h2>Instrucciones</h2>
-          <p>¡Prepárate para recorrer el camino hacia Jericó! Responde preguntas bíblicas y avanza por cinco escenarios, con seis pasos en cada uno.</p>
-          <ol>
-            <li>Participan de 1 a 4 jugadores. Cada participante escribe su nombre y elige un personaje diferente.</li>
-            <li>En cada turno, elige la dificultad: Fácil avanza 1 paso, Medio 2 pasos y Difícil 3 pasos.</li>
-            <li>Si respondes incorrectamente, no avanzas. Si respondes correctamente, tu personaje avanza la cantidad indicada.</li>
-            <li>Las preguntas se seleccionan al azar y no se repiten hasta agotar las 100 preguntas de esa dificultad.</li>
-            <li>El primer jugador que alcance los 30 pasos conquista Jericó. La partida termina inmediatamente.</li>
-          </ol>
+          <p className="eyebrow">{t.instructionsEyebrow}</p>
+          <h2>{t.instructionsTitle}</h2>
+          <p>{t.instructionsIntro}</p>
+          <ol>{t.instructionsRules.map((rule, index) => <li key={index}>{rule}</li>)}</ol>
           <button className="primary" type="button" onClick={() => setScreen('menu')}>{t.back}</button>
         </section>
       )}
 
       {screen === 'settings' && (
         <section className="panel parchment settings-panel">
-          <button className="settings-close" type="button" aria-label="Cerrar configuración" onClick={closeSettings}>×</button>
-          <p className="eyebrow">JERICO · PREFERENCIAS</p>
+          <button className="settings-close" type="button" aria-label={t.settingsClose} onClick={closeSettings}>×</button>
+          <p className="eyebrow">{t.settingsEyebrow}</p>
           <h2>{t.settings}</h2>
-          <label>Idioma
+          <label>{t.language}
             <select value={language} onChange={(event) => setLanguage(event.target.value)}>
               <option>Español</option><option>Português</option><option>English</option>
             </select>
           </label>
-          <label className="switch-row">Efectos de sonido <input type="checkbox" checked={soundOn} onChange={(event) => setSoundOn(event.target.checked)} /></label>
-          <label className="switch-row">Música ambiental <input type="checkbox" checked={musicOn} onChange={(event) => setMusicOn(event.target.checked)} /></label>
-          <label className="switch-row">Notificaciones <input type="checkbox" checked={notificationsOn} onChange={(event) => setNotificationsOn(event.target.checked)} /></label>
+          <label className="switch-row">{t.soundEffects} <input type="checkbox" checked={soundOn} onChange={(event) => setSoundOn(event.target.checked)} /></label>
+          <label className="switch-row">{t.ambientMusic} <input type="checkbox" checked={musicOn} onChange={(event) => setMusicOn(event.target.checked)} /></label>
+          <label className="switch-row">{t.notifications} <input type="checkbox" checked={notificationsOn} onChange={(event) => setNotificationsOn(event.target.checked)} /></label>
           <div className="settings-links">
-            <button type="button" onClick={() => setSettingsModal('Soporte')}>Soporte</button>
-            <button type="button" onClick={() => setSettingsModal('Créditos')}>Créditos</button>
-            <button type="button" onClick={() => setSettingsModal('Términos y privacidad')}>Términos y privacidad</button>
+            <button type="button" onClick={() => setSettingsModal('support')}>{t.support}</button>
+            <button type="button" onClick={() => setSettingsModal('credits')}>{t.credits}</button>
+            <button type="button" onClick={() => setSettingsModal('privacy')}>{t.termsPrivacy}</button>
           </div>
           <button className="primary" type="button" onClick={closeSettings}>{t.back}</button>
-          {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal}</h3><p>{settingsModal === 'Soporte' ? 'Para reportar un problema, contacta al equipo responsable del proyecto JERICO.' : settingsModal === 'Créditos' ? 'JERICO — Camino a Jericó. Proyecto de juego bíblico educativo. Desarrollo y diseño: equipo del proyecto.' : 'Esta versión no usa cuentas ni sincroniza partidas. Los nombres y avances solo se mantienen durante la partida abierta en este navegador. El sitio se distribuye mediante GitHub Pages.'}</p></div></div>}
+          {settingsModal && <div className="modal-backdrop" role="presentation" onClick={() => setSettingsModal('')}><div className="settings-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSettingsModal('')}>×</button><h3>{settingsModal === 'support' ? t.support : settingsModal === 'credits' ? t.credits : t.termsPrivacy}</h3><p>{settingsModal === 'support' ? t.supportText : settingsModal === 'credits' ? t.creditsText : t.privacyText}</p></div></div>}
         </section>
       )}
 
       {screen === 'setup' && (
         <section className="panel parchment">
-          <p className="eyebrow">PREPARA TU PARTIDA</p>
+          <p className="eyebrow">{t.playerPrep}</p>
           <h2>{t.choosePlayers}</h2>
           <div className="player-count">
             {[1, 2, 3, 4].map((number) => <button key={number} type="button" className={playerCount === number ? 'count active' : 'count'} onClick={() => setPlayerCount(number)}>{number}</button>)}
@@ -514,7 +520,7 @@ function App() {
           <h3>{t.names}</h3>
           <div className="name-grid">
             {names.slice(0, playerCount).map((name, index) => (
-              <label key={index}>Jugador {index + 1}
+              <label key={index}>{t.playerLabel} {index + 1}
                 <input maxLength={12} value={name} onChange={(event) => setNames((current) => current.map((value, i) => i === index ? event.target.value.slice(0, 12) : value))} />
                 <small className="char-counter">{name.length}/12</small>
               </label>
@@ -523,48 +529,48 @@ function App() {
           <button className="primary" type="button" disabled={names.slice(0, playerCount).some((name) => !name.trim()) || !isBankReady} onClick={() => { setSelections([]); setFocusedCharacter(0); setScreen('characters'); }}>
             {t.next}
           </button>
-          {!isBankReady && <p className="hint">{bankError || 'Cargando las 300 preguntas bíblicas...'}</p>}
+          {!isBankReady && <p className="hint">{bankError === 'load' ? t.bankError : t.bankLoading}</p>}
         </section>
       )}
 
       {screen === 'characters' && (
         <section className="panel parchment character-panel">
-          <p className="eyebrow">SELECCIÓN DE PERSONAJES · {selections.length + 1}/{playerCount}</p>
+          <p className="eyebrow">{t.characterEyebrow} · {selections.length + 1}/{playerCount}</p>
           <h2>{selections.length < playerCount ? names[selections.length] : t.ready}</h2>
           {selections.length < playerCount ? (
             <>
-              <p>{t.choose}. Cada jugador debe tener un personaje diferente.</p>
+              <p>{t.choose}. {t.uniqueCharacters}</p>
               <div className="character-stage">
-                <button className="carousel-arrow" type="button" aria-label="Personaje anterior" onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, -1, selections)); playSound('tap'); }}>‹</button>
+                <button className="carousel-arrow" type="button" aria-label={t.previousCharacter} onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, -1, selections)); playSound('tap'); }}>‹</button>
                 <div className="character-preview">
                   <div className="character-spotlight"><Sprite character={CHARACTERS[focusedCharacter]} /></div>
                   <h3>{CHARACTERS[focusedCharacter].name}</h3>
                   <p>{CHARACTERS[focusedCharacter].description}</p>
                   <div className="character-dots">{CHARACTERS.map((character, index) => <button key={character.id} type="button" className={index === focusedCharacter ? 'dot active' : 'dot'} disabled={selections.includes(index)} onClick={() => chooseFocus(index)} aria-label={character.name} />)}</div>
                 </div>
-                <button className="carousel-arrow" type="button" aria-label="Siguiente personaje" onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, 1, selections)); playSound('tap'); }}>›</button>
+                <button className="carousel-arrow" type="button" aria-label={t.nextCharacter} onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, 1, selections)); playSound('tap'); }}>›</button>
               </div>
               <div className="character-roster">
-                {CHARACTERS.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} /><b>{character.name}</b>{selections.includes(index) && <small>Elegido</small>}</button>)}
+                {CHARACTERS.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} /><b>{character.name}</b>{selections.includes(index) && <small>{t.chosen}</small>}</button>)}
               </div>
-              <div className="keyboard-hint">Usa ← → para elegir y ENTER para confirmar.</div>
+              <div className="keyboard-hint">{t.keyboardHint}</div>
               <button className="primary" type="button" disabled={selections.includes(focusedCharacter)} onClick={confirmCharacter}>{t.confirm}</button>
             </>
           ) : (
             <>
               <div className="selected-players">{players.length ? null : names.slice(0, playerCount).map((name, index) => <div key={name}><Sprite character={CHARACTERS[selections[index]]} /> <b>{name}</b></div>)}</div>
-              <p>Todos tienen un personaje único. El orden de juego seguirá el orden de los jugadores.</p>
-              <button className="primary" type="button" onClick={beginAdventure}>Comenzar aventura</button>
+              <p>{t.allHaveCharacter}</p>
+              <button className="primary" type="button" onClick={beginAdventure}>{t.begin}</button>
             </>
           )}
-          <button className="text-button" type="button" onClick={() => setScreen('setup')}>Volver</button>
+          <button className="text-button" type="button" onClick={() => setScreen('setup')}>{t.goBack}</button>
         </section>
       )}
 
       {(screen === 'map' || screen === 'routeMap') && (
         <section className={`map-screen ${screen === 'routeMap' ? 'map-progress-screen' : 'map-intro-screen'}`}>
           <div className="journey-map-artboard">
-            <svg className="journey-map-illustration" viewBox="0 0 1600 900" role="img" aria-label="Mapa ilustrado del viaje de Egipto a Jericó">
+            <svg className="journey-map-illustration" viewBox="0 0 1600 900" role="img" aria-label={t.mapAria}>
               <defs>
                 <linearGradient id="mapPaper" x2="0" y2="1"><stop stopColor="#f7d28b"/><stop offset="1" stopColor="#e6a94f"/></linearGradient>
                 <linearGradient id="mapSky" x2="0" y2="1"><stop stopColor="#84bce9"/><stop offset="1" stopColor="#f6d18d"/></linearGradient>
@@ -631,25 +637,25 @@ function App() {
                 <circle cx="835" cy="490" r="18"/><circle cx="1054" cy="471" r="18"/><circle cx="1175" cy="420" r="18"/>
               </g>
               <g fontFamily="Georgia,serif" fontWeight="bold" fill="#49270f" textAnchor="middle" filter="url(#mapShadow)">
-                <text x="180" y="597" fontSize="43">Egipto</text>
-                <text x="405" y="585" fontSize="36">Mar Rojo</text>
-                <text x="740" y="589" fontSize="36">Desierto del Sinaí</text>
-                <text x="1125" y="567" fontSize="35">Río Jordán</text>
-                <text x="1388" y="510" fontSize="44">Jericó</text>
+                <text x="180" y="597" fontSize="43">{t.scenes[0].name}</text>
+                <text x="405" y="585" fontSize="36">{t.scenes[1].name}</text>
+                <text x="740" y="589" fontSize="36">{language === 'English' ? 'Sinai Desert' : language === 'Português' ? 'Deserto do Sinai' : 'Desierto del Sinaí'}</text>
+                <text x="1125" y="567" fontSize="35">{t.scenes[3].name}</text>
+                <text x="1388" y="510" fontSize="44">{t.scenes[4].name}</text>
               </g>
               <g fill="#ffdc39" stroke="#673619" strokeWidth="8" filter="url(#mapShadow)">
                 <path d="M110 680h360l-28 42H138z"/><path d="M600 680h400l-25 42H625z"/><path d="M1100 680h380l-28 42h-324z"/>
               </g>
-              <text x="800" y="823" textAnchor="middle" fontFamily="Georgia,serif" fontWeight="bold" fontSize="41" fill="#633b18">EL VIAJE DEL PUEBLO DE DIOS · DE EGIPTO A JERICÓ</text>
+              <text x="800" y="823" textAnchor="middle" fontFamily="Georgia,serif" fontWeight="bold" fontSize="41" fill="#633b18">{language === 'English' ? 'THE JOURNEY OF GOD’S PEOPLE · FROM EGYPT TO JERICHO' : language === 'Português' ? 'A JORNADA DO POVO DE DEUS · DO EGITO A JERICÓ' : 'EL VIAJE DEL PUEBLO DE DIOS · DE EGIPTO A JERICÓ'}</text>
             </svg>
-            <div className="journey-map-markers" aria-label="Posición actual de los jugadores">
+            <div className="journey-map-markers" aria-label={t.positionAria}>
               {players.map((player, index) => {
                 const position = getJourneyMapPosition(player.steps);
                 const spread = (index - (players.length - 1) / 2) * 2;
                 return (
                   <div className="journey-map-marker" key={player.id}
                     style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y + (index % 2 ? 1.8 : 0)))}%` }}
-                    title={`${player.name}: ${player.steps} de 30 pasos`}>
+                    title={`${player.name}: ${player.steps}/30 ${t.stepsUnit}`}>
                     <b>{player.name}</b>
                     <Sprite character={player.character} />
                   </div>
@@ -658,8 +664,8 @@ function App() {
             </div>
             <div className="journey-map-dock">
               <div className="journey-map-dock-heading">
-                <strong>{screen === 'routeMap' ? 'AVANCE DE LOS JUGADORES' : 'JUGADORES EN EL PUNTO DE PARTIDA'}</strong>
-                <span>{screen === 'routeMap' ? 'Cada personaje avanza por su propia ruta' : 'Todos comienzan en Egipto'}</span>
+                <strong>{screen === 'routeMap' ? t.advanceHeading : t.startingHeading}</strong>
+                <span>{screen === 'routeMap' ? t.ownRoute : t.everyoneStarts}</span>
               </div>
               <div className="journey-map-player-list">
                 {players.map((player) => (
@@ -667,7 +673,7 @@ function App() {
                     <Sprite character={player.character} />
                     <div className="journey-map-player-info">
                       <b>{player.name}</b>
-                      <small>{SCENES[sceneIndexForStep(player.steps)].name} · {player.steps}/30 pasos</small>
+                      <small>{sceneForSteps(player.steps).name} · {player.steps}/30 {t.stepsUnit}</small>
                       <div className="meter"><i style={{ width: `${(player.steps / 30) * 100}%` }} /></div>
                     </div>
                   </div>
@@ -676,9 +682,9 @@ function App() {
             </div>
           </div>
           <div className="journey-map-footer">
-            <p>{screen === 'routeMap' ? 'El recorrido continúa. Observa cómo cambia la posición de cada jugador.' : 'Acompaña al pueblo de Israel desde Egipto hasta Jericó.'}</p>
-            {screen === 'map' && <div className="map-intro-countdown"><span>La aventura comenzará automáticamente</span><i /></div>}
-            {screen === 'routeMap' && <small>El siguiente turno comenzará automáticamente.</small>}
+            <p>{screen === 'routeMap' ? t.routeContinue : t.routeIntro}</p>
+            {screen === 'map' && <div className="map-intro-countdown"><span>{t.countdown}</span><i /></div>}
+            {screen === 'routeMap' && <small>{t.nextTurnAuto}</small>}
           </div>
         </section>
       )}
@@ -687,13 +693,13 @@ function App() {
         <section className="advance-screen">
           {(() => {
             const sceneIndex = sceneIndexForStep(advanceFromSteps);
-            const scene = SCENES[sceneIndex];
+            const scene = sceneForSteps(advanceFromSteps);
             const segmentEnd = Math.min(advancePayload.toSteps, (Math.floor(advanceFromSteps / 6) + 1) * 6);
             const shownSteps = Math.min(segmentEnd, advanceFromSteps + animatedStepCount);
             const localStep = advancePayload.correct ? Math.min(6, (advanceFromSteps % 6) + animatedStepCount) : advanceFromSteps % 6;
             const pan = Math.max(0, Math.min(100, (localStep / 6) * 100));
             return <>
-              <div className="advance-heading"><span>JERICO · {scene.name.toUpperCase()}</span><b>{advancePayload.correct ? `AVANZA ${advancePayload.steps} PASO${advancePayload.steps === 1 ? '' : 'S'}` : 'EL CAMINO ESPERA'}</b></div>
+              <div className="advance-heading"><span>JERICO · {scene.name.toUpperCase()}</span><b>{advancePayload.correct ? `${t.advance} ${advancePayload.steps} ${advancePayload.steps === 1 ? t.stepUnit : t.stepsUnit}` : t.pathWait}</b></div>
               <div className="advance-playfield" style={{ backgroundImage: `url("${ASSET(scene.asset)}")`, backgroundPosition: 'center center', backgroundSize: '100% 100%' }}>
                 <div className="advance-sky-vignette" />
                 <div className="advance-road" />
@@ -710,10 +716,10 @@ function App() {
                     <small>{isMoving ? shownSteps : player.steps}/30</small>
                   </div>;
                 })}
-                <div className="advance-step-counter"><span>PASOS</span><b>{shownSteps}/30</b><i><em style={{ width: `${(shownSteps / 30) * 100}%` }} /></i></div>
+                <div className="advance-step-counter"><span>{t.steps}</span><b>{shownSteps}/30</b><i><em style={{ width: `${(shownSteps / 30) * 100}%` }} /></i></div>
               </div>
               <div className="advance-footer">
-                <div className="advance-active-player"><Sprite character={players.find((p) => p.id === advancePayload.playerId)?.character || CHARACTERS[0]} walking={advancePayload.correct} /><div><b>{players.find((p) => p.id === advancePayload.playerId)?.name}</b><small>{advancePayload.correct ? 'Avanzando por el camino...' : 'No hubo avance en este turno.'}</small></div></div>
+                <div className="advance-active-player"><Sprite character={players.find((p) => p.id === advancePayload.playerId)?.character || CHARACTERS[0]} walking={advancePayload.correct} /><div><b>{players.find((p) => p.id === advancePayload.playerId)?.name}</b><small>{advancePayload.correct ? t.advancing : t.noAdvance}</small></div></div>
                 <div className="advance-roster">{players.map((player) => <div key={player.id}><Sprite character={player.character} /><span>{player.name}</span><b>{player.id === advancePayload.playerId ? shownSteps : player.steps}/30</b></div>)}</div>
               </div>
             </>;
@@ -724,12 +730,12 @@ function App() {
       {screen === 'board' && activePlayer && (
         <section className="board">
           <div className="board-head">
-            <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{SCENES[currentSceneIndex].name}</h2><p>{SCENES[currentSceneIndex].detail} · {activePlayer.steps % 6}/6 pasos en esta región</p></div>
+            <div><p className="eyebrow">{t.turn.toUpperCase()} {activePlayer.name.toUpperCase()}</p><h2>{sceneForSteps(activePlayer.steps).name}</h2><p>{sceneForSteps(activePlayer.steps).detail} · {t.regionProgress.replace('{current}', activePlayer.steps % 6)}</p></div>
             <div className="turn-avatar"><Sprite character={activePlayer.character} /></div>
           </div>
           <div className="scene-track" style={{ backgroundImage: `url("${ASSET(SCENES[currentSceneIndex].asset)}")`, backgroundSize: '100% 100%' }}>
             <div className="scene-overlay" />
-            <div className="scene-labels">{SCENES.map((scene, index) => <span key={scene.name} className={index === currentSceneIndex ? 'active' : ''}>{scene.name}</span>)}</div>
+            <div className="scene-labels">{localizedScenes.map((scene, index) => <span key={scene.id} className={index === currentSceneIndex ? 'active' : ''}>{scene.name}</span>)}</div>
             <div className="path-markers">{stageMarkers.map((marker) => <span key={marker} className={marker <= (activePlayer.steps % 6) ? 'passed' : ''} />)}</div>
             {players.map((player, index) => {
               if (sceneIndexForStep(player.steps) !== currentSceneIndex) return null;
@@ -744,21 +750,21 @@ function App() {
           </div>
           <div className="turn-actions">
             <p>{t.difficulty}</p>
-            <div className="difficulty">{LEVELS.map((item) => <button key={item.id} type="button" className={item.color} onClick={() => askQuestion(item)}><b>{item.label}</b><small>+{item.steps} paso{item.steps > 1 ? 's' : ''}</small></button>)}</div>
-            <p className="bank-status" aria-live={notificationsOn ? 'polite' : 'off'}>{notificationsOn ? `Turno de ${activePlayer.name}. ` : ''}{questionBank?.length === 300 ? '300 preguntas listas · 100 por dificultad' : bankError || 'Cargando banco de preguntas...'}</p>
+            <div className="difficulty">{localizedLevels.map((item) => <button key={item.id} type="button" className={item.color} onClick={() => askQuestion(item)}><b>{item.label}</b><small>+{item.steps} {item.steps > 1 ? t.stepsUnit : t.stepUnit}</small></button>)}</div>
+            <p className="bank-status" aria-live={notificationsOn ? 'polite' : 'off'}>{notificationsOn ? t.turnStatus.replace('{name}', activePlayer.name) + ' ' : ''}{questionBank?.length === 300 ? t.bankReady : bankError === 'load' ? t.bankError : bankError === 'selection' ? t.selectionError : t.loadingBank}</p>
           </div>
         </section>
       )}
 
       {screen === 'question' && question && level && (
         <section className="panel question-panel">
-          <p className="eyebrow">{level.label.toUpperCase()} · AVANZAS {level.steps} PASO{level.steps > 1 ? 'S' : ''}</p>
+          <p className="eyebrow">{level.label.toUpperCase()} · {t.advance} {level.steps} {level.steps > 1 ? t.stepsUnit : t.stepUnit}</p>
           <h2>{question.text}</h2>
           <div className="answers">
             {question.options.map((option, index) => <button key={`${question.id}-${index}`} type="button" className={answer === index ? 'answer selected' : 'answer'} onClick={() => { setAnswer(index); playSound('tap'); }}><span>{String.fromCharCode(65 + index)}</span>{option.text}</button>)}
           </div>
           <p className="reference">{t.reference}: {question.reference}</p>
-          <div className="question-actions"><button className="text-button" type="button" onClick={() => { setUsedQuestionIds(question.previousUsedIds); setQuestion(null); setAnswer(null); setScreen('board'); }}>Cancelar turno</button><button className="primary" type="button" disabled={answer === null} onClick={submitAnswer}>{t.answer}</button></div>
+          <div className="question-actions"><button className="text-button" type="button" onClick={() => { setUsedQuestionIds(question.previousUsedIds); setQuestion(null); setAnswer(null); setScreen('board'); }}>{t.questionCancel}</button><button className="primary" type="button" disabled={answer === null} onClick={submitAnswer}>{t.answer}</button></div>
         </section>
       )}
 
@@ -768,29 +774,29 @@ function App() {
             <div className="feedback-icon">{feedback.correct ? '✦' : '×'}</div>
             <h2>{feedback.correct ? t.correct : t.incorrect}</h2>
             <p>{feedback.correct ? `${t.move} +${feedback.steps} paso(s)` : t.noMove}</p>
-            {feedback.winner && <p className="winner-note">¡{winner?.name} ha llegado primero a Jericó!</p>}
+            {feedback.winner && <p className="winner-note">{t.feedbackWinner.replace('{name}', winner?.name || '')}</p>}
           </div>
         </div>
       )}
 
       {screen === 'collapse' && (
         <section className={`collapse-screen ${wallFrame === 3 || wallFrame === 4 ? 'heavy-shake' : 'light-shake'}`}>
-          <p className="eyebrow">¡EL PUEBLO HA GRITADO!</p>
+          <p className="eyebrow">{t.collapseEyebrow}</p>
           <h2>{t.victory}</h2>
           <div className="wall-frame">
-            <img src={ASSET(`wall-${wallFrame}.webp`)} alt={`Derrumbe de las murallas de Jericó, imagen ${wallFrame} de 5`} />
+            <img src={ASSET(`wall-${wallFrame}.webp`)} alt={t.wallAlt.replace('{frame}', wallFrame)} />
           </div>
-          <p>Jericó ha sido conquistada</p>
+          <p>{t.collapseCaption}</p>
         </section>
       )}
 
       {screen === 'story' && (
         <section className="panel parchment story-panel">
-          <p className="eyebrow">LA PROMESA SE CUMPLIÓ</p>
-          <h2>La conquista de Jericó</h2>
+          <p className="eyebrow">{t.storyEyebrow}</p>
+          <h2>{t.storyTitle}</h2>
           <div className="scripture">
-            <p><strong>1</strong> {STORY[0]}</p>
-            <p><strong>2</strong> {STORY[1]} <strong>3</strong> {STORY[2]} <strong>4</strong> {STORY[3]} <strong>5</strong> {STORY[4]}</p>
+            <p><strong>1</strong> {t.story[0]}</p>
+            <p><strong>2</strong> {t.story[1]} <strong>3</strong> {t.story[2]} <strong>4</strong> {t.story[3]} <strong>5</strong> {t.story[4]}</p>
           </div>
           <b className="scripture-ref">Josué 6:1–5</b>
           <button className="primary" type="button" onClick={() => setScreen('victory')}>{t.continue}</button>
@@ -801,7 +807,7 @@ function App() {
         <section className="victory-screen" style={{ backgroundImage: `linear-gradient(180deg, #281c2a50, #281c2aee), url("${ASSET('stage-jericho.webp')}")` }}>
           <div className="victory-overlay">
             <div className="victory-crown">♛</div>
-            <p className="eyebrow">LA CONQUISTA HA TERMINADO</p>
+            <p className="eyebrow">{t.victoryEyebrow}</p>
             <h1>{t.win}</h1>
             <h2>{winner?.name}</h2>
             <p className="winner-copy">{t.conquered}</p>
