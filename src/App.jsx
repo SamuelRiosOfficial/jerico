@@ -95,7 +95,17 @@ function Sprite({ character, walking = false, className = '' }) {
 function App() {
   const [screen, setScreen] = useState('menu');
   const [settingsReturnScreen, setSettingsReturnScreen] = useState('menu');
-  const [language, setLanguage] = useState('Español');
+  const [language, setLanguage] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem('jerico-language');
+      return ['Español', 'Português', 'English'].includes(saved) ? saved : 'Español';
+    } catch {
+      return 'Español';
+    }
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem('jerico-language', language); } catch { /* Settings still work for this session. */ }
+  }, [language]);
   const t = TEXT[language] || TEXT.Español;
   const [soundOn, setSoundOn] = useState(true);
   const [musicOn, setMusicOn] = useState(true);
@@ -295,6 +305,24 @@ function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [screen, focusedCharacter, selections, playerCount]);
 
+  useEffect(() => {
+    if (!question || !questionBank) return;
+    const source = questionBank.find((item) => item.id === question.id);
+    if (!source) return;
+    const code = ({ Español: 'es', Português: 'pt', English: 'en' })[language] || 'es';
+    const localized = code === 'es' ? source : source.translations?.[code];
+    if (!localized) return;
+    setQuestion((current) => current && current.id === source.id ? {
+      ...current,
+      text: localized.question,
+      reference: localized.biblicalReference,
+      options: current.options.map((option) => ({
+        ...option,
+        text: localized.options[option.index]
+      }))
+    } : current);
+  }, [language, question?.id, questionBank]);
+
   const currentPlayerName = names[selections.length] || names[0];
   const isBankReady = Boolean(questionBank);
   const startSetup = () => {
@@ -430,7 +458,7 @@ function App() {
             <button className="primary" type="button" onClick={startSetup}>{t.start} <span>▶</span></button>
             <button className="secondary" type="button" onClick={() => setScreen('instructions')}>{t.how}</button>
             <button className="secondary" type="button" onClick={openSettings}>{t.settings}</button>
-            {!isBankReady && <p className="menu-status">{bankError || 'Preparando banco de 120 preguntas...'}</p>}
+            {!isBankReady && <p className="menu-status">{bankError || 'Preparando banco de 300 preguntas...'}</p>}
           </div>
           <div className="menu-party" aria-hidden="true">{CHARACTERS.map((character) => <Sprite key={character.id} character={character} />)}</div>
           <div className="hero-bottom">UNA HISTORIA DE FE · VALOR · OBEDIENCIA</div>
@@ -446,7 +474,7 @@ function App() {
             <li>Participan de 1 a 4 jugadores. Cada participante escribe su nombre y elige un personaje diferente.</li>
             <li>En cada turno, elige la dificultad: Fácil avanza 1 paso, Medio 2 pasos y Difícil 3 pasos.</li>
             <li>Si respondes incorrectamente, no avanzas. Si respondes correctamente, tu personaje avanza la cantidad indicada.</li>
-            <li>Las preguntas se seleccionan al azar y no se repiten hasta agotar las 40 preguntas de esa dificultad.</li>
+            <li>Las preguntas se seleccionan al azar y no se repiten hasta agotar las 100 preguntas de esa dificultad.</li>
             <li>El primer jugador que alcance los 30 pasos conquista Jericó. La partida termina inmediatamente.</li>
           </ol>
           <button className="primary" type="button" onClick={() => setScreen('menu')}>{t.back}</button>
@@ -495,7 +523,7 @@ function App() {
           <button className="primary" type="button" disabled={names.slice(0, playerCount).some((name) => !name.trim()) || !isBankReady} onClick={() => { setSelections([]); setFocusedCharacter(0); setScreen('characters'); }}>
             {t.next}
           </button>
-          {!isBankReady && <p className="hint">{bankError || 'Cargando las 120 preguntas bíblicas...'}</p>}
+          {!isBankReady && <p className="hint">{bankError || 'Cargando las 300 preguntas bíblicas...'}</p>}
         </section>
       )}
 
@@ -717,7 +745,7 @@ function App() {
           <div className="turn-actions">
             <p>{t.difficulty}</p>
             <div className="difficulty">{LEVELS.map((item) => <button key={item.id} type="button" className={item.color} onClick={() => askQuestion(item)}><b>{item.label}</b><small>+{item.steps} paso{item.steps > 1 ? 's' : ''}</small></button>)}</div>
-            <p className="bank-status" aria-live={notificationsOn ? 'polite' : 'off'}>{notificationsOn ? `Turno de ${activePlayer.name}. ` : ''}{questionBank?.length === 120 ? '120 preguntas listas · 40 por dificultad' : bankError || 'Cargando banco de preguntas...'}</p>
+            <p className="bank-status" aria-live={notificationsOn ? 'polite' : 'off'}>{notificationsOn ? `Turno de ${activePlayer.name}. ` : ''}{questionBank?.length === 300 ? '300 preguntas listas · 100 por dificultad' : bankError || 'Cargando banco de preguntas...'}</p>
           </div>
         </section>
       )}

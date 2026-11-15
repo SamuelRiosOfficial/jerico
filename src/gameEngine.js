@@ -35,8 +35,8 @@ export function shuffle(items, random = Math.random) {
 }
 
 export function validateQuestionBank(bank) {
-  if (!bank || bank.questionCount !== 120 || !Array.isArray(bank.questions) || bank.questions.length !== 120) {
-    throw new Error('El banco debe contener exactamente 120 preguntas.');
+  if (!bank || !Array.isArray(bank.questions) || !Number.isInteger(bank.questionCount) || bank.questionCount !== bank.questions.length) {
+    throw new Error('El total declarado del banco debe coincidir con sus preguntas.');
   }
 
   const counts = { facil: 0, medio: 0, dificil: 0 };
@@ -74,8 +74,11 @@ export function validateQuestionBank(bank) {
     }
   }
 
-  if (counts.facil !== 40 || counts.medio !== 40 || counts.dificil !== 40) {
-    throw new Error('El banco debe incluir 40 preguntas por dificultad.');
+  const expected = bank.distribution || { facil: 40, medio: 40, dificil: 40 };
+  for (const difficulty of Object.keys(counts)) {
+    if (!Number.isInteger(expected[difficulty]) || counts[difficulty] !== expected[difficulty]) {
+      throw new Error(`El banco debe incluir ${expected[difficulty] ?? 'un número válido'} preguntas de dificultad ${difficulty}.`);
+    }
   }
   return counts;
 }
@@ -109,7 +112,7 @@ export function selectQuestionForTurn(bank, difficulty, usedIds, random = Math.r
     biblicalReference: localized.biblicalReference
   };
   const options = shuffle(displayQuestion.options.map((text, index) => ({
-    text, correct: index === selected.correctAnswerIndex
+    text, index, correct: index === selected.correctAnswerIndex
   })), random);
   return { question: displayQuestion, options, usedIds: nextUsedIds, cycleRestarted };
 }

@@ -1,11 +1,11 @@
 {
-  "version": 3,
+  "version": 4,
   "status": "integrated",
-  "questionCount": 120,
+  "questionCount": 300,
   "distribution": {
-    "facil": 40,
-    "medio": 40,
-    "dificil": 40
+    "facil": 100,
+    "medio": 100,
+    "dificil": 100
   },
   "languages": [
     "es",
@@ -21,14 +21,15 @@
   "randomizeAnswerOrder": true,
   "noRepeatUntilDifficultyPoolExhausted": true,
   "poolScope": "shared_by_all_players_in_the_same_game",
-  "source": "public/data/question-bank.json.gz.b64 + src/questionTranslations.js",
+  "source": "public/data/question-bank.json.gz.b64 + src/questionTranslations.js + src/additionalQuestions.js",
   "generatedAsset": "public/data/question-bank.multilingual.json",
   "integrityChecks": [
-    "exactly 120 questions",
-    "40 questions in each difficulty",
-    "four options per question",
+    "exactly 300 questions",
+    "100 questions in each difficulty",
+    "four unique options per question",
     "valid correctAnswerIndex",
     "biblicalReference present in each language",
-    "Portuguese and English translation present for all 120 questions"
+    "Portuguese and English translations present for all 300 questions",
+    "unique question identifiers"
   ]
 }
