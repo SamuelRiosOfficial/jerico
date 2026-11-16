@@ -1,0 +1,31 @@
+name: JERICO online mode checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/online-multiplayer]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Run game logic tests
+        run: npm test
+      - name: Build online game
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://sgzattxgduoowsmijifa.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_gYYVuo4ejQqkiWUWxTpp1Q_3At7lpJD
