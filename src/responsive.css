@@ -957,3 +957,80 @@
   word-break: keep-all;
   line-height: 1.3;
 }
+
+/* Main menu actions: consistent spacing between every button at every size. */
+.screen-menu .menu-actions {
+  position: absolute;
+  top: 36%;
+  bottom: 14%;
+  left: 4%;
+  width: min(31%, 330px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(10px, 1.5vh, 16px);
+}
+
+.screen-menu .menu-actions > button {
+  position: static !important;
+  inset: auto !important;
+  display: flex;
+  flex: 0 0 clamp(48px, 7vh, 58px);
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  height: auto;
+  margin: 0 !important;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.screen-menu .menu-status {
+  top: 93%;
+}
+
+@media (max-width: 760px) {
+  .screen-menu .menu-actions {
+    position: static;
+    inset: auto;
+    width: 100%;
+    max-width: 390px;
+    margin: 0 auto;
+    gap: 12px;
+  }
+
+  .screen-menu .menu-actions > button {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 54px;
+    height: auto;
+    margin: 0 auto !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .screen-menu .menu-actions {
+    gap: 10px;
+  }
+
+  .screen-menu .menu-actions > button {
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  .screen-menu .menu-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 560px;
+    gap: 8px;
+  }
+
+  .screen-menu .menu-actions > button {
+    min-height: 42px;
+  }
+}
