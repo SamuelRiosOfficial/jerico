@@ -39,6 +39,15 @@ export async function joinRoom({ code, name, characterId }) {
   return { roomId: data, userId: user.id };
 }
 
+export async function getRoomOccupiedCharacters(code) {
+  if (!supabase) throw new Error('Supabase no está configurado.');
+  const { data, error } = await supabase.rpc('jerico_room_occupied_characters', {
+    p_code: code.trim().toUpperCase()
+  });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
 export async function fetchRoom(roomId) {
   if (!supabase) throw new Error('Supabase no está configurado.');
   const [{ data: room, error: roomError }, { data: players, error: playersError }] = await Promise.all([

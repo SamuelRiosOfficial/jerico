@@ -1,16 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { resolveAnswer, selectQuestionForTurn } from '../gameEngine.js';
+import { getAvailableCharacters, getFirstAvailableCharacter } from './characterSelection.js';
 import {
   createRoom, createRoomCode, ensureAnonymousSession, fetchRoom, isOnlineConfigured,
-  joinRoom, leaveRoom, startRoom, subscribeToRoom, updateGameState
+  joinRoom, leaveRoom, startRoom, subscribeToRoom, updateGameState, getRoomOccupiedCharacters
 } from './onlineService.js';
 import './online.css';
 
 const TEXTS = {
   es: {
     title:'Jugar en línea', subtitle:'Conecta hasta cuatro dispositivos a una misma partida.',
-    create:'Crear partida', join:'Unirme a una partida', back:'Volver al menú',
+    create:'Crear partida', join:'Unirme a una partida', back:'Volver al menú', backStep:'Atrás',
     name:'Tu nombre', character:'Elige tu personaje', code:'Código de partida',
     createRoom:'Crear sala', joinRoom:'Entrar a la sala', lobby:'Sala de espera',
     waiting:'Comparte el QR o el enlace para que se unan los demás jugadores.',
@@ -25,13 +26,13 @@ const TEXTS = {
     loading:'Conectando…', error:'No se pudo completar la operación',
     max:'La sala ya tiene cuatro jugadores.', occupied:'Ese personaje ya fue elegido.',
     unavailable:'La sala no existe, está llena o ya comenzó.', confirm:'Confirmar personaje',
-    chosen:'Elegido', turn:'Turno de', question:'Responde para avanzar',
+    chosen:'Elegido', turn:'Turno de', question:'Responde para avanzar', unavailableCharacter:'No disponible',
     continue:'Continuar', home:'Elige cómo quieres jugar', enterCode:'Introduce el código',
     retry:'Volver a intentar', room:'Sala', online:'Conectado'
   },
   en: {
     title:'Play online', subtitle:'Connect up to four devices to the same game.',
-    create:'Create game', join:'Join a game', back:'Back to menu',
+    create:'Create game', join:'Join a game', back:'Back to menu', backStep:'Back',
     name:'Your name', character:'Choose your character', code:'Game code',
     createRoom:'Create room', joinRoom:'Join room', lobby:'Waiting room',
     waiting:'Share the QR code or link so others can join.',
@@ -46,13 +47,13 @@ const TEXTS = {
     loading:'Connecting…', error:'The operation could not be completed',
     max:'The room already has four players.', occupied:'That character is taken.',
     unavailable:'The room is missing, full, or already started.', confirm:'Confirm character',
-    chosen:'Chosen', turn:'Turn:', question:'Answer to move forward',
+    chosen:'Chosen', turn:'Turn:', question:'Answer to move forward', unavailableCharacter:'Unavailable',
     continue:'Continue', home:'Choose how to play', enterCode:'Enter the code',
     retry:'Try again', room:'Room', online:'Connected'
   },
   pt: {
     title:'Jogar online', subtitle:'Conecte até quatro dispositivos à mesma partida.',
-    create:'Criar partida', join:'Entrar em uma partida', back:'Voltar ao menu',
+    create:'Criar partida', join:'Entrar em uma partida', back:'Voltar ao menu', backStep:'Voltar',
     name:'Seu nome', character:'Escolha seu personagem', code:'Código da partida',
     createRoom:'Criar sala', joinRoom:'Entrar na sala', lobby:'Sala de espera',
     waiting:'Compartilhe o QR ou o link para os outros jogadores entrarem.',
@@ -67,7 +68,7 @@ const TEXTS = {
     loading:'Conectando…', error:'Não foi possível concluir a operação',
     max:'A sala já tem quatro jogadores.', occupied:'Esse personagem já foi escolhido.',
     unavailable:'A sala não existe, está cheia ou já começou.', confirm:'Confirmar personagem',
-    chosen:'Escolhido', turn:'Vez de', question:'Responda para avançar',
+    chosen:'Escolhido', turn:'Vez de', question:'Responda para avançar', unavailableCharacter:'Indisponível',
     continue:'Continuar', home:'Escolha como deseja jogar', enterCode:'Digite o código',
     retry:'Tentar novamente', room:'Sala', online:'Conectado'
   }
@@ -108,6 +109,9 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
   const [error, setError] = useState('');
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [roomOccupiedCharacters, setRoomOccupiedCharacters] = useState([]);
+  const [checkingRoom, setCheckingRoom] = useState(false);
+  const [roomLookupFailed, setRoomLookupFailed] = useState(false);
 
   const gameState = room?.game_state || null;
   const currentPlayer = players.find((player) => player.user_id === userId);
@@ -123,8 +127,43 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
     url.searchParams.set('room', room.code);
     return url.toString();
   }, [room?.code]);
-  const occupiedCharacters = players.filter(p => p.user_id !== userId).map(p => p.character_id);
-  const availableCharacters = characters.filter(c => !occupiedCharacters.includes(c.id));
+  const occupiedCharacters = page === 'join'
+    ? roomOccupiedCharacters
+    : players.filter(p => p.user_id !== userId).map(p => p.character_id);
+  const availableCharacters = getAvailableCharacters(characters, occupiedCharacters);
+
+  useEffect(() => {
+    if (page !== 'join' || code.length !== 8 || !userId) {
+      setRoomOccupiedCharacters([]);
+      setCheckingRoom(false);
+      setRoomLookupFailed(false);
+      return undefined;
+    }
+    let active = true;
+    setCheckingRoom(true);
+    setRoomLookupFailed(false);
+    const timer = window.setTimeout(async () => {
+      try {
+        const occupied = await getRoomOccupiedCharacters(code);
+        if (active) {
+          setRoomOccupiedCharacters(occupied);
+          setRoomLookupFailed(false);
+          setCharacterId(current => occupied.includes(current)
+            ? getFirstAvailableCharacter(characters, occupied)
+            : current);
+        }
+      } catch {
+        if (active) {
+          setRoomOccupiedCharacters([]);
+          setRoomLookupFailed(true);
+        }
+      } finally {
+        if (active) setCheckingRoom(false);
+      }
+    }, 250);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [page, code, userId]);
+
   const refreshRoom = useCallback(async () => {
     if (!roomId) return;
     const data = await fetchRoom(roomId);
@@ -170,6 +209,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
   const runJoin = async () => {
     if (!name.trim()) { setError(t.name); return; }
     if (!code.trim()) { setError(t.code); return; }
+    if (checkingRoom || roomLookupFailed || occupiedCharacters.includes(characterId) || !characterId) { setError(t.occupied); return; }
     if (!isOnlineConfigured) { setError(t.setupHint); return; }
     setBusy(true); setError('');
     try {
@@ -178,7 +218,13 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
       setUserId(result.userId);
       const data = await fetchRoom(result.roomId);
       setRoom(data.room); setPlayers(data.players); setPage('lobby');
-    } catch (err) { setError(err.message || t.unavailable); }
+    } catch (err) {
+      const message = err.message || '';
+      setError(/character already taken/i.test(message) ? t.occupied : message || t.unavailable);
+      if (/character already taken/i.test(message)) {
+        try { setRoomOccupiedCharacters(await getRoomOccupiedCharacters(code)); } catch { /* Keep the last availability snapshot. */ }
+      }
+    }
     finally { setBusy(false); }
   };
 
@@ -284,7 +330,6 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
     <section className="panel parchment online-panel">
       <div className="online-heading">
         <div><p className="eyebrow">JERICO · MULTIJUGADOR</p><h2>{t.title}</h2><p>{t.subtitle}</p></div>
-        <button className="online-back" type="button" onClick={exitRoom} disabled={busy}>{t.back}</button>
       </div>
 
       {!isOnlineConfigured && (
@@ -310,15 +355,33 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
           {page === 'join' && <label>{t.code}
             <input maxLength={8} value={code} onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8))} placeholder="ABCD1234" />
           </label>}
-          <label>{t.character}
-            <select value={characterId} onChange={e => setCharacterId(e.target.value)}>
-              {characters.map(c => <option key={c.id} value={c.id} disabled={occupiedCharacters.includes(c.id)}>{c.name}{occupiedCharacters.includes(c.id) ? ' · '+t.chosen : ''}</option>)}
-            </select>
-          </label>
-          <button className="primary" type="button" disabled={busy || !name.trim() || (page === 'join' && code.length < 6)} onClick={page === 'create' ? runCreate : runJoin}>
+          <div className="online-character-picker">
+            <div className="online-character-picker-heading">
+              <b>{t.character}</b>
+              {page === 'join' && <small>{checkingRoom ? t.loading : roomLookupFailed ? t.unavailable : t.chosen + ': ' + occupiedCharacters.length}</small>}
+            </div>
+            <div className="online-character-featured">
+              <OnlineAvatar characterId={characterId || availableCharacters[0]?.id || 'warrior'} />
+              <strong>{characters.find(c => c.id === characterId)?.name || t.occupied}</strong>
+            </div>
+            <div className="online-character-grid">
+              {characters.map(character => {
+                const taken = occupiedCharacters.includes(character.id);
+                return <button key={character.id} type="button"
+                  className={'online-character-card' + (characterId === character.id ? ' selected' : '') + (taken ? ' taken' : '')}
+                  disabled={taken || (page === 'join' && (checkingRoom || roomLookupFailed)) || busy}
+                  onClick={() => setCharacterId(character.id)}>
+                  <OnlineAvatar characterId={character.id} />
+                  <b>{character.name}</b>
+                  {taken && <small>{t.unavailableCharacter}</small>}
+                </button>;
+              })}
+            </div>
+          </div>
+          <button className="primary" type="button" disabled={busy || !name.trim() || (page === 'join' && (code.length !== 8 || checkingRoom || roomLookupFailed || !characterId || occupiedCharacters.includes(characterId)))} onClick={page === 'create' ? runCreate : runJoin}>
             {busy ? t.loading : page === 'create' ? t.createRoom : t.joinRoom}
           </button>
-          <button className="text-button" type="button" onClick={() => { setPage('home'); setError(''); }}>{t.back}</button>
+          <button className="text-button" type="button" onClick={() => { setPage('home'); setError(''); }}>{t.backStep}</button>
         </div>
       )}
 
@@ -405,6 +468,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
       )}
 
       {error && <div className="online-error" role="alert">{error}</div>}
+      <button className="online-menu-back" type="button" onClick={exitRoom} disabled={busy}>{t.back}</button>
     </section>
   );
 }
