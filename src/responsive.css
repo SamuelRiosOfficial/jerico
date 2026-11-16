@@ -860,3 +860,82 @@
     font-size: 8px;
   }
 }
+
+/* Desktop main menu: centered upper title and a separated vertical button stack.
+   Kept above the mobile breakpoint so phone layouts remain unchanged. */
+@media (min-width: 761px) {
+  .screen-menu .hero-content > .eyebrow {
+    top: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+
+  .screen-menu .hero h1 {
+    position: absolute;
+    top: 8%;
+    left: 50%;
+    right: auto;
+    width: min(58%, 720px);
+    margin: 0;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+
+  .screen-menu .hero-sub {
+    position: absolute;
+    top: 29%;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    margin: 0;
+    text-align: center;
+  }
+
+  .screen-menu .hero-content > .menu-start-button,
+  .screen-menu .hero-content > .menu-online-button,
+  .screen-menu .hero-content > .menu-instructions-button,
+  .screen-menu .hero-content > .menu-settings-button {
+    position: absolute;
+    left: 4%;
+    right: auto;
+    width: min(31%, 330px);
+    height: clamp(42px, 6vw, 60px);
+    min-height: clamp(42px, 6vw, 60px);
+    max-width: 330px;
+    margin: 0;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .screen-menu .hero-content > .menu-start-button {
+    top: 38%;
+  }
+
+  .screen-menu .hero-content > .menu-online-button {
+    top: 51%;
+  }
+
+  .screen-menu .hero-content > .menu-instructions-button {
+    top: 64%;
+  }
+
+  .screen-menu .hero-content > .menu-settings-button {
+    top: 77%;
+  }
+
+  .screen-menu .menu-status {
+    top: 89%;
+    left: 4%;
+    width: min(31%, 330px);
+    margin: 0;
+    line-height: 1.3;
+  }
+}
