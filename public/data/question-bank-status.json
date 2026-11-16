@@ -1,11 +1,11 @@
 {
-  "version": 4,
+  "version": 5,
   "status": "integrated",
-  "questionCount": 300,
+  "questionCount": 900,
   "distribution": {
-    "facil": 100,
-    "medio": 100,
-    "dificil": 100
+    "facil": 300,
+    "medio": 300,
+    "dificil": 300
   },
   "languages": [
     "es",
@@ -24,12 +24,29 @@
   "source": "public/data/question-bank.json.gz.b64 + src/questionTranslations.js + src/additionalQuestions.js",
   "generatedAsset": "public/data/question-bank.multilingual.json",
   "integrityChecks": [
-    "exactly 300 questions",
-    "100 questions in each difficulty",
-    "four unique options per question",
-    "valid correctAnswerIndex",
-    "biblicalReference present in each language",
-    "Portuguese and English translations present for all 300 questions",
-    "unique question identifiers"
-  ]
+    "900 preguntas en total",
+    "300 preguntas por dificultad: fácil, medio y difícil",
+    "600 preguntas nuevas distribuidas en los doce libros solicitados",
+    "50 preguntas por cada libro añadido",
+    "Cada pregunta incluye cuatro opciones y un índice de respuesta correcto",
+    "Cada pregunta incluye referencia bíblica en español, portugués e inglés",
+    "Identificadores únicos para las 900 preguntas",
+    "Traducciones completas de preguntas y opciones al portugués e inglés",
+    "Selección sin repetir hasta agotar el grupo de dificultad"
+  ],
+  "expandedQuestionCount": 600,
+  "bookDistribution": {
+    "Génesis": 50,
+    "Éxodo": 50,
+    "Levítico": 50,
+    "Hechos": 50,
+    "Mateo": 50,
+    "Marcos": 50,
+    "Lucas": 50,
+    "Juan": 50,
+    "Jonás": 50,
+    "Jueces": 50,
+    "Apocalipsis": 50,
+    "Daniel": 50
+  }
 }
