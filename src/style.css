@@ -2370,3 +2370,7 @@ button{image-rendering:pixelated}
   overflow:hidden !important;
   image-rendering:pixelated;
 }
+
+
+/* Online multiplayer entry point */
+.online-menu-button{margin-top:7px}
