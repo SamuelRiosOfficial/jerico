@@ -35,3 +35,21 @@ test('online character sprite rows stay inside the selected character frame', as
   assert.equal(getCharacterSpritePosition('woman'), 100);
   assert.equal(getCharacterSpriteRow('unknown'), 0);
 });
+
+
+test('online progress uses the same five six-step scenes as local play', async () => {
+  const { sceneIndexForStep, getJourneyMapPosition } = await import('../src/gameEngine.js');
+  assert.equal(sceneIndexForStep(0), 0);
+  assert.equal(sceneIndexForStep(5), 0);
+  assert.equal(sceneIndexForStep(6), 1);
+  assert.equal(sceneIndexForStep(12), 2);
+  assert.equal(sceneIndexForStep(18), 3);
+  assert.equal(sceneIndexForStep(24), 4);
+  assert.equal(sceneIndexForStep(30), 4);
+  const start = getJourneyMapPosition(0);
+  const firstStop = getJourneyMapPosition(6);
+  const finalStop = getJourneyMapPosition(30);
+  assert.ok(start.x < firstStop.x);
+  assert.ok(firstStop.x < finalStop.x);
+  assert.ok(Number.isFinite(finalStop.y));
+});
