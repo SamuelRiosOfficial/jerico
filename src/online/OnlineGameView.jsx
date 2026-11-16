@@ -481,7 +481,8 @@ export default function OnlineGameView({
             <h2>{winnerName}</h2>
             <p className="winner-copy">{gameText.conquered || 'Has conquistado Jericó'}</p>
             <div className="invite"><b>{gameText.thank || 'Gracias por participar.'}</b><p>{gameText.bible || ''}</p></div>
-            <button className="primary" type="button" disabled={busy} onClick={onExit}>{gameText.return || onlineText.back || 'Volver al menú'}</button>
+            <a className="primary hope-media-link" href="https://hopemedia.umch.org.mx/" target="_blank" rel="noopener noreferrer">{gameText.hopeMedia || 'Visitar Hope Media'}</a>
+            <button className="secondary" type="button" disabled={busy} onClick={onExit}>{gameText.return || onlineText.back || 'Volver al menú'}</button>
           </div>
         </section>
       )}

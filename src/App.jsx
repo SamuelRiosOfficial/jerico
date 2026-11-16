@@ -806,7 +806,8 @@ function App() {
             <h2>{winner?.name}</h2>
             <p className="winner-copy">{t.conquered}</p>
             <div className="invite"><b>{t.thank}</b><p>{t.bible}</p></div>
-            <button className="primary" type="button" onClick={resetGame}>{t.return}</button>
+            <a className="primary hope-media-link" href="https://hopemedia.umch.org.mx/" target="_blank" rel="noopener noreferrer">{t.hopeMedia}</a>
+            <button className="secondary" type="button" onClick={resetGame}>{t.return}</button>
           </div>
         </section>
       )}
