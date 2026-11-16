@@ -162,27 +162,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
         if (active) setCheckingRoom(false);
       }
     }, 250);
-    return page === 'game' && room && gameState ? (
-    <OnlineGameView
-      gameState={gameState}
-      roomCode={room.code}
-      userId={userId}
-      language={language}
-      scenes={scenes}
-      gameText={gameText}
-      onlineText={t}
-      questionBank={questionBank}
-      busy={busy}
-      selectedAnswer={selectedAnswer}
-      setSelectedAnswer={setSelectedAnswer}
-      askQuestion={askQuestion}
-      submitAnswer={submitAnswer}
-      continueTurn={continueTurn}
-      canContinue={isHost || myTurn}
-      onExit={exitRoom}
-    />
-  ) : (
-) => { active = false; window.clearTimeout(timer); };
+    return () => { active = false; window.clearTimeout(timer); };
   }, [page, code, userId]);
 
   const refreshRoom = useCallback(async () => {
@@ -347,7 +327,26 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
   const roomIsActive = room?.status === 'playing';
   const roomIsFinished = room?.status === 'finished';
 
-  return (
+  return page === 'game' && room && gameState ? (
+    <OnlineGameView
+      gameState={gameState}
+      roomCode={room.code}
+      userId={userId}
+      language={language}
+      scenes={scenes}
+      gameText={gameText}
+      onlineText={t}
+      questionBank={questionBank}
+      busy={busy}
+      selectedAnswer={selectedAnswer}
+      setSelectedAnswer={setSelectedAnswer}
+      askQuestion={askQuestion}
+      submitAnswer={submitAnswer}
+      continueTurn={continueTurn}
+      canContinue={isHost || myTurn}
+      onExit={exitRoom}
+    />
+  ) : (
     <section className="panel parchment online-panel">
       <div className="online-heading">
         <div><p className="eyebrow">JERICO · MULTIJUGADOR</p><h2>{t.title}</h2><p>{t.subtitle}</p></div>
