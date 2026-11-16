@@ -4,6 +4,7 @@ import OnlineMode from './online/OnlineMode.jsx';
 import './style.css';
 import './responsive.css';
 import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep, nextAvailableCharacter, getJourneyMapPosition } from './gameEngine.js';
+import { recordVisit } from './visitTracking.js';
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
 const DATA = (name) => `${import.meta.env.BASE_URL}data/${name}`;
@@ -87,6 +88,14 @@ function Sprite({ character, walking = false, className = '' }) {
 
 function App() {
   const [screen, setScreen] = useState('menu');
+  const [visitCount, setVisitCount] = useState(null);
+  const visitTracked = useRef(false);
+
+  useEffect(() => {
+    if (visitTracked.current) return;
+    visitTracked.current = true;
+    recordVisit().then(setVisitCount).catch(() => setVisitCount(-1));
+  }, []);
   const [settingsReturnScreen, setSettingsReturnScreen] = useState('menu');
   const [language, setLanguage] = useState(() => {
     try {
@@ -98,6 +107,7 @@ function App() {
   });
   const t = TEXT[language] || TEXT.Español;
   const localeCode = ({ Español: 'es', Português: 'pt', English: 'en' })[language] || 'es';
+  const visitLabel = ({ es: 'entradas', pt: 'acessos', en: 'visits' })[localeCode];
   const playerDefault = (locale, number) => ({ Español: 'Jugador', Português: 'Jogador', English: 'Player' }[locale] || 'Player') + ' ' + number;
   const defaultNames = (locale) => Array.from({ length: 4 }, (_, index) => playerDefault(locale, index + 1));
   const localizedCharacters = CHARACTERS.map((character) => ({ ...character, ...t.characters[character.id] }));
@@ -489,6 +499,10 @@ function App() {
           </div>
           <div className="menu-party" aria-hidden="true">{localizedCharacters.map((character) => <Sprite key={character.id} character={character} />)}</div>
           <div className="hero-bottom">{t.heroBottom}</div>
+          <div className="visit-counter" role="status" aria-live="polite">
+            <span aria-hidden="true">◉</span>
+            <span>{visitCount === null ? '…' : visitCount < 0 ? '—' : visitCount.toLocaleString(localeCode)} {visitLabel}</span>
+          </div>
         </section>
       )}
 
