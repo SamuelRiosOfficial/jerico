@@ -1,5 +1,7 @@
--- JERICO online multiplayer: anonymous players, private rooms and host/turn-authorized game state.
+-- JERICO online multiplayer: hardened private RPC implementation. anonymous players, private rooms and host/turn-authorized game state.
 create extension if not exists pgcrypto;
+create schema if not exists private;
+grant usage on schema private to authenticated;
 
 create table if not exists public.jerico_rooms (
   id uuid primary key default gen_random_uuid(),
@@ -30,26 +32,26 @@ create index if not exists jerico_players_room_idx on public.jerico_room_players
 alter table public.jerico_rooms enable row level security;
 alter table public.jerico_room_players enable row level security;
 
-create or replace function public.jerico_is_room_member(p_room_id uuid)
-returns boolean language sql stable security definer set search_path=public
+create or replace function private.jerico_is_room_member(p_room_id uuid)
+returns boolean language sql stable security definer set search_path=pg_catalog, public, auth
 as $
   select exists(select 1 from public.jerico_room_players where room_id=p_room_id and user_id=auth.uid())
 $;
 
 drop policy if exists "room members can read their room" on public.jerico_rooms;
 create policy "room members can read their room" on public.jerico_rooms
-  for select to authenticated using (public.jerico_is_room_member(id));
+  for select to authenticated using (private.jerico_is_room_member(id));
 
 drop policy if exists "room members can read roster" on public.jerico_room_players;
 create policy "room members can read roster" on public.jerico_room_players
-  for select to authenticated using (public.jerico_is_room_member(room_id));
+  for select to authenticated using (private.jerico_is_room_member(room_id));
 
 revoke all on public.jerico_rooms from anon, authenticated;
 revoke all on public.jerico_room_players from anon, authenticated;
 grant select on public.jerico_rooms, public.jerico_room_players to authenticated;
 
-create or replace function public.jerico_create_room(p_code text,p_name text,p_character_id text)
-returns uuid language plpgsql security definer set search_path=public
+create or replace function private.jerico_create_room(p_code text,p_name text,p_character_id text)
+returns uuid language plpgsql security definer set search_path=pg_catalog, public, auth
 as $$
 declare v_uid uuid:=auth.uid(); v_room_id uuid;
 begin
@@ -63,8 +65,8 @@ begin
   return v_room_id;
 end $$;
 
-create or replace function public.jerico_join_room(p_code text,p_name text,p_character_id text)
-returns uuid language plpgsql security definer set search_path=public
+create or replace function private.jerico_join_room(p_code text,p_name text,p_character_id text)
+returns uuid language plpgsql security definer set search_path=pg_catalog, public, auth
 as $$
 declare v_uid uuid:=auth.uid(); v_room public.jerico_rooms%rowtype; v_count integer;
 begin
@@ -86,8 +88,8 @@ begin
   return v_room.id;
 end $$;
 
-create or replace function public.jerico_start_room(p_room_id uuid)
-returns jsonb language plpgsql security definer set search_path=public
+create or replace function private.jerico_start_room(p_room_id uuid)
+returns jsonb language plpgsql security definer set search_path=pg_catalog, public, auth
 as $$
 declare v_room public.jerico_rooms%rowtype; v_players jsonb; v_count integer;
 begin
@@ -108,8 +110,8 @@ begin
   return v_players;
 end $$;
 
-create or replace function public.jerico_update_game_state(p_room_id uuid,p_expected_revision integer,p_game_state jsonb)
-returns integer language plpgsql security definer set search_path=public
+create or replace function private.jerico_update_game_state(p_room_id uuid,p_expected_revision integer,p_game_state jsonb)
+returns integer language plpgsql security definer set search_path=pg_catalog, public, auth
 as $$
 declare
   v_room public.jerico_rooms%rowtype;
@@ -190,8 +192,8 @@ begin
   return p_expected_revision+1;
 end $$;
 
-create or replace function public.jerico_leave_room(p_room_id uuid)
-returns void language plpgsql security definer set search_path=public
+create or replace function private.jerico_leave_room(p_room_id uuid)
+returns void language plpgsql security definer set search_path=pg_catalog, public, auth
 as $$
 declare v_room public.jerico_rooms%rowtype;
 begin
@@ -204,13 +206,38 @@ begin
   end if;
 end $$;
 
-revoke all on function public.jerico_is_room_member(uuid) from public, anon;
+
+-- Privileged implementation stays in the non-exposed private schema.
+revoke all on all functions in schema private from public, anon;
+grant execute on function private.jerico_is_room_member(uuid) to authenticated;
+grant execute on function private.jerico_create_room(text,text,text) to authenticated;
+grant execute on function private.jerico_join_room(text,text,text) to authenticated;
+grant execute on function private.jerico_start_room(uuid) to authenticated;
+grant execute on function private.jerico_update_game_state(uuid,integer,jsonb) to authenticated;
+grant execute on function private.jerico_leave_room(uuid) to authenticated;
+
+-- Public RPC entry points are invoker functions and delegate to private implementations.
+create or replace function public.jerico_create_room(p_code text,p_name text,p_character_id text)
+returns uuid language sql security invoker set search_path=''
+as $$ select private.jerico_create_room(p_code,p_name,p_character_id) $$;
+create or replace function public.jerico_join_room(p_code text,p_name text,p_character_id text)
+returns uuid language sql security invoker set search_path=''
+as $$ select private.jerico_join_room(p_code,p_name,p_character_id) $$;
+create or replace function public.jerico_start_room(p_room_id uuid)
+returns jsonb language sql security invoker set search_path=''
+as $$ select private.jerico_start_room(p_room_id) $$;
+create or replace function public.jerico_update_game_state(p_room_id uuid,p_expected_revision integer,p_game_state jsonb)
+returns integer language sql security invoker set search_path=''
+as $$ select private.jerico_update_game_state(p_room_id,p_expected_revision,p_game_state) $$;
+create or replace function public.jerico_leave_room(p_room_id uuid)
+returns void language sql security invoker set search_path=''
+as $$ select private.jerico_leave_room(p_room_id) $$;
+
 revoke all on function public.jerico_create_room(text,text,text) from public, anon;
 revoke all on function public.jerico_join_room(text,text,text) from public, anon;
 revoke all on function public.jerico_start_room(uuid) from public, anon;
 revoke all on function public.jerico_update_game_state(uuid,integer,jsonb) from public, anon;
 revoke all on function public.jerico_leave_room(uuid) from public, anon;
-grant execute on function public.jerico_is_room_member(uuid) to authenticated;
 grant execute on function public.jerico_create_room(text,text,text) to authenticated;
 grant execute on function public.jerico_join_room(text,text,text) to authenticated;
 grant execute on function public.jerico_start_room(uuid) to authenticated;
