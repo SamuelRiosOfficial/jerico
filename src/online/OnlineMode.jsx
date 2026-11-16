@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { resolveAnswer, selectQuestionForTurn } from '../gameEngine.js';
+import { getAvailableCharacters, getFirstAvailableCharacter } from './characterSelection.js';
 import {
   createRoom, createRoomCode, ensureAnonymousSession, fetchRoom, isOnlineConfigured,
   joinRoom, leaveRoom, startRoom, subscribeToRoom, updateGameState, getRoomOccupiedCharacters
@@ -129,7 +130,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
   const occupiedCharacters = page === 'join'
     ? roomOccupiedCharacters
     : players.filter(p => p.user_id !== userId).map(p => p.character_id);
-  const availableCharacters = characters.filter(c => !occupiedCharacters.includes(c.id));
+  const availableCharacters = getAvailableCharacters(characters, occupiedCharacters);
 
   useEffect(() => {
     if (page !== 'join' || code.length !== 8 || !userId) {
@@ -148,7 +149,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
           setRoomOccupiedCharacters(occupied);
           setRoomLookupFailed(false);
           setCharacterId(current => occupied.includes(current)
-            ? (characters.find(character => !occupied.includes(character.id))?.id || '')
+            ? getFirstAvailableCharacter(characters, occupied)
             : current);
         }
       } catch {
