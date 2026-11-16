@@ -23,3 +23,15 @@ test('online character picker hides characters already selected in the room', ()
   assert.equal(getFirstAvailableCharacter(characters, ['warrior']), 'soldier');
   assert.equal(getFirstAvailableCharacter(characters, ['warrior','soldier','trumpeter','woman']), '');
 });
+
+
+test('online character sprite rows stay inside the selected character frame', async () => {
+  const { getCharacterSpriteRow, getCharacterSpritePosition } = await import('../src/online/characterSelection.js');
+  assert.equal(getCharacterSpriteRow('warrior'), 0);
+  assert.equal(getCharacterSpriteRow('soldier'), 1);
+  assert.equal(getCharacterSpriteRow('trumpeter'), 2);
+  assert.equal(getCharacterSpriteRow('woman'), 3);
+  assert.equal(getCharacterSpritePosition('trumpeter'), (2 * 100) / 3);
+  assert.equal(getCharacterSpritePosition('woman'), 100);
+  assert.equal(getCharacterSpriteRow('unknown'), 0);
+});
