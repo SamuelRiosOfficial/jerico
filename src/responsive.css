@@ -854,3 +854,47 @@
 @media (max-width: 560px) {
   .journey-map-dock { display: none; }
 }
+
+
+/* JERICO visit counter — lower corner of the main menu. */
+.screen-menu .visit-counter {
+  position: absolute;
+  z-index: 4;
+  right: 18px;
+  bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid #c9964d;
+  border-radius: 999px;
+  background: #211824e8;
+  color: #ffe4ad;
+  box-shadow: 0 3px 12px #120c1688;
+  font-size: 10px;
+  letter-spacing: .3px;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.screen-menu .visit-counter > span:first-child {
+  color: #e9b65f;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .screen-menu .visit-counter {
+    right: 12px;
+    bottom: max(42px, calc(env(safe-area-inset-bottom) + 40px));
+    padding: 6px 9px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 380px) {
+  .screen-menu .visit-counter {
+    right: 8px;
+    font-size: 8px;
+  }
+}
