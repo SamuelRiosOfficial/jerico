@@ -3,6 +3,14 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const nativeBuild = process.env.JERICO_NATIVE_BUILD === '1';
+const mobileAssetPathPlugin = {
+  name: 'jerico-mobile-asset-paths',
+  enforce: 'pre',
+  transform(source, id) {
+    if (process.env.JERICO_MOBILE_BUILD !== '1' || !id.endsWith('.css')) return null;
+    return source.replaceAll('/jerico/assets/', '/assets/');
+  }
+};
 
 const pwaPlugin = VitePWA({
   registerType: 'autoUpdate',
@@ -12,10 +20,10 @@ const pwaPlugin = VitePWA({
     name: 'JERICO — Camino a Jericó',
     short_name: 'JERICO',
     description: 'Un juego bíblico para aprender jugando.',
+    lang: 'es',
     theme_color: '#24152d',
     background_color: '#24152d',
     display: 'standalone',
-    orientation: 'portrait',
     start_url: './',
     scope: './',
     icons: [
@@ -32,6 +40,6 @@ const pwaPlugin = VitePWA({
 });
 
 export default defineConfig({
-  plugins: [react(), ...(nativeBuild ? [] : [pwaPlugin])],
+  plugins: [mobileAssetPathPlugin, react(), ...(nativeBuild ? [] : [pwaPlugin])],
   base: '/jerico/'
 });
