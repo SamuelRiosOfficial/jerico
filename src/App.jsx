@@ -507,6 +507,9 @@ function App() {
           <h2>{t.instructionsTitle}</h2>
           <p>{t.instructionsIntro}</p>
           <ol>{t.instructionsRules.map((rule, index) => <li key={index}>{rule}</li>)}</ol>
+          <h3>{t.onlineInstructionsTitle}</h3>
+          <p>{t.onlineInstructionsIntro}</p>
+          <ol>{t.onlineInstructionsRules.map((rule, index) => <li key={index}>{rule}</li>)}</ol>
           <button className="primary" type="button" onClick={() => setScreen('menu')}>{t.back}</button>
         </section>
       )}
