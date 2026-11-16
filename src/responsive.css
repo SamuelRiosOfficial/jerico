@@ -227,3 +227,545 @@
     max-width: 390px;
   }
 }
+
+
+/* Global text-fit and contrast audit — responsive across desktop, tablet and phones. */
+:root {
+  --jerico-ink: #24170d;
+  --jerico-paper: #fff0c7;
+  --jerico-paper-ink: #38251d;
+  --jerico-dark: #241b29;
+  --jerico-light-text: #fff0c7;
+}
+
+.game-shell,
+.game-shell * {
+  min-width: 0;
+}
+
+.game-shell :where(h1,h2,h3,h4,p,li,label,b,strong,small,span) {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.game-shell :where(h1,h2,h3,h4) {
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.game-shell :where(p,li,label,small) {
+  line-height: 1.55;
+}
+
+.game-shell :where(button,.primary,.secondary,.text-button,.answer,.difficulty button,.settings-links button) {
+  box-sizing: border-box;
+  height: auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.game-shell :where(.panel,.board,.map-screen,.collapse-screen,.victory-screen,.feedback-card,.online-panel,.online-playfield) {
+  min-width: 0;
+}
+
+.game-shell :where(.parchment,.question-panel,.settings-modal,.online-panel,.online-playfield,.online-warning,.online-invite,.online-wait) {
+  color: var(--jerico-paper-ink);
+}
+
+.game-shell :where(.parchment,.question-panel,.settings-modal,.online-panel,.online-playfield,.online-warning,.online-invite,.online-wait) :where(h1,h2,h3,h4,p,li,label,b,strong,small) {
+  color: inherit;
+}
+
+.game-shell :where(.parchment,.question-panel,.settings-modal,.online-panel,.online-playfield,.online-warning,.online-invite,.online-wait) :where(.eyebrow,.hint,.small,.reference,.scripture-ref) {
+  color: #624326;
+}
+
+.game-shell :where(.board,.feedback-card,.victory-overlay,.invite,.journey-map-dock,.advance-screen) {
+  color: var(--jerico-light-text);
+}
+
+.game-shell :where(.board,.feedback-card,.victory-overlay,.invite,.advance-screen) :where(h1,h2,h3,h4,p,li,b,strong,small) {
+  color: inherit;
+}
+
+.game-shell :where(.primary,.secondary,.count,.carousel-arrow,.settings-links button,.answer,.difficulty button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.game-shell :where(.primary,.secondary,.count,.carousel-arrow,.settings-links button,.answer,.difficulty button) > :where(span,b,small) {
+  min-width: 0;
+}
+
+.hero-content > :where(.primary,.secondary) {
+  justify-self: stretch;
+}
+
+.track-player b {
+  max-width: min(24vw, 150px);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.progress-details,
+.journey-map-player-info,
+.advance-active-player > div {
+  min-width: 0;
+}
+
+.progress-details b,
+.progress-card small,
+.advance-roster span,
+.advance-active-player b,
+.advance-active-player small {
+  display: block;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.scene-labels {
+  align-items: flex-start;
+}
+
+.scene-labels span {
+  min-width: 0;
+  max-width: 19%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.journey-map-marker b {
+  max-width: clamp(62px, 11vw, 124px);
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+
+.journey-map-dock-heading {
+  flex-wrap: wrap;
+  align-items: center;
+  line-height: 1.45;
+}
+
+.journey-map-dock-heading span,
+.journey-map-player-info b,
+.journey-map-player-info small {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.journey-map-player-card {
+  min-width: 0;
+  height: auto;
+  min-height: 48px;
+}
+
+.journey-map-footer :where(p,small) {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.advance-heading {
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  line-height: 1.5;
+}
+
+.advance-heading > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.advance-actor :where(b,small) {
+  max-width: min(30vw, 180px);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.advance-step-counter {
+  min-width: 120px;
+  max-width: min(42vw, 240px);
+}
+
+.advance-footer,
+.advance-roster,
+.advance-active-player {
+  min-width: 0;
+}
+
+.instruction-panel > ol {
+  max-width: 62ch;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+
+.instruction-panel > ol li {
+  padding-inline: 4px;
+  margin-block: 8px;
+  overflow-wrap: anywhere;
+}
+
+.settings-links button {
+  min-height: 46px;
+}
+
+.modal-backdrop {
+  overflow-y: auto;
+}
+
+.settings-modal {
+  width: min(460px, 100%);
+  max-height: min(85svh, 760px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .game-shell {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+
+  .game-shell :where(.panel,.board,.collapse-screen) {
+    padding-inline: clamp(12px, 4vw, 22px);
+  }
+
+  .parchment h2,
+  .question-panel h2,
+  .collapse-screen h2,
+  .victory-screen h1,
+  .victory-screen h2 {
+    font-size: clamp(19px, 5.2vw, 28px);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .board-head {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .board-head > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .board-head .eyebrow {
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+
+  .board-head p:not(.eyebrow) {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .scene-track {
+    min-height: 260px;
+    height: clamp(260px, 72vw, 360px);
+  }
+
+  .scene-labels {
+    left: 6px;
+    right: 6px;
+    gap: 4px;
+  }
+
+  .scene-labels span {
+    max-width: 20%;
+    padding: 4px 3px;
+    font-size: clamp(7px, 2vw, 9px);
+  }
+
+  .track-player b {
+    max-width: 28vw;
+    font-size: 9px;
+  }
+
+  .difficulty {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .difficulty button {
+    min-width: 0;
+    padding: 12px 5px;
+    font-size: clamp(10px, 2.7vw, 13px);
+  }
+
+  .difficulty button small {
+    font-size: clamp(9px, 2.4vw, 11px);
+    overflow-wrap: anywhere;
+  }
+
+  .answers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .answer {
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+    min-height: 58px;
+    padding: 12px;
+    line-height: 1.5;
+  }
+
+  .question-actions {
+    flex-wrap: wrap;
+  }
+
+  .question-actions > * {
+    min-width: 0;
+  }
+
+  .character-stage {
+    flex-wrap: wrap;
+  }
+
+  .character-preview {
+    min-width: 0;
+    flex: 1 1 150px;
+  }
+
+  .character-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .selected-players {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .map-screen {
+    padding: 16px 8px;
+  }
+
+  .journey-map-artboard {
+    aspect-ratio: 4 / 5;
+  }
+
+  .journey-map-dock {
+    left: 2%;
+    right: 2%;
+    bottom: 1.5%;
+    height: 29%;
+    padding: 7px 6px;
+    gap: 5px;
+  }
+
+  .journey-map-dock-heading {
+    font-size: clamp(7px, 2vw, 9px);
+  }
+
+  .journey-map-dock-heading span {
+    font-size: clamp(9px, 2.5vw, 12px);
+  }
+
+  .journey-map-player-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .journey-map-player-card {
+    min-height: 42px;
+    padding: 4px 5px;
+    gap: 4px;
+  }
+
+  .journey-map-player-info b {
+    font-size: clamp(9px, 2.5vw, 11px);
+  }
+
+  .journey-map-player-info small {
+    font-size: clamp(7px, 2vw, 9px);
+  }
+
+  .journey-map-marker b {
+    max-width: clamp(54px, 17vw, 78px);
+    font-size: clamp(5px, 1.5vw, 7px);
+  }
+
+  .advance-heading {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .advance-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .advance-active-player {
+    justify-content: center;
+  }
+
+  .advance-roster {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .advance-roster > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .advance-actor :where(b,small) {
+    max-width: 26vw;
+    font-size: clamp(7px, 2vw, 10px);
+  }
+
+  .instruction-panel {
+    padding-bottom: clamp(190px, 55vw, 245px) !important;
+  }
+
+  .instruction-panel:before {
+    width: clamp(90px, 26vw, 120px) !important;
+    height: clamp(170px, 48vw, 230px) !important;
+  }
+
+  .victory-overlay {
+    width: min(100% - 16px, 690px);
+    padding: clamp(16px, 4vw, 26px);
+  }
+
+  .invite {
+    max-width: 100%;
+    padding: 14px;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 420px) {
+  .board-head .eyebrow {
+    font-size: 8px;
+  }
+
+  .scene-labels span {
+    font-size: 6px;
+    padding: 3px 2px;
+  }
+
+  .progress-card {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .map-stop b,
+  .map-stop small {
+    font-size: clamp(9px, 2.8vw, 11px);
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .advance-step-counter {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 761px) {
+  .game-shell :where(.panel,.board,.collapse-screen) {
+    padding-inline: clamp(22px, 3vw, 44px);
+  }
+
+  .hero-content > :where(.primary,.secondary) {
+    justify-self: start;
+  }
+
+  .scene-labels span {
+    font-size: clamp(8px, .85vw, 12px);
+  }
+}
+
+
+/* Character selection: reserve a dedicated sprite zone above each name.
+   Prevent the sprite's transparent canvas/margins from colliding with its label. */
+.character-panel .character-roster .roster-item {
+  box-sizing: border-box;
+  min-height: 154px;
+  height: auto;
+  padding: 9px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.character-panel .character-roster .roster-item .character-select-sprite {
+  display: block;
+  flex: 0 0 92px;
+  width: 60px !important;
+  height: 110px !important;
+  margin: -4px 0 0 !important;
+  transform: translateY(-5px) scale(.72) !important;
+  transform-origin: center bottom !important;
+  overflow: hidden;
+}
+
+.character-panel .character-roster .roster-item > b {
+  position: relative;
+  z-index: 2;
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 25px;
+  margin: 0;
+  padding: 3px 2px 0;
+  background: #ffedb4;
+  color: #24170d;
+  font-size: clamp(10px, 1.1vw, 13px);
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.character-panel .character-roster .roster-item > small {
+  position: relative;
+  z-index: 2;
+  display: block;
+  line-height: 1.3;
+  background: #ffedb4;
+}
+
+@media (max-width: 760px) {
+  .character-panel .character-roster .roster-item {
+    min-height: 158px;
+    padding: 8px 5px 9px;
+    gap: 3px;
+  }
+
+  .character-panel .character-roster .roster-item .character-select-sprite {
+    flex-basis: 94px;
+    transform: translateY(-7px) scale(.72) !important;
+  }
+
+  .character-panel .character-roster .roster-item > b {
+    min-height: 27px;
+    font-size: clamp(10px, 3vw, 12px);
+  }
+}
+
+@media (min-width: 761px) {
+  .character-panel .character-roster .roster-item {
+    min-height: 160px;
+  }
+}
