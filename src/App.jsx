@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TEXT } from './gameLocales.js';
 import OnlineMode from './online/OnlineMode.jsx';
 import './style.css';
+import './responsive.css';
 import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep, nextAvailableCharacter, getJourneyMapPosition } from './gameEngine.js';
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
@@ -480,10 +481,10 @@ function App() {
             <h1>JERICO</h1>
             <p className="hero-sub">{t.heroSubtitle}</p>
             <div className="gold-line" />
-            <button className="primary" type="button" onClick={startSetup}>{t.start} <span>▶</span></button>
-            <button className="secondary online-menu-button" type="button" onClick={() => setScreen('online')}>Jugar en línea <span>🌐</span></button>
-            <button className="secondary" type="button" onClick={() => setScreen('instructions')}>{t.how}</button>
-            <button className="secondary" type="button" onClick={openSettings}>{t.settings}</button>
+            <button className="primary menu-start-button" type="button" onClick={startSetup}>{t.start} <span>▶</span></button>
+            <button className="secondary online-menu-button menu-online-button" type="button" onClick={() => setScreen('online')}>Jugar en línea <span>🌐</span></button>
+            <button className="secondary menu-instructions-button" type="button" onClick={() => setScreen('instructions')}>{t.how}</button>
+            <button className="secondary menu-settings-button" type="button" onClick={openSettings}>{t.settings}</button>
             {!isBankReady && <p className="menu-status">{bankError === 'load' ? t.bankError : t.bankLoading}</p>}
           </div>
           <div className="menu-party" aria-hidden="true">{localizedCharacters.map((character) => <Sprite key={character.id} character={character} />)}</div>
