@@ -281,7 +281,15 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
       players:nextPlayers,
       question:null,
       winner,
-      feedback:{ correct, steps:correct ? question.steps : 0, playerName:activePlayer.name }
+      feedback:{
+        correct,
+        steps:correct ? question.steps : 0,
+        playerName:activePlayer.name,
+        playerId:activePlayer.id,
+        fromSteps:activePlayer.steps,
+        toSteps:outcome.steps,
+        animationId:(room.revision + 1) + '-' + gameState.turn + '-' + question.id
+      }
     });
   };
 
