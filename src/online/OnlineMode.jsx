@@ -161,7 +161,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
       }
     }, 250);
     return () => { active = false; window.clearTimeout(timer); };
-  }, [page, code, userId, characters]);
+  }, [page, code, userId]);
 
   const refreshRoom = useCallback(async () => {
     if (!roomId) return;
@@ -217,7 +217,13 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
       setUserId(result.userId);
       const data = await fetchRoom(result.roomId);
       setRoom(data.room); setPlayers(data.players); setPage('lobby');
-    } catch (err) { setError(err.message || t.unavailable); }
+    } catch (err) {
+      const message = err.message || '';
+      setError(/character already taken/i.test(message) ? t.occupied : message || t.unavailable);
+      if (/character already taken/i.test(message)) {
+        try { setRoomOccupiedCharacters(await getRoomOccupiedCharacters(code)); } catch { /* Keep the last availability snapshot. */ }
+      }
+    }
     finally { setBusy(false); }
   };
 
