@@ -802,10 +802,11 @@ function App() {
           <div className="victory-overlay">
             <div className="victory-crown">♛</div>
             <p className="eyebrow">{t.victoryEyebrow}</p>
-            <h1>{t.win}</h1>
+            <h1 className="victory-title">{t.win}</h1>
             <h2>{winner?.name}</h2>
             <p className="winner-copy">{t.conquered}</p>
             <div className="invite"><b>{t.thank}</b><p>{t.bible}</p></div>
+            <a className="primary victory-learn-more" href="https://hopemedia.umch.org.mx/">Aprender más de la Biblia</a>
             <button className="primary" type="button" onClick={resetGame}>{t.return}</button>
           </div>
         </section>
