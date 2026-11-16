@@ -86,14 +86,29 @@ function Sprite({ character, walking = false, className = '' }) {
   return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -frameStepX}px`, '--sprite-y': `${character.row * -frameStepY}px`, '--sprite-image': `url("${ASSET(spriteAsset)}")` }} aria-label={character.name} />;
 }
 
+const JOURNEY_MAP_CHARACTER_ROWS = Object.freeze({
+  warrior: 0,
+  soldier: 1,
+  trumpeter: 2,
+  woman: 3
+});
+
 function JourneyMapCharacter({ character, variant = 'marker' }) {
+  const row = JOURNEY_MAP_CHARACTER_ROWS[character.id] ?? 0;
   return (
-    <img
+    <span
       className={`journey-map-character journey-map-character-${variant}`}
-      src={ASSET(`character-${character.id}.svg`)}
-      alt=""
-      draggable="false"
-    />
+      role="img"
+      aria-label={character.name}
+    >
+      <img
+        src={ASSET('characters-sprites.webp')}
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+        style={{ top: `${row * -100}%` }}
+      />
+    </span>
   );
 }
 

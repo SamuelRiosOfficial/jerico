@@ -37,21 +37,21 @@ test('el mapa final está autocontenido e incluye la imagen raster incrustada', 
 });
 
 
-test('los personajes del mapa usan recortes independientes de la primera columna del atlas', () => {
-  const rows = { warrior: 0, soldier: 1, trumpeter: 2, woman: 3 };
-  for (const [character, row] of Object.entries(rows)) {
-    const svg = readFileSync(new URL(`../public/assets/character-${character}.svg`, import.meta.url), 'utf8');
-    assert.match(svg, new RegExp(`viewBox="0 ${row * 110} 60 110"`), `Recorte incorrecto para ${character}`);
-    assert.match(svg, /href="characters-sprites\.webp"/, `El recorte de ${character} debe usar el atlas original`);
-    assert.match(svg, /<image[^>]+width="180"[^>]+height="440"/, `Dimensiones del atlas incorrectas para ${character}`);
+test('los personajes del mapa se recortan desde el atlas mediante una imagen HTML visible', () => {
+  const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  const expectedRows = { warrior: 0, soldier: 1, trumpeter: 2, woman: 3 };
+  for (const [character, row] of Object.entries(expectedRows)) {
+    assert.match(app, new RegExp(`${character}: ${row}`), `Fila incorrecta para ${character}`);
   }
 
-  const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(app, /ASSET\('characters-sprites\.webp'\)/);
+  assert.match(app, /top: \`\$\{row \* -100\}%\`/);
   assert.match(app, /<JourneyMapCharacter character=\{player\.character\} \/>/);
   assert.match(app, /<JourneyMapCharacter character=\{player\.character\} variant="dock" \/>/);
 
   const css = readFileSync(new URL('../src/style.css', import.meta.url), 'utf8');
-  assert.match(css, /\.journey-map-marker>\.journey-map-character-marker/);
-  assert.match(css, /object-fit:contain/);
-  assert.doesNotMatch(css, /\.journey-map-marker \.sprite\s*\{/);
+  assert.match(css, /\.journey-map-character\s*\{[^}]*overflow:hidden/s);
+  assert.match(css, /\.journey-map-character>img\s*\{[^}]*width:300%;height:400%/s);
+  assert.match(css, /aspect-ratio:6\/11/);
+  assert.doesNotMatch(app, /character-\$\{character\.id\}\.svg/);
 });
