@@ -1056,21 +1056,3 @@
     min-height: 42px;
   }
 }
-
-
-/* Keep the victory greeting on one line at every screen width. */
-.victory-screen h1.victory-title {
-  white-space: nowrap;
-  overflow-wrap: normal;
-  word-break: keep-all;
-  font-size: clamp(16px, 4.2vw, 42px);
-  line-height: 1.2;
-}
-
-.victory-screen .victory-learn-more {
-  display: block;
-  max-width: 340px;
-  margin: 12px auto;
-  text-align: center;
-  text-decoration: none;
-}

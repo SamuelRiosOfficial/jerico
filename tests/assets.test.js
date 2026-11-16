@@ -51,14 +51,3 @@ test('los personajes del mapa se recortan desde el atlas mediante una imagen HTM
   assert.match(css, /aspect-ratio:6\/11/);
   assert.doesNotMatch(app, /character-\$\{character\.id\}\.svg/);
 });
-
-
-test('la pantalla de victoria mantiene el saludo en una fila y enlaza a Hope Media', () => {
-  const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
-  assert.match(app, /<h1 className="victory-title">\{t\.win\}<\/h1>/);
-  assert.match(app, /<a className="primary victory-learn-more" href="https:\/\/hopemedia\.umch\.org\.mx\/">Aprender más de la Biblia<\/a>/);
-
-  const responsive = readFileSync(new URL('../src/responsive.css', import.meta.url), 'utf8');
-  assert.match(responsive, /\.victory-screen h1\.victory-title\s*\{[^}]*white-space:\s*nowrap/s);
-  assert.match(responsive, /\.victory-screen \.victory-learn-more\s*\{/);
-});
