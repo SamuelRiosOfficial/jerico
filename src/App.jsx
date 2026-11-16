@@ -597,91 +597,14 @@ function App() {
       {(screen === 'map' || screen === 'routeMap') && (
         <section className={`map-screen ${screen === 'routeMap' ? 'map-progress-screen' : 'map-intro-screen'}`}>
           <div className="journey-map-artboard">
-            <svg className="journey-map-illustration" viewBox="0 0 1600 900" role="img" aria-label={t.mapAria}>
-              <defs>
-                <linearGradient id="mapPaper" x2="0" y2="1"><stop stopColor="#f7d28b"/><stop offset="1" stopColor="#e6a94f"/></linearGradient>
-                <linearGradient id="mapSky" x2="0" y2="1"><stop stopColor="#84bce9"/><stop offset="1" stopColor="#f6d18d"/></linearGradient>
-                <linearGradient id="mapSea" x2="0" y2="1"><stop stopColor="#22a8ea"/><stop offset="1" stopColor="#0755a8"/></linearGradient>
-                <linearGradient id="mapStone" x2="0" y2="1"><stop stopColor="#f7c368"/><stop offset="1" stopColor="#a85b28"/></linearGradient>
-                <pattern id="mapPixels" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 0h2v2H0zM9 9h2v2H9z" fill="#8d531f" opacity=".12"/></pattern>
-                <filter id="mapShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="7" dy="9" stdDeviation="3" floodColor="#56300f" floodOpacity=".55"/></filter>
-              </defs>
-              <rect width="1600" height="900" fill="url(#mapPaper)"/>
-              <rect x="18" y="18" width="1564" height="864" rx="24" fill="none" stroke="#7c451b" strokeWidth="13"/>
-              <rect x="32" y="32" width="1536" height="836" rx="18" fill="url(#mapSky)"/>
-              <path d="M35 300L170 180l92 78 136-140 125 118 115-72 110 114 126-112 115 82 109-126 129 122 142-112 134 130 70-50V650H35Z" fill="#bb8a69"/>
-              <path d="M35 330l141-146 64 80 159-154 125 132 128-75 112 94 116-126 117 95 114-130 142 120 118-78 125 121 54-42V650H35Z" fill="#8c7ca0" opacity=".78"/>
-              <path d="M40 426q160-90 300-32t260-14 280 18 290-20 390 15v430H40Z" fill="#e8b965"/>
-              <path d="M40 540q180-112 332-44t281-21 280 30 284-35 343 28v320H40Z" fill="#e7a84e"/>
-              <rect x="32" y="32" width="1536" height="836" fill="url(#mapPixels)"/>
-              <path d="M350 384q-42 45 4 80t-22 76 62 75" fill="none" stroke="url(#mapSea)" strokeWidth="72" strokeLinecap="round"/>
-              <path d="M335 394q-26 38 16 66t-15 69 38 58" fill="none" stroke="#7de1ff" strokeWidth="12" strokeDasharray="27 17" opacity=".8"/>
-              <path d="M1094 358q-71 50-24 104t-14 95 55 75 4 104" fill="none" stroke="url(#mapSea)" strokeWidth="62" strokeLinecap="round"/>
-              <path d="M1087 363q-48 47-9 92t-11 100 41 74 1 90" fill="none" stroke="#8ce6ff" strokeWidth="10" strokeDasharray="24 15"/>
-              <g filter="url(#mapShadow)">
-                <path d="M75 418h225v120H75z" fill="url(#mapStone)" stroke="#5e351b" strokeWidth="9"/>
-                <path d="M83 419l75-122 74 122Z" fill="#e7a43e" stroke="#70421e" strokeWidth="8"/>
-                <path d="M175 419l87-155 90 155Z" fill="#f4bc51" stroke="#70421e" strokeWidth="8"/>
-                <path d="M98 448h180v24H98zM98 490h180v24H98z" fill="#b86c31"/>
-                <path d="M132 456h26v82h-26zM207 456h26v82h-26z" fill="#714022"/>
-                <path d="M278 475h60v63h-60z" fill="#9b5328" stroke="#583019" strokeWidth="7"/>
-              </g>
-              <g fill="#397947" stroke="#244c2e" strokeWidth="5">
-                <path d="M85 357q-40-48-14-77 27 5 26 42 8-43 43-48 18 36-15 69 45-22 59 5-20 35-71 22-24 25-42-13z"/>
-                <path d="M310 356q-28-46-3-72 30 9 25 45 11-39 43-37 12 39-23 65 44-14 52 17-29 27-68 10-27 19-38-28z"/>
-                <path d="M1234 339q-31-47-3-75 30 8 25 47 14-40 48-36 9 40-26 63 47-12 51 18-30 25-70 7-24 20-25-24z"/>
-                <path d="M1490 388q-33-48-5-74 31 8 26 45 12-37 44-35 10 39-25 62 43-13 52 16-31 27-70 10-24 20-22-24z"/>
-              </g>
-              <g fill="#e7ad60" stroke="#75411c" strokeWidth="9" filter="url(#mapShadow)">
-                <path d="M650 460l94-190 105 190Z"/>
-                <path d="M780 456l113-240 126 240Z"/>
-                <path d="M890 463l75-170 98 170Z"/>
-              </g>
-              <g fill="#c7ad97" stroke="#775b54" strokeWidth="5">
-                <path d="M648 273l96-18-94 205z"/><path d="M781 218l113-21-116 255z"/><path d="M889 297l76-14-82 182z"/>
-              </g>
-              <g fill="#fff4cf" stroke="#5d3518" strokeWidth="7" filter="url(#mapShadow)">
-                <path d="M780 116h42v105h-42zM830 116h42v105h-42z"/>
-                <path d="M760 113l41-38 41 38M810 113l41-38 41 38"/>
-                <path d="M758 109h94v10h-94z"/>
-              </g>
-              <g fill="#eab75f" stroke="#6f3c18" strokeWidth="8" filter="url(#mapShadow)">
-                <rect x="1265" y="272" width="260" height="176" rx="4"/>
-                <rect x="1245" y="325" width="50" height="123"/><rect x="1495" y="325" width="50" height="123"/>
-                <rect x="1283" y="228" width="57" height="90"/><rect x="1356" y="195" width="72" height="123"/><rect x="1440" y="226" width="59" height="92"/>
-                <path d="M1361 448v-83q38-56 80 0v83z" fill="#663719"/>
-                <path d="M1397 196v-65M1355 228v-54M1471 227v-54" fill="none"/>
-                <path d="M1382 157l29 6-29 22zM1341 181l29 6-29 22zM1457 180l29 6-29 22z" fill="#b53021"/>
-              </g>
-              <g fill="none" stroke="#6b341a" strokeWidth="21" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M178 522Q298 458 402 520T603 510Q713 452 835 490T1054 471Q1175 420 1272 392"/>
-              </g>
-              <g fill="none" stroke="#fff0b8" strokeWidth="10" strokeDasharray="12 25" strokeLinecap="round">
-                <path d="M178 522Q298 458 402 520T603 510Q713 452 835 490T1054 471Q1175 420 1272 392"/>
-              </g>
-              <g fill="#ffdc35" stroke="#613619" strokeWidth="7">
-                <circle cx="288" cy="486" r="18"/><circle cx="402" cy="520" r="18"/><circle cx="603" cy="510" r="18"/>
-                <circle cx="835" cy="490" r="18"/><circle cx="1054" cy="471" r="18"/><circle cx="1175" cy="420" r="18"/>
-              </g>
-              <g fontFamily="Georgia,serif" fontWeight="bold" fill="#49270f" textAnchor="middle" filter="url(#mapShadow)">
-                <text x="180" y="597" fontSize="43">{t.scenes[0].name}</text>
-                <text x="405" y="585" fontSize="36">{t.scenes[1].name}</text>
-                <text x="740" y="589" fontSize="36">{language === 'English' ? 'Sinai Desert' : language === 'Português' ? 'Deserto do Sinai' : 'Desierto del Sinaí'}</text>
-                <text x="1125" y="567" fontSize="35">{t.scenes[3].name}</text>
-                <text x="1388" y="510" fontSize="44">{t.scenes[4].name}</text>
-              </g>
-              <g fill="#ffdc39" stroke="#673619" strokeWidth="8" filter="url(#mapShadow)">
-                <path d="M110 680h360l-28 42H138z"/><path d="M600 680h400l-25 42H625z"/><path d="M1100 680h380l-28 42h-324z"/>
-              </g>
-              <text x="800" y="823" textAnchor="middle" fontFamily="Georgia,serif" fontWeight="bold" fontSize="41" fill="#633b18">{language === 'English' ? 'THE JOURNEY OF GOD’S PEOPLE · FROM EGYPT TO JERICHO' : language === 'Português' ? 'A JORNADA DO POVO DE DEUS · DO EGITO A JERICÓ' : 'EL VIAJE DEL PUEBLO DE DIOS · DE EGIPTO A JERICÓ'}</text>
-            </svg>
+            <img className="journey-map-illustration" src={ASSET('journey-map.svg')} alt={t.mapAria} draggable="false" />
             <div className="journey-map-markers" aria-label={t.positionAria}>
               {players.map((player, index) => {
                 const position = getJourneyMapPosition(player.steps);
-                const spread = (index - (players.length - 1) / 2) * 2;
+                const spread = (index - (players.length - 1) / 2) * 1.5;
                 return (
                   <div className="journey-map-marker" key={player.id}
-                    style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y + (index % 2 ? 1.8 : 0)))}%` }}
+                    style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y + (index % 2 ? 1.0 : 0)))}%` }}
                     title={`${player.name}: ${player.steps}/30 ${t.stepsUnit}`}>
                     <b>{player.name}</b>
                     <Sprite character={player.character} />

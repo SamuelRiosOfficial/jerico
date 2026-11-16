@@ -80,14 +80,22 @@ test('el selector de personajes salta los que ya eligieron otros jugadores', asy
 });
 
 
-test('la posición del jugador sigue la ruta ilustrada de Egipto a Jericó', () => {
-  assert.deepEqual(getJourneyMapPosition(0), { x: 10.8, y: 50.2 });
-  assert.deepEqual(getJourneyMapPosition(30), { x: 85, y: 35.2 });
-  const first = getJourneyMapPosition(5);
-  const second = getJourneyMapPosition(6);
-  const third = getJourneyMapPosition(12);
-  assert.ok(second.x > first.x);
-  assert.ok(third.x > second.x);
+test('la posición del jugador sigue la curva SVG final de Egipto a Jericó', () => {
+  const boundaries = [
+    [0, { x: 11.13, y: 58.12 }],
+    [6, { x: 25.12, y: 57.89 }],
+    [12, { x: 37.69, y: 56.79 }],
+    [18, { x: 52.19, y: 54.57 }],
+    [24, { x: 65.88, y: 52.47 }],
+    [30, { x: 79.5, y: 43.71 }]
+  ];
+  for (const [steps, expected] of boundaries) {
+    assert.deepEqual(getJourneyMapPosition(steps), expected);
+  }
+  const curveMidpoint = getJourneyMapPosition(3);
+  assert.ok(curveMidpoint.x > boundaries[0][1].x);
+  assert.ok(curveMidpoint.x < boundaries[1][1].x);
+  assert.ok(curveMidpoint.y < boundaries[0][1].y);
   assert.deepEqual(getJourneyMapPosition(-10), getJourneyMapPosition(0));
   assert.deepEqual(getJourneyMapPosition(100), getJourneyMapPosition(30));
 });

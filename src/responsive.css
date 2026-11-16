@@ -769,3 +769,88 @@
     min-height: 160px;
   }
 }
+
+
+/* Final JERICO map: preserve the uploaded SVG viewBox and keep the live roster in the blank lower-right panel. */
+.journey-map-artboard {
+  aspect-ratio: 1600 / 902.5;
+}
+.journey-map-illustration {
+  object-fit: fill;
+  display: block;
+  pointer-events: none;
+}
+.journey-map-dock {
+  left: 68%;
+  right: 1.8%;
+  bottom: 3%;
+  height: 20.5%;
+  padding: 6px 8px 5px;
+  gap: 4px;
+}
+.journey-map-dock-heading {
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+.journey-map-player-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+.journey-map-player-card {
+  height: 54px;
+  padding: 3px 5px;
+  gap: 4px;
+}
+
+@media (max-width: 760px) {
+  .journey-map-artboard {
+    aspect-ratio: 1600 / 902.5;
+  }
+  .journey-map-dock {
+    left: 68%;
+    right: 1.8%;
+    bottom: 3%;
+    height: 20.5%;
+    padding: 3px 4px;
+    gap: 2px;
+    border-width: 2px;
+  }
+  .journey-map-dock-heading {
+    font-size: clamp(4px, 1vw, 7px);
+  }
+  .journey-map-dock-heading span {
+    font-size: clamp(5px, 1vw, 7px);
+  }
+  .journey-map-player-list {
+    gap: 2px;
+  }
+  .journey-map-player-card {
+    height: clamp(16px, 3.5vw, 27px);
+    min-height: 0;
+    padding: 1px 2px;
+    gap: 1px;
+    border-width: 1px;
+  }
+  .journey-map-player-card > .sprite {
+    flex-basis: 12px;
+    transform: scale(.16);
+    margin: -62px -44px;
+  }
+  .journey-map-player-info b {
+    font-size: clamp(4px, .9vw, 6px);
+  }
+  .journey-map-player-info small {
+    font-size: clamp(3px, .7vw, 5px);
+  }
+  .journey-map-player-info .meter {
+    height: 2px;
+    margin-top: 1px;
+  }
+}
+
+@media (max-width: 560px) {
+  .journey-map-dock { display: none; }
+}

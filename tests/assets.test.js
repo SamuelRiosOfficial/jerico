@@ -23,3 +23,11 @@ test('todos los recursos gráficos llamados por la interfaz están en public/ass
     assert.equal(existsSync(new URL(`../public/assets/${file}`, import.meta.url)), true, `Falta el recurso ${file}`);
   }
 });
+
+
+test('el mapa final está autocontenido e incluye la imagen raster incrustada', () => {
+  const map = readFileSync(new URL('../public/assets/journey-map.svg', import.meta.url), 'utf8');
+  assert.match(map, /viewBox="0 0 1600 902\.5"/);
+  assert.match(map, /<image[\s\S]*data:image\/png;base64,/);
+  assert.match(map, /id="editable-stage-labels"/);
+});
