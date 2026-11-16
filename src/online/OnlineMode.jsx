@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { QRCodeSVG } from 'qrcode.react';
 import { resolveAnswer, selectQuestionForTurn } from '../gameEngine.js';
 import { getAvailableCharacters, getFirstAvailableCharacter } from './characterSelection.js';
@@ -121,7 +122,9 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
   const question = gameState?.question || null;
   const joinUrl = useMemo(() => {
     if (!room?.code) return '';
-    const url = new URL(window.location.href);
+    const url = Capacitor.isNativePlatform()
+      ? new URL('https://samuelriosofficial.github.io/jerico/')
+      : new URL(window.location.href);
     url.search = '';
     url.hash = '';
     url.searchParams.set('room', room.code);
