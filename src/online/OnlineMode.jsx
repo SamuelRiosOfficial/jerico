@@ -11,7 +11,7 @@ import './online.css';
 const TEXTS = {
   es: {
     title:'Jugar en línea', subtitle:'Conecta hasta cuatro dispositivos a una misma partida.',
-    create:'Crear partida', join:'Unirme a una partida', back:'Volver al menú', backStep:'Atrás',
+    create:'Crear partida', join:'Unirme a una partida', back:'Volver al menú',
     name:'Tu nombre', character:'Elige tu personaje', code:'Código de partida',
     createRoom:'Crear sala', joinRoom:'Entrar a la sala', lobby:'Sala de espera',
     waiting:'Comparte el QR o el enlace para que se unan los demás jugadores.',
@@ -32,7 +32,7 @@ const TEXTS = {
   },
   en: {
     title:'Play online', subtitle:'Connect up to four devices to the same game.',
-    create:'Create game', join:'Join a game', back:'Back to menu', backStep:'Back',
+    create:'Create game', join:'Join a game', back:'Back to menu',
     name:'Your name', character:'Choose your character', code:'Game code',
     createRoom:'Create room', joinRoom:'Join room', lobby:'Waiting room',
     waiting:'Share the QR code or link so others can join.',
@@ -53,7 +53,7 @@ const TEXTS = {
   },
   pt: {
     title:'Jogar online', subtitle:'Conecte até quatro dispositivos à mesma partida.',
-    create:'Criar partida', join:'Entrar em uma partida', back:'Voltar ao menu', backStep:'Voltar',
+    create:'Criar partida', join:'Entrar em uma partida', back:'Voltar ao menu',
     name:'Seu nome', character:'Escolha seu personagem', code:'Código da partida',
     createRoom:'Criar sala', joinRoom:'Entrar na sala', lobby:'Sala de espera',
     waiting:'Compartilhe o QR ou o link para os outros jogadores entrarem.',
@@ -381,7 +381,6 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
           <button className="primary" type="button" disabled={busy || !name.trim() || (page === 'join' && (code.length !== 8 || checkingRoom || roomLookupFailed || !characterId || occupiedCharacters.includes(characterId)))} onClick={page === 'create' ? runCreate : runJoin}>
             {busy ? t.loading : page === 'create' ? t.createRoom : t.joinRoom}
           </button>
-          <button className="text-button" type="button" onClick={() => { setPage('home'); setError(''); }}>{t.backStep}</button>
         </div>
       )}
 
