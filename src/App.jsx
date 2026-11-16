@@ -76,7 +76,11 @@ function Sprite({ character, walking = false, className = '' }) {
     }, 180);
     return () => window.clearInterval(timer);
   }, [walking]);
-  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -60}px`, '--sprite-y': `${character.row * -110}px`, '--sprite-image': `url("${ASSET('characters-sprites.webp')}")` }} aria-label={character.name} />;
+  const isolatedSheet = className.split(/\s+/).includes('character-select-sprite');
+  const frameStepX = isolatedSheet ? 65 : 60;
+  const frameStepY = isolatedSheet ? 115 : 110;
+  const spriteAsset = isolatedSheet ? 'characters-sprites-padded.webp' : 'characters-sprites.webp';
+  return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -frameStepX}px`, '--sprite-y': `${character.row * -frameStepY}px`, '--sprite-image': `url("${ASSET(spriteAsset)}")` }} aria-label={character.name} />;
 }
 
 function App() {
@@ -546,7 +550,7 @@ function App() {
               <div className="character-stage">
                 <button className="carousel-arrow" type="button" aria-label={t.previousCharacter} onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, -1, selections)); playSound('tap'); }}>‹</button>
                 <div className="character-preview">
-                  <div className="character-spotlight"><Sprite character={localizedCharacters[focusedCharacter]} /></div>
+                  <div className="character-spotlight"><Sprite character={localizedCharacters[focusedCharacter]} className="character-select-sprite" /></div>
                   <h3>{localizedCharacters[focusedCharacter].name}</h3>
                   <p>{localizedCharacters[focusedCharacter].description}</p>
                   <div className="character-dots">{localizedCharacters.map((character, index) => <button key={character.id} type="button" className={index === focusedCharacter ? 'dot active' : 'dot'} disabled={selections.includes(index)} onClick={() => chooseFocus(index)} aria-label={character.name} />)}</div>
@@ -554,7 +558,7 @@ function App() {
                 <button className="carousel-arrow" type="button" aria-label={t.nextCharacter} onClick={() => { setFocusedCharacter((current) => nextAvailableCharacter(current, 1, selections)); playSound('tap'); }}>›</button>
               </div>
               <div className="character-roster">
-                {localizedCharacters.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} /><b>{character.name}</b>{selections.includes(index) && <small>{t.chosen}</small>}</button>)}
+                {localizedCharacters.map((character, index) => <button key={character.id} type="button" disabled={selections.includes(index)} className={`roster-item ${index === focusedCharacter ? 'selected' : ''} ${selections.includes(index) ? 'locked' : ''}`} onClick={() => chooseFocus(index)}><Sprite character={character} className="character-select-sprite" /><b>{character.name}</b>{selections.includes(index) && <small>{t.chosen}</small>}</button>)}
               </div>
               <div className="keyboard-hint">{t.keyboardHint}</div>
               <button className="primary" type="button" disabled={selections.includes(focusedCharacter)} onClick={confirmCharacter}>{t.confirm}</button>

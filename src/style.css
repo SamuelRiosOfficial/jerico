@@ -2356,3 +2356,17 @@ button{image-rendering:pixelated}
   background-position:left bottom !important;
   background-repeat:no-repeat !important;
 }
+
+
+/* Character picker: exact 60x110 viewport over a padded 3x4 sprite atlas.
+   The atlas keeps 5 transparent CSS pixels between frames after 2.5x scaling. */
+.character-panel .character-select-sprite{
+  display:inline-block;
+  width:60px !important;
+  height:110px !important;
+  background-size:190px 455px !important;
+  background-position:var(--sprite-x,0px) var(--sprite-y,0px) !important;
+  background-repeat:no-repeat !important;
+  overflow:hidden !important;
+  image-rendering:pixelated;
+}
