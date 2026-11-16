@@ -14,103 +14,140 @@
   width: min(100%, 340px);
   justify-self: start;
 }
-.settings-panel {
-  max-width: 920px;
-  min-width: 0;
-}
+.settings-panel { max-width: 920px; min-width: 0; }
+
 @media (max-width: 760px) {
-  .game-shell.screen-menu { padding: 0; }
+  html, body, #root { min-height: 100%; }
+  body { overflow-x: hidden; }
+  .game-shell.screen-menu { padding: 0; min-height: 100svh; overflow: visible; }
   .screen-menu .hero {
+    box-sizing: border-box;
+    width: 100%;
     min-height: 100svh;
     height: auto;
-    padding: max(22px, env(safe-area-inset-top)) 14px 86px;
+    padding: max(24px, env(safe-area-inset-top)) 16px max(76px, calc(env(safe-area-inset-bottom) + 62px));
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0;
     overflow: hidden;
+    background-position: center center;
   }
+  .screen-menu .hero-shade { position: absolute; inset: 0; }
   .screen-menu .hero-content {
     position: relative;
     inset: auto;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
     width: min(100%, 430px);
     max-width: 430px;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    gap: 11px;
-    margin: 0 auto;
+    margin: auto;
     padding: 12px 4px;
     text-align: center;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
   }
+  .screen-menu .hero-content > .eyebrow { display: none; }
   .screen-menu .hero-content h1 {
+    display: block;
+    position: static;
+    grid-column: auto;
+    grid-row: auto;
     width: min(100%, 390px);
     max-width: 100%;
     margin: 0 auto 2px;
-    padding: 12px 8px;
-    font-size: clamp(24px, 8vw, 38px);
+    padding: 13px 8px;
+    font-size: clamp(25px, 8vw, 38px);
+    line-height: 1.35;
     overflow-wrap: anywhere;
   }
-  .screen-menu .hero-sub {
+  .screen-menu .hero-content .hero-sub {
+    position: static;
+    grid-column: auto;
+    grid-row: auto;
     width: fit-content;
     max-width: 100%;
     margin: 0 auto 8px;
     padding: 8px 12px;
-    font-size: clamp(13px, 4vw, 17px);
+    font-size: clamp(13px, 3.8vw, 17px);
     line-height: 1.45;
   }
+  .screen-menu .hero-content > .gold-line { display: none; }
   .screen-menu .hero-content > .primary,
   .screen-menu .hero-content > .secondary {
-    display: block;
+    position: static !important;
+    inset: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     max-width: 390px;
-    min-height: 52px;
+    min-height: 54px;
     margin: 0 auto;
     padding: 12px 10px;
     font-size: clamp(9px, 2.8vw, 12px);
     line-height: 1.5;
+    white-space: normal;
   }
   .screen-menu .menu-status {
+    position: static;
     width: 100%;
     margin: 4px auto 0;
     font-size: 11px;
   }
-  .screen-menu .menu-party {
-    display: none;
-  }
+  .screen-menu .menu-party { display: none; }
   .screen-menu .hero-bottom {
+    position: absolute;
     left: 12px;
     right: 12px;
     bottom: max(12px, env(safe-area-inset-bottom));
+    width: auto;
+    padding: 0 8px;
     text-align: center;
     line-height: 1.5;
+    font-size: clamp(6px, 1.7vw, 9px);
   }
   .settings-panel {
+    box-sizing: border-box;
     width: calc(100% - 24px);
     max-width: 560px;
+    min-width: 0;
     margin: 12px auto 22px;
-    padding: 26px 18px 20px;
+    padding: 30px 18px 20px;
   }
-  .settings-panel h2 {
-    padding-right: 34px;
-    overflow-wrap: anywhere;
-  }
-  .settings-links {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .settings-links button {
-    min-height: 46px;
-  }
-  .settings-close {
-    top: 10px;
-    right: 10px;
-  }
+  .settings-panel h2 { padding-right: 34px; overflow-wrap: anywhere; }
+  .settings-links { grid-template-columns: 1fr; gap: 10px; }
+  .settings-links button { min-height: 46px; }
+  .settings-close { top: 10px; right: 10px; }
 }
 @media (max-width: 380px) {
-  .screen-menu .hero-content { gap: 9px; }
-  .screen-menu .hero-content h1 { font-size: 23px; }
+  .screen-menu .hero-content { gap: 10px; }
+  .screen-menu .hero-content h1 { font-size: 24px; }
   .screen-menu .hero-content > .primary,
-  .screen-menu .hero-content > .secondary { min-height: 48px; }
+  .screen-menu .hero-content > .secondary { min-height: 50px; }
+}
+@media (max-width: 760px) and (orientation: landscape) {
+  .screen-menu .hero {
+    min-height: 100svh;
+    padding: 18px 14px 58px;
+  }
+  .screen-menu .hero-content {
+    width: min(100%, 560px);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+  }
+  .screen-menu .hero-content h1,
+  .screen-menu .hero-content .hero-sub { grid-column: 1 / -1; }
+  .screen-menu .hero-content > .primary,
+  .screen-menu .hero-content > .secondary { min-height: 42px; }
 }
