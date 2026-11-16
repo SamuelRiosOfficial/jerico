@@ -174,7 +174,7 @@ function App() {
   const [notificationsOn, setNotificationsOn] = useState(true);
   const playSound = useSound(soundOn);
   const [settingsModal, setSettingsModal] = useState('');
-  const [playerCount, setPlayerCount] = useState(2);
+  const [playerCount, setPlayerCount] = useState(1);
   const [names, setNames] = useState(() => defaultNames(language));
   const [selections, setSelections] = useState([]);
   const [focusedCharacter, setFocusedCharacter] = useState(0);
@@ -388,7 +388,7 @@ function App() {
   const currentPlayerName = names[selections.length] || names[0];
   const isBankReady = Boolean(questionBank);
   const startSetup = () => {
-    setPlayerCount(2);
+    setPlayerCount(1);
     setNames(defaultNames(language));
     setSelections([]);
     setFocusedCharacter(0);

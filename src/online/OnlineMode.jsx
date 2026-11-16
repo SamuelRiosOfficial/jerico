@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { resolveAnswer, selectQuestionForTurn } from '../gameEngine.js';
 import { getAvailableCharacters, getFirstAvailableCharacter, getCharacterSpritePosition } from './characterSelection.js';
+import { canStartOnlineRoom } from './roomRules.js';
 import {
   createRoom, createRoomCode, ensureAnonymousSession, fetchRoom, isOnlineConfigured,
   joinRoom, leaveRoom, startRoom, subscribeToRoom, updateGameState, getRoomOccupiedCharacters
@@ -17,7 +18,7 @@ const TEXTS = {
     createRoom:'Crear sala', joinRoom:'Entrar a la sala', lobby:'Sala de espera',
     waiting:'Comparte el QR o el enlace para que se unan los demás jugadores.',
     copy:'Copiar enlace', copied:'Enlace copiado', start:'Iniciar partida',
-    players:'Jugadores', host:'Anfitrión', startHint:'Se necesitan al menos dos jugadores.',
+    players:'Jugadores', host:'Anfitrión', startHint:'Puedes iniciar con un jugador; se permiten hasta cuatro.',
     difficulty:'Elige la dificultad', easy:'Fácil', medium:'Medio', hard:'Difícil',
     step:'paso(s)', answer:'Confirmar respuesta', moved:'avanzó', player:'Jugador',
     correct:'¡Respuesta correcta!', wrong:'Respuesta incorrecta',
@@ -38,7 +39,7 @@ const TEXTS = {
     createRoom:'Create room', joinRoom:'Join room', lobby:'Waiting room',
     waiting:'Share the QR code or link so others can join.',
     copy:'Copy link', copied:'Link copied', start:'Start game',
-    players:'Players', host:'Host', startHint:'At least two players are required.',
+    players:'Players', host:'Host', startHint:'You can start with one player; up to four are allowed.',
     difficulty:'Choose difficulty', easy:'Easy', medium:'Medium', hard:'Hard',
     step:'step(s)', answer:'Submit answer', moved:'moved', player:'Player',
     correct:'Correct answer!', wrong:'Incorrect answer',
@@ -59,7 +60,7 @@ const TEXTS = {
     createRoom:'Criar sala', joinRoom:'Entrar na sala', lobby:'Sala de espera',
     waiting:'Compartilhe o QR ou o link para os outros jogadores entrarem.',
     copy:'Copiar link', copied:'Link copiado', start:'Iniciar partida',
-    players:'Jogadores', host:'Anfitrião', startHint:'São necessários pelo menos dois jogadores.',
+    players:'Jogadores', host:'Anfitrião', startHint:'Você pode iniciar com um jogador; são permitidos até quatro.',
     difficulty:'Escolha a dificuldade', easy:'Fácil', medium:'Médio', hard:'Difícil',
     step:'passo(s)', answer:'Confirmar resposta', moved:'avançou', player:'Jogador',
     correct:'Resposta correta!', wrong:'Resposta incorreta',
@@ -224,7 +225,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
   };
 
   const startGame = async () => {
-    if (!isHost || players.length < 2) return;
+    if (!isHost || !canStartOnlineRoom(players.length)) return;
     setBusy(true); setError('');
     try { await startRoom(roomId); await refreshRoom(); }
     catch (err) { setError(err.message || t.error); }
@@ -425,7 +426,7 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
             ))}
           </div>
           {isHost ? (
-            <button className="primary" type="button" disabled={busy || players.length < 2 || players.length > 4} onClick={startGame}>{busy ? t.loading : t.start}</button>
+            <button className="primary" type="button" disabled={busy || !canStartOnlineRoom(players.length)} onClick={startGame}>{busy ? t.loading : t.start}</button>
           ) : <p className="online-wait">{t.waiting}</p>}
           <small>{t.startHint}</small>
         </div>

@@ -53,3 +53,24 @@ test('online progress uses the same five six-step scenes as local play', async (
   assert.ok(firstStop.x < finalStop.x);
   assert.ok(Number.isFinite(finalStop.y));
 });
+
+
+test('online room can start with one player and still supports up to four', async () => {
+  const { canStartOnlineRoom, MIN_ROOM_PLAYERS, MAX_ROOM_PLAYERS } = await import('../src/online/roomRules.js');
+  assert.equal(MIN_ROOM_PLAYERS, 1);
+  assert.equal(MAX_ROOM_PLAYERS, 4);
+  assert.equal(canStartOnlineRoom(0), false);
+  assert.equal(canStartOnlineRoom(1), true);
+  assert.equal(canStartOnlineRoom(2), true);
+  assert.equal(canStartOnlineRoom(4), true);
+  assert.equal(canStartOnlineRoom(5), false);
+  assert.equal(canStartOnlineRoom(1.5), false);
+});
+
+test('online host UI uses the 1-to-4 player room rule', async () => {
+  const fs = await import('node:fs');
+  const source = fs.readFileSync(new URL('../src/online/OnlineMode.jsx', import.meta.url), 'utf8');
+  assert.match(source, /if \(!isHost \|\| !canStartOnlineRoom\(players\.length\)\) return;/);
+  assert.match(source, /disabled=\{busy \|\| !canStartOnlineRoom\(players\.length\)\}/);
+  assert.match(source, /Puedes iniciar con un jugador/);
+});
