@@ -153,6 +153,44 @@
 }
 
 
+@media (max-width: 760px) {
+  .screen-menu .hero-content {
+    box-sizing: border-box;
+    justify-self: center;
+    align-self: center;
+    width: min(calc(100% - 8px), 430px);
+    margin-inline: auto;
+    transform: none;
+    left: auto;
+    right: auto;
+  }
+  .screen-menu .hero-content h1,
+  .screen-menu .hero-content .hero-sub,
+  .screen-menu .hero-content > .primary,
+  .screen-menu .hero-content > .secondary {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    justify-self: center;
+    align-self: center;
+    text-align: center;
+    transform: none !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .screen-menu .hero-content h1 {
+    width: 100%;
+    max-width: 390px;
+    white-space: normal;
+  }
+  .screen-menu .hero-content > .primary,
+  .screen-menu .hero-content > .secondary {
+    width: 100%;
+    max-width: 390px;
+  }
+}
+
+
 /* Global text-fit and contrast audit — responsive across desktop, tablet and phones. */
 :root {
   --jerico-ink: #24170d;
