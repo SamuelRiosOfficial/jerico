@@ -340,3 +340,193 @@
     margin-top: 20px;
   }
 }
+
+/* Full-screen online game layout reuses the normal game's map, stage and victory visuals. */
+.online-game-root {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100svh;
+  padding: 12px clamp(8px, 2vw, 24px) 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.online-game-toolbar {
+  z-index: 8;
+  box-sizing: border-box;
+  width: min(1500px, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 auto;
+  padding: 8px 12px;
+  border: 2px solid #7d4d24;
+  border-radius: 6px;
+  background: #fff0c7e8;
+  color: #38251d;
+  box-shadow: 3px 4px 0 #75451c;
+}
+
+.online-game-toolbar > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.online-game-toolbar b {
+  font-size: clamp(9px, 1vw, 12px);
+  letter-spacing: .3px;
+}
+
+.online-game-toolbar small {
+  color: #765333;
+  font-size: 10px;
+}
+
+.online-exit-button {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 2px solid #39200e;
+  border-radius: 4px;
+  background: #3d2b2a;
+  color: #fff0c7;
+  box-shadow: 2px 3px 0 #8b541f;
+  font-weight: 800;
+}
+
+.online-game-root .map-screen {
+  width: 100%;
+  max-width: 1500px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.online-game-root .journey-map-artboard {
+  width: 100%;
+}
+
+.online-game-root .board {
+  box-sizing: border-box;
+  width: min(1500px, 100%);
+  margin: 0 auto;
+}
+
+.online-game-root .advance-screen {
+  width: min(1500px, 100%);
+}
+
+.online-game-root .online-track-sprite {
+  width: 60px;
+  height: 110px;
+  background-size: 180px 440px;
+  transform: scale(1.45);
+  transform-origin: center bottom;
+  margin: -13px 0 -18px;
+}
+
+.online-turn-actions {
+  max-width: 100%;
+}
+
+.online-turn-actions .bank-status {
+  color: #694724;
+}
+
+.online-game-root .online-question-panel {
+  box-sizing: border-box;
+  width: min(900px, 100%);
+  margin: auto;
+}
+
+.online-game-root .online-feedback-backdrop {
+  z-index: 30;
+}
+
+.online-game-root .online-story-panel {
+  box-sizing: border-box;
+  width: min(1000px, 100%);
+  margin: auto;
+}
+
+.online-game-root.screen-map,
+.online-game-root.screen-routeMap {
+  overflow-x: hidden;
+}
+
+.online-game-root.online-board-shell,
+.online-game-root.online-question-shell,
+.online-game-root.online-advance-shell,
+.online-game-root.online-feedback-shell,
+.online-game-root.online-collapse-shell,
+.online-game-root.online-story-shell,
+.online-game-root.online-victory-shell {
+  background: linear-gradient(180deg, #2074e8 0%, #92c0ed 32%, #f5c77a 32%, #df9949 100%);
+}
+
+.online-game-root.online-board-shell,
+.online-game-root.online-question-shell {
+  justify-content: flex-start;
+}
+
+@media (max-width: 760px) {
+  .online-game-root {
+    min-height: 100svh;
+    padding: 8px 7px 14px;
+    gap: 10px;
+    overflow-x: hidden;
+  }
+
+  .online-game-toolbar {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .online-game-toolbar b {
+    font-size: 8px;
+  }
+
+  .online-game-toolbar small {
+    font-size: 9px;
+  }
+
+  .online-exit-button {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+
+  .online-game-root .board {
+    padding: 12px;
+  }
+
+  .online-game-root .online-track-sprite {
+    transform: scale(1.05);
+    margin: -7px 0 -10px;
+  }
+
+  .online-game-root .journey-map-artboard {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .online-game-toolbar {
+    align-items: flex-start;
+  }
+
+  .online-game-toolbar b {
+    max-width: 55vw;
+  }
+}
