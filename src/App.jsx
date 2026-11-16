@@ -615,10 +615,10 @@ function App() {
             <div className="journey-map-markers" aria-label={t.positionAria}>
               {players.map((player, index) => {
                 const position = getJourneyMapPosition(player.steps);
-                const spread = (index - (players.length - 1) / 2) * 1.5;
+                const spread = (index - (players.length - 1) / 2) * 0.45;
                 return (
                   <div className="journey-map-marker" key={player.id}
-                    style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y + (index % 2 ? 1.0 : 0)))}%` }}
+                    style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y))}%` }}
                     title={`${player.name}: ${player.steps}/30 ${t.stepsUnit}`}>
                     <b>{player.name}</b>
                     <Sprite character={player.character} />

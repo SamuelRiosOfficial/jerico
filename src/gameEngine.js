@@ -4,12 +4,13 @@ export const STEPS_PER_SCENE = 6;
 export const SCENE_COUNT = 5;
 
 const JOURNEY_MAP_VIEWBOX = Object.freeze({ width: 1600, height: 902.5 });
+// These six anchors are the exact centers of the six route circles in public/assets/journey-map.svg.
 const JOURNEY_MAP_ROUTE = Object.freeze([
-  Object.freeze({ start: Object.freeze({ x: 178, y: 524.5 }), control: Object.freeze({ x: 298, y: 460.5 }), end: Object.freeze({ x: 402, y: 522.5 }) }),
+  Object.freeze({ start: Object.freeze({ x: 288, y: 488.5 }), control: Object.freeze({ x: 344, y: 488 }), end: Object.freeze({ x: 402, y: 522.5 }) }),
   Object.freeze({ start: Object.freeze({ x: 402, y: 522.5 }), control: Object.freeze({ x: 506, y: 584.5 }), end: Object.freeze({ x: 603, y: 512.5 }) }),
   Object.freeze({ start: Object.freeze({ x: 603, y: 512.5 }), control: Object.freeze({ x: 713, y: 454.5 }), end: Object.freeze({ x: 835, y: 492.5 }) }),
   Object.freeze({ start: Object.freeze({ x: 835, y: 492.5 }), control: Object.freeze({ x: 957, y: 530.5 }), end: Object.freeze({ x: 1054, y: 473.5 }) }),
-  Object.freeze({ start: Object.freeze({ x: 1054, y: 473.5 }), control: Object.freeze({ x: 1175, y: 422.5 }), end: Object.freeze({ x: 1272, y: 394.5 }) })
+  Object.freeze({ start: Object.freeze({ x: 1054, y: 473.5 }), control: Object.freeze({ x: 1125, y: 407 }), end: Object.freeze({ x: 1175, y: 422.5 }) })
 ]);
 
 /** Returns a position along the exact quadratic SVG route (0–30 steps), in percent of the map viewBox. */
