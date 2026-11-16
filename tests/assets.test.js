@@ -42,7 +42,7 @@ test('los personajes del mapa usan recortes independientes de la primera columna
   for (const [character, row] of Object.entries(rows)) {
     const svg = readFileSync(new URL(`../public/assets/character-${character}.svg`, import.meta.url), 'utf8');
     assert.match(svg, new RegExp(`viewBox="0 ${row * 110} 60 110"`), `Recorte incorrecto para ${character}`);
-    assert.match(svg, /href="characters-sprites\\.webp"/, `El recorte de ${character} debe usar el atlas original`);
+    assert.match(svg, /href="characters-sprites\.webp"/, `El recorte de ${character} debe usar el atlas original`);
     assert.match(svg, /<image[^>]+width="180"[^>]+height="440"/, `Dimensiones del atlas incorrectas para ${character}`);
   }
 
