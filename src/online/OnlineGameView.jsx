@@ -42,6 +42,7 @@ function interpolate(value, from, to) {
 export default function OnlineGameView({
   gameState,
   roomCode,
+  userId,
   language,
   scenes = [],
   gameText = {},
@@ -59,6 +60,8 @@ export default function OnlineGameView({
   const players = gameState?.players || [];
   const turn = Number.isInteger(gameState?.turn) ? gameState.turn : 0;
   const activePlayer = players[turn] || null;
+  const isMyTurn = Boolean(activePlayer && activePlayer.id === userId);
+  const isActiveTurn = isMyTurn;
   const question = gameState?.question || null;
   const feedback = gameState?.feedback || null;
   const winner = gameState?.winner || null;
