@@ -514,6 +514,8 @@ function App() {
           questionBank={questionBank}
           language={localeCode}
           characters={localizedCharacters}
+          scenes={localizedScenes}
+          gameText={t}
         />
       )}
 
