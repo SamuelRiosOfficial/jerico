@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "node scripts/assembleMenuVideo.mjs && node scripts/assembleQuestionBank.mjs && vite build",
-    "build:mobile": "node scripts/assembleMenuVideo.mjs && node scripts/assembleQuestionBank.mjs && vite build --base=/",
+    "build:mobile": "node scripts/assembleMenuVideo.mjs && node scripts/assembleQuestionBank.mjs && JERICO_MOBILE_BUILD=1 vite build --base=/",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test",
     "pretest": "node scripts/assembleMenuVideo.mjs && node scripts/assembleQuestionBank.mjs"
