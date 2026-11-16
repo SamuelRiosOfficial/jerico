@@ -30,15 +30,19 @@ create index if not exists jerico_players_room_idx on public.jerico_room_players
 alter table public.jerico_rooms enable row level security;
 alter table public.jerico_room_players enable row level security;
 
+create or replace function public.jerico_is_room_member(p_room_id uuid)
+returns boolean language sql stable security definer set search_path=public
+as $
+  select exists(select 1 from public.jerico_room_players where room_id=p_room_id and user_id=auth.uid())
+$;
+
 drop policy if exists "room members can read their room" on public.jerico_rooms;
 create policy "room members can read their room" on public.jerico_rooms
-  for select to authenticated
-  using (exists (select 1 from public.jerico_room_players p where p.room_id=id and p.user_id=auth.uid()));
+  for select to authenticated using (public.jerico_is_room_member(id));
 
 drop policy if exists "room members can read roster" on public.jerico_room_players;
 create policy "room members can read roster" on public.jerico_room_players
-  for select to authenticated
-  using (exists (select 1 from public.jerico_room_players me where me.room_id=jerico_room_players.room_id and me.user_id=auth.uid()));
+  for select to authenticated using (public.jerico_is_room_member(room_id));
 
 revoke all on public.jerico_rooms from anon, authenticated;
 revoke all on public.jerico_room_players from anon, authenticated;
@@ -107,21 +111,80 @@ end $$;
 create or replace function public.jerico_update_game_state(p_room_id uuid,p_expected_revision integer,p_game_state jsonb)
 returns integer language plpgsql security definer set search_path=public
 as $$
-declare v_room public.jerico_rooms%rowtype; v_active_id uuid; v_turn integer; v_count integer; v_status text;
+declare
+  v_room public.jerico_rooms%rowtype;
+  v_active_id uuid;
+  v_turn integer;
+  v_count integer;
+  v_old_phase text;
+  v_new_phase text;
+  v_old_steps integer;
+  v_new_steps integer;
+  v_next_turn integer;
+  v_i integer;
 begin
   select * into v_room from public.jerico_rooms where id=p_room_id for update;
-  if not found or v_room.status not in ('playing','finished') then raise exception 'Room is not active'; end if;
+  if not found or v_room.status<>'playing' then raise exception 'Room is not active'; end if;
   if v_room.revision<>p_expected_revision then raise exception 'Game state changed; refresh and retry'; end if;
-  if not exists(select 1 from public.jerico_room_players where room_id=p_room_id and user_id=auth.uid()) then raise exception 'Not a room member'; end if;
+  if not exists(select 1 from public.jerico_room_players where room_id=p_room_id and user_id=auth.uid()) then
+    raise exception 'Not a room member';
+  end if;
   if jsonb_typeof(p_game_state->'players')<>'array' then raise exception 'Invalid game state'; end if;
   select count(*) into v_count from public.jerico_room_players where room_id=p_room_id;
   if jsonb_array_length(p_game_state->'players')<>v_count then raise exception 'Player roster cannot be changed'; end if;
   v_turn:=coalesce((v_room.game_state->>'turn')::integer,0);
-  select (v_room.game_state->'players'->v_turn->>'id')::uuid into v_active_id;
-  if auth.uid()<>v_room.host_user_id and auth.uid()<>v_active_id then raise exception 'Only the host or active player may act'; end if;
-  if p_game_state->>'phase' not in ('board','question','feedback','finished') then raise exception 'Invalid game phase'; end if;
-  if p_game_state->>'phase'='finished' then v_status:='finished'; else v_status:='playing'; end if;
-  update public.jerico_rooms set game_state=p_game_state,status=v_status,
+  if v_turn<0 or v_turn>=v_count then raise exception 'Invalid active turn'; end if;
+  v_active_id:=(v_room.game_state->'players'->v_turn->>'id')::uuid;
+  if auth.uid()<>v_room.host_user_id and auth.uid()<>v_active_id then
+    raise exception 'Only the host or active player may act';
+  end if;
+  v_old_phase:=v_room.game_state->>'phase';
+  v_new_phase:=p_game_state->>'phase';
+  if (p_game_state->>'turn')::integer is distinct from v_turn then
+    if not (v_old_phase='feedback' and v_new_phase='board' and
+      (p_game_state->>'turn')::integer=((v_turn+1)%v_count)) then
+      raise exception 'Invalid turn transition';
+    end if;
+  end if;
+  if v_old_phase='board' and v_new_phase='question' then
+    if p_game_state->'question' is null or p_game_state->'question'='null'::jsonb then
+      raise exception 'A question is required';
+    end if;
+    for v_i in 0..v_count-1 loop
+      if p_game_state->'players'->v_i is distinct from v_room.game_state->'players'->v_i then
+        raise exception 'Player scores cannot change while selecting a question';
+      end if;
+    end loop;
+  elsif v_old_phase='question' and v_new_phase in ('feedback','finished') then
+    for v_i in 0..v_count-1 loop
+      if p_game_state->'players'->v_i->>'id' is distinct from v_room.game_state->'players'->v_i->>'id'
+        or p_game_state->'players'->v_i->>'name' is distinct from v_room.game_state->'players'->v_i->>'name'
+        or p_game_state->'players'->v_i->>'characterId' is distinct from v_room.game_state->'players'->v_i->>'characterId' then
+        raise exception 'Player identity cannot be changed';
+      end if;
+      if v_i<>v_turn and p_game_state->'players'->v_i->>'steps' is distinct from v_room.game_state->'players'->v_i->>'steps' then
+        raise exception 'Only the active player can advance';
+      end if;
+    end loop;
+    v_old_steps:=coalesce((v_room.game_state->'players'->v_turn->>'steps')::integer,0);
+    v_new_steps:=coalesce((p_game_state->'players'->v_turn->>'steps')::integer,-1);
+    if v_new_steps<v_old_steps or v_new_steps>least(30,v_old_steps+3) then
+      raise exception 'Invalid step update';
+    end if;
+    if v_new_phase='finished' and v_new_steps<30 then raise exception 'Winner has not reached Jericho'; end if;
+    if v_new_phase='feedback' and v_new_steps>=30 then raise exception 'The game must finish at 30 steps'; end if;
+  elsif v_old_phase='feedback' and v_new_phase='board' then
+    for v_i in 0..v_count-1 loop
+      if p_game_state->'players'->v_i->>'steps' is distinct from v_room.game_state->'players'->v_i->>'steps' then
+        raise exception 'Scores cannot change between turns';
+      end if;
+    end loop;
+  else
+    raise exception 'Invalid game phase transition';
+  end if;
+  if v_new_phase not in ('board','question','feedback','finished') then raise exception 'Invalid game phase'; end if;
+  update public.jerico_rooms set game_state=p_game_state,
+    status=case when v_new_phase='finished' then 'finished' else 'playing' end,
     revision=revision+1,updated_at=now()
     where id=p_room_id;
   return p_expected_revision+1;
@@ -141,11 +204,13 @@ begin
   end if;
 end $$;
 
+revoke all on function public.jerico_is_room_member(uuid) from public, anon;
 revoke all on function public.jerico_create_room(text,text,text) from public, anon;
 revoke all on function public.jerico_join_room(text,text,text) from public, anon;
 revoke all on function public.jerico_start_room(uuid) from public, anon;
 revoke all on function public.jerico_update_game_state(uuid,integer,jsonb) from public, anon;
 revoke all on function public.jerico_leave_room(uuid) from public, anon;
+grant execute on function public.jerico_is_room_member(uuid) to authenticated;
 grant execute on function public.jerico_create_room(text,text,text) to authenticated;
 grant execute on function public.jerico_join_room(text,text,text) to authenticated;
 grant execute on function public.jerico_start_room(uuid) to authenticated;
