@@ -3,25 +3,27 @@ export const TOTAL_STEPS = 30;
 export const STEPS_PER_SCENE = 6;
 export const SCENE_COUNT = 5;
 
-const JOURNEY_MAP_NODES = Object.freeze([
-  Object.freeze({ x: 10.8, y: 50.2 }),
-  Object.freeze({ x: 30.5, y: 53.5 }),
-  Object.freeze({ x: 49.4, y: 49.4 }),
-  Object.freeze({ x: 69.1, y: 45.7 }),
-  Object.freeze({ x: 80.5, y: 40.6 }),
-  Object.freeze({ x: 85.0, y: 35.2 })
+const JOURNEY_MAP_VIEWBOX = Object.freeze({ width: 1600, height: 902.5 });
+const JOURNEY_MAP_ROUTE = Object.freeze([
+  Object.freeze({ start: Object.freeze({ x: 178, y: 524.5 }), control: Object.freeze({ x: 298, y: 460.5 }), end: Object.freeze({ x: 402, y: 522.5 }) }),
+  Object.freeze({ start: Object.freeze({ x: 402, y: 522.5 }), control: Object.freeze({ x: 506, y: 584.5 }), end: Object.freeze({ x: 603, y: 512.5 }) }),
+  Object.freeze({ start: Object.freeze({ x: 603, y: 512.5 }), control: Object.freeze({ x: 713, y: 454.5 }), end: Object.freeze({ x: 835, y: 492.5 }) }),
+  Object.freeze({ start: Object.freeze({ x: 835, y: 492.5 }), control: Object.freeze({ x: 957, y: 530.5 }), end: Object.freeze({ x: 1054, y: 473.5 }) }),
+  Object.freeze({ start: Object.freeze({ x: 1054, y: 473.5 }), control: Object.freeze({ x: 1175, y: 422.5 }), end: Object.freeze({ x: 1272, y: 394.5 }) })
 ]);
 
-/** Returns an independently animated position along the illustrated route (0–30 steps). */
+/** Returns a position along the exact quadratic SVG route (0–30 steps), in percent of the map viewBox. */
 export function getJourneyMapPosition(steps) {
   const safeSteps = Number.isFinite(steps) ? Math.max(0, Math.min(TOTAL_STEPS, steps)) : 0;
-  const segment = Math.min(SCENE_COUNT - 1, Math.floor(safeSteps / STEPS_PER_SCENE));
-  const progress = (safeSteps - segment * STEPS_PER_SCENE) / STEPS_PER_SCENE;
-  const start = JOURNEY_MAP_NODES[segment];
-  const end = JOURNEY_MAP_NODES[segment + 1];
+  const segmentIndex = Math.min(SCENE_COUNT - 1, Math.floor(safeSteps / STEPS_PER_SCENE));
+  const progress = (safeSteps - segmentIndex * STEPS_PER_SCENE) / STEPS_PER_SCENE;
+  const { start, control, end } = JOURNEY_MAP_ROUTE[segmentIndex];
+  const inverse = 1 - progress;
+  const x = inverse * inverse * start.x + 2 * inverse * progress * control.x + progress * progress * end.x;
+  const y = inverse * inverse * start.y + 2 * inverse * progress * control.y + progress * progress * end.y;
   return {
-    x: Number((start.x + (end.x - start.x) * progress).toFixed(2)),
-    y: Number((start.y + (end.y - start.y) * progress).toFixed(2))
+    x: Number((x / JOURNEY_MAP_VIEWBOX.width * 100).toFixed(2)),
+    y: Number((y / JOURNEY_MAP_VIEWBOX.height * 100).toFixed(2))
   };
 }
 
