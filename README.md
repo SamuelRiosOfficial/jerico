@@ -1,37 +1,23 @@
 # JERICO — Camino a Jericó
 
-Juego bíblico multijugador local para 1–4 participantes, desarrollado con React + Vite.
+Juego bíblico desarrollado con React + Vite.
 
-## Probar la versión publicada
-El despliegue se realiza automáticamente con GitHub Actions y GitHub Pages después de superar las pruebas.
+## Juego local
+El botón **Iniciar juego** conserva el modo de 1 a 4 participantes en el mismo dispositivo.
 
-## Ejecutar localmente
-```bash
-npm install
-npm run dev
-``
+## Multijugador en línea
+El botón **Jugar en línea** permite crear una sala o entrar con un código/enlace QR. Las salas admiten hasta cuatro jugadores, comparten turnos y estado en tiempo real y finalizan cuando alguien llega a 30 pasos.
 
-## Validar y compilar
-```bash
-npm test
-npm run build
-npm run preview
-``
+### Configuración de Supabase necesaria para publicar el modo en línea
+1. Crea un proyecto Supabase.
+2. En la configuración de Authentication, activa **Allow anonymous sign-ins**. Cada dispositivo recibirá una identidad anónima automática; no hay que crear cuentas ni contraseñas manualmente.
+3. En el diálogo **Connect** del proyecto (o en **Settings > API Keys**), copia la Project URL y la publishable key.
+4. Ejecuta el archivo `supabase/migrations/20261116010000_jerico_multiplayer.sql` en el SQL Editor del proyecto.
+5. Añade estos secretos/variables al entorno de compilación de GitHub Pages como **Actions variables**: `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. La clave publishable está diseñada para uso de cliente; nunca agregues la clave `service_role`.
+6. Para desarrollo local, copia `.env.example` a `.env.local` y completa las dos variables.
+7. Antes de abrir el juego al público, configura protección CAPTCHA/Turnstile o límites de uso para los inicios de sesión anónimos; Supabase recomienda protección contra abuso para este tipo de cuentas.
 
-## Reglas del juego
-- Cinco escenarios con seis pasos cada uno: 30 pasos totales.
-- De 1 a 4 jugadores; nombres de hasta 12 caracteres y personajes únicos.
-- Los cuatro personajes tienen las mismas condiciones de juego.
-- Dificultad elegida antes de cada turno: Fácil (+1), Medio (+2), Difícil (+3).
-- Una respuesta incorrecta no permite avanzar.
-- Banco bíblico aprobado de 120 preguntas: 40 por dificultad.
-- Preguntas aleatorias y opciones mezcladas, manteniendo la respuesta correcta.
-- El grupo de preguntas de cada dificultad es compartido por todos los jugadores y se renueva al agotarse.
-- El primer jugador que alcanza 30 pasos gana inmediatamente y la partida termina para todos.
-- Secuencia de victoria: cinco fotogramas del derrumbe de las murallas, efecto de temblor, lectura de Josué 6:1–5 y felicitación al ganador.
+El modo local sigue funcionando sin Supabase. El modo en línea muestra un aviso si el backend aún no está configurado.
 
-## Pruebas automáticas
-La suite `node --test` valida el banco, la estructura de preguntas, la no repetición hasta agotar cada dificultad, la aleatorización de opciones, la puntuación, la victoria y la agrupación de escenarios.
-
-## Recursos visuales
-Los fondos de los cinco escenarios, la ilustración de portada, los sprites de personajes y los cinco fotogramas del derrumbe están en `public/assets/`.
+## Validar
+`npm install`, `npm test`, `npm run build`.

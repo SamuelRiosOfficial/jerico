@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TEXT } from './gameLocales.js';
+import OnlineMode from './online/OnlineMode.jsx';
 import './style.css';
 import { validateQuestionBank, selectQuestionForTurn, resolveAnswer, sceneIndexForStep, nextAvailableCharacter, getJourneyMapPosition } from './gameEngine.js';
 
@@ -121,6 +122,11 @@ function App() {
       previousLanguage.current = language;
     }
   }, [language]);
+  useEffect(() => {
+    const roomCode = new URLSearchParams(window.location.search).get('room');
+    if (roomCode) setScreen('online');
+  }, []);
+
   useEffect(() => {
     document.documentElement.lang = localeCode;
     document.title = t.pageTitle;
@@ -475,6 +481,7 @@ function App() {
             <p className="hero-sub">{t.heroSubtitle}</p>
             <div className="gold-line" />
             <button className="primary" type="button" onClick={startSetup}>{t.start} <span>▶</span></button>
+            <button className="secondary online-menu-button" type="button" onClick={() => setScreen('online')}>Jugar en línea <span>🌐</span></button>
             <button className="secondary" type="button" onClick={() => setScreen('instructions')}>{t.how}</button>
             <button className="secondary" type="button" onClick={openSettings}>{t.settings}</button>
             {!isBankReady && <p className="menu-status">{bankError === 'load' ? t.bankError : t.bankLoading}</p>}
@@ -482,6 +489,15 @@ function App() {
           <div className="menu-party" aria-hidden="true">{localizedCharacters.map((character) => <Sprite key={character.id} character={character} />)}</div>
           <div className="hero-bottom">{t.heroBottom}</div>
         </section>
+      )}
+
+      {screen === 'online' && (
+        <OnlineMode
+          onExit={() => setScreen('menu')}
+          questionBank={questionBank}
+          language={localeCode}
+          characters={localizedCharacters}
+        />
       )}
 
       {screen === 'instructions' && (
