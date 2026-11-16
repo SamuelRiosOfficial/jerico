@@ -2206,9 +2206,9 @@ button{image-rendering:pixelated}
   line-height:1.5;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   box-shadow:2px 3px 0 #7b4519;
 }
-.journey-map-marker .sprite{
-  width:100px;height:156px;background-size:300px 624px;
-  transform:scale(.56);transform-origin:center bottom;margin:-33px -21px -36px;
+.journey-map-marker>.journey-map-character-marker{
+  display:block;width:48px;height:auto;flex:none;
+  object-fit:contain;object-position:center bottom;image-rendering:pixelated;
 }
 .journey-map-dock{
   position:absolute;z-index:5;left:2.5%;right:2.5%;bottom:1.7%;height:24%;
@@ -2237,9 +2237,9 @@ button{image-rendering:pixelated}
   border:2px solid #7e4c21;border-radius:3px;
   background:#fff0c6e8;box-shadow:2px 3px 0 #9b642c;
 }
-.journey-map-player-card>.sprite{
-  width:100px;height:156px;background-size:300px 624px;
-  flex:0 0 34px;transform:scale(.34);transform-origin:center center;margin:-48px -33px;
+.journey-map-player-card>.journey-map-character-dock{
+  display:block;width:24px;height:auto;flex:0 0 24px;
+  object-fit:contain;object-position:center;image-rendering:pixelated;
 }
 .journey-map-player-info{min-width:0;flex:1;text-align:left;color:#3c240f}
 .journey-map-player-info b{display:block;font-size:clamp(10px,.9vw,13px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2266,16 +2266,13 @@ button{image-rendering:pixelated}
   .screen-map .map-screen,.screen-routeMap .map-screen{gap:10px}
   .journey-map-artboard{width:100%;aspect-ratio:16/9;border-width:3px;box-shadow:4px 5px 0 #75451c,inset 0 0 0 2px #ffdf69}
   .journey-map-marker b{max-width:68px;padding:2px 3px;font-size:5px;border-width:1px}
-  .journey-map-marker .sprite{
-    width:100px;height:156px;background-size:300px 624px;
-    transform:scale(.39);transform-origin:center bottom;margin:-47px -30px -51px;
-  }
+  .journey-map-marker>.journey-map-character-marker{width:35px}
   .journey-map-dock{left:2%;right:2%;bottom:1.4%;height:24%;padding:4px 5px;gap:3px;border-width:2px;box-shadow:2px 3px 0 #6d3d17,inset 0 0 0 1px #fff2bd}
   .journey-map-dock-heading{font-size:5px;gap:3px}
   .journey-map-dock-heading span{font-size:7px}
   .journey-map-player-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}
   .journey-map-player-card{height:35px;padding:2px 4px;gap:2px;border-width:1px;box-shadow:1px 2px 0 #9b642c}
-  .journey-map-player-card>.sprite{transform:scale(.23);margin:-59px -38px;flex-basis:23px}
+  .journey-map-player-card>.journey-map-character-dock{width:16px;flex-basis:16px}
   .journey-map-player-info b{font-size:8px}
   .journey-map-player-info small{font-size:6px;margin-top:0}
   .journey-map-player-info .meter{height:3px;margin-top:2px}
@@ -2284,7 +2281,7 @@ button{image-rendering:pixelated}
 }
 @media(max-width:420px){
   .journey-map-marker b{max-width:55px;font-size:4px}
-  .journey-map-marker .sprite{transform:scale(.31);margin:-54px -34px -59px}
+  .journey-map-marker>.journey-map-character-marker{width:30px}
   .journey-map-dock-heading{font-size:4px}
   .journey-map-dock-heading span{font-size:6px}
   .journey-map-player-card{height:32px}

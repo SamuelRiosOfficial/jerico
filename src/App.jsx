@@ -86,6 +86,17 @@ function Sprite({ character, walking = false, className = '' }) {
   return <span className={`sprite sprite-${character.id} ${walking ? 'is-walking' : ''} ${className}`} style={{ '--sprite-x': `${frame * -frameStepX}px`, '--sprite-y': `${character.row * -frameStepY}px`, '--sprite-image': `url("${ASSET(spriteAsset)}")` }} aria-label={character.name} />;
 }
 
+function JourneyMapCharacter({ character, variant = 'marker' }) {
+  return (
+    <img
+      className={`journey-map-character journey-map-character-${variant}`}
+      src={ASSET(`character-${character.id}.svg`)}
+      alt=""
+      draggable="false"
+    />
+  );
+}
+
 function App() {
   const [screen, setScreen] = useState('menu');
   const [visitCount, setVisitCount] = useState(null);
@@ -625,7 +636,7 @@ function App() {
                     style={{ left: `${Math.max(5, Math.min(95, position.x + spread))}%`, top: `${Math.max(18, Math.min(68, position.y))}%` }}
                     title={`${player.name}: ${player.steps}/30 ${t.stepsUnit}`}>
                     <b>{player.name}</b>
-                    <Sprite character={player.character} />
+                    <JourneyMapCharacter character={player.character} />
                   </div>
                 );
               })}
@@ -638,7 +649,7 @@ function App() {
               <div className="journey-map-player-list">
                 {players.map((player) => (
                   <div className="journey-map-player-card" key={player.id}>
-                    <Sprite character={player.character} />
+                    <JourneyMapCharacter character={player.character} variant="dock" />
                     <div className="journey-map-player-info">
                       <b>{player.name}</b>
                       <small>{sceneForSteps(player.steps).name} · {player.steps}/30 {t.stepsUnit}</small>
