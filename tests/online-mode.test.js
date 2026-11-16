@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DIFFICULTY_STEPS, TOTAL_STEPS, resolveAnswer, nextAvailableCharacter } from '../gameEngine.js';
+import { DIFFICULTY_STEPS, TOTAL_STEPS, resolveAnswer, nextAvailableCharacter } from '../src/gameEngine.js';
 
 test('online mode reuses approved journey scoring rules', () => {
   assert.equal(TOTAL_STEPS, 30);
