@@ -53,7 +53,7 @@ jobs:
 
       - name: Build native Android web bundle
         run: |
-          JERICO_NATIVE_BUILD=1 npm run build:mobile
+          npm run build:native
 
       - name: Generate Android project and sync web assets
         run: |
