@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { resolveAnswer, selectQuestionForTurn } from '../gameEngine.js';
-import { getAvailableCharacters, getFirstAvailableCharacter } from './characterSelection.js';
+import { getAvailableCharacters, getFirstAvailableCharacter, getCharacterSpritePosition } from './characterSelection.js';
 import {
   createRoom, createRoomCode, ensureAnonymousSession, fetchRoom, isOnlineConfigured,
   joinRoom, leaveRoom, startRoom, subscribeToRoom, updateGameState, getRoomOccupiedCharacters
@@ -81,15 +81,9 @@ const DIFFICULTIES = [
   { id:'dificil', steps:3, color:'hard' }
 ];
 const emptyUsed = () => ({ facil:[], medio:[], dificil:[] });
-const characterAsset = (characterId) => {
-  const row = { warrior:0, soldier:1, trumpeter:2, woman:3 }[characterId] ?? 0;
-  return { row, id:characterId };
-};
-
 function OnlineAvatar({ characterId, walking = false }) {
-  const row = characterAsset(characterId).row;
   return <span className={'online-avatar' + (walking ? ' walking' : '')} style={{
-    '--avatar-y': (-row * 110) + 'px',
+    '--avatar-position': getCharacterSpritePosition(characterId) + '%',
     backgroundImage:`url("${import.meta.env.BASE_URL}assets/characters-sprites.webp")`
   }} aria-hidden="true" />;
 }
