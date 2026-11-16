@@ -7,6 +7,7 @@ import {
   joinRoom, leaveRoom, startRoom, subscribeToRoom, updateGameState, getRoomOccupiedCharacters
 } from './onlineService.js';
 import './online.css';
+import OnlineGameView from './OnlineGameView.jsx';
 
 const TEXTS = {
   es: {
@@ -93,7 +94,7 @@ function OnlineAvatar({ characterId, walking = false }) {
   }} aria-hidden="true" />;
 }
 
-export default function OnlineMode({ onExit, questionBank, language = 'es', characters = [] }) {
+export default function OnlineMode({ onExit, questionBank, language = 'es', characters = [], scenes = [], gameText = {} }) {
   const t = TEXTS[language] || TEXTS.es;
   const initialCode = new URLSearchParams(window.location.search).get('room') || '';
   const [page, setPage] = useState(initialCode ? 'join' : 'home');
@@ -161,7 +162,27 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
         if (active) setCheckingRoom(false);
       }
     }, 250);
-    return () => { active = false; window.clearTimeout(timer); };
+    return page === 'game' && room && gameState ? (
+    <OnlineGameView
+      gameState={gameState}
+      roomCode={room.code}
+      userId={userId}
+      language={language}
+      scenes={scenes}
+      gameText={gameText}
+      onlineText={t}
+      questionBank={questionBank}
+      busy={busy}
+      selectedAnswer={selectedAnswer}
+      setSelectedAnswer={setSelectedAnswer}
+      askQuestion={askQuestion}
+      submitAnswer={submitAnswer}
+      continueTurn={continueTurn}
+      canContinue={isHost || myTurn}
+      onExit={exitRoom}
+    />
+  ) : (
+) => { active = false; window.clearTimeout(timer); };
   }, [page, code, userId]);
 
   const refreshRoom = useCallback(async () => {
@@ -406,63 +427,6 @@ export default function OnlineMode({ onExit, questionBank, language = 'es', char
             <button className="primary" type="button" disabled={busy || players.length < 2 || players.length > 4} onClick={startGame}>{busy ? t.loading : t.start}</button>
           ) : <p className="online-wait">{t.waiting}</p>}
           <small>{t.startHint}</small>
-        </div>
-      )}
-
-      {page === 'game' && room && gameState && (
-        <div className="online-game">
-          {gameState.phase === 'finished' || roomIsFinished ? (
-            <div className="online-finish">
-              <div className="online-trophy">🏆</div><h2>{t.winner}</h2>
-              <OnlineAvatar characterId={gameState.winner?.characterId} />
-              <h3>{gameState.winner?.name}</h3><p>{t.finished}</p>
-            </div>
-          ) : (
-            <>
-              <div className="online-scoreboard">
-                {gameState.players.map((player,index) => (
-                  <div className={'online-score' + (index === gameState.turn ? ' current' : '')} key={player.id}>
-                    <OnlineAvatar characterId={player.characterId} walking={index === gameState.turn} />
-                    <b>{player.name}</b><span>{player.steps}/30</span>
-                    <div className="online-meter"><i style={{width:(player.steps/30*100)+'%'}} /></div>
-                  </div>
-                ))}
-              </div>
-              <div className="online-playfield">
-                <p className="eyebrow">{t.board}</p>
-                {gameState.phase === 'board' && (
-                  <>
-                    <h3>{t.turn} {activePlayer?.name}</h3>
-                    {myTurn ? <>
-                      <p>{t.difficulty}</p>
-                      <div className="online-difficulties">
-                        {DIFFICULTIES.map(d => <button type="button" key={d.id} disabled={busy || !questionBank} className={d.color} onClick={() => askQuestion(d)}><b>{t[d.id === 'facil' ? 'easy' : d.id === 'medio' ? 'medium' : 'hard']}</b><small>+{d.steps} {t.step}</small></button>)}
-                      </div>
-                    </> : <p>{t.waiting} {activePlayer?.name}</p>}
-                  </>
-                )}
-                {gameState.phase === 'question' && question && (
-                  <>
-                    <h3>{t.question} · {activePlayer?.name}</h3><h2 className="online-question">{question.text}</h2>
-                    <div className="online-answers">
-                      {question.options.map((option,index) => <button type="button" key={index} className={selectedAnswer===index?'selected':''} disabled={!myTurn || busy} onClick={() => setSelectedAnswer(index)}><b>{String.fromCharCode(65+index)}</b>{option.text}</button>)}
-                    </div>
-                    <small>{question.reference}</small>
-                    {myTurn && <button className="primary" type="button" disabled={busy || selectedAnswer===null} onClick={submitAnswer}>{t.answer}</button>}
-                  </>
-                )}
-                {gameState.phase === 'feedback' && (
-                  <>
-                    <h3>{gameState.feedback?.correct ? t.correct : t.wrong}</h3>
-                    <p>{gameState.feedback?.playerName} · {t.moved} {gameState.feedback?.steps || 0}</p>
-                    {(isHost || myTurn) && <button className="primary" type="button" disabled={busy} onClick={continueTurn}>{t.continue}</button>}
-                    {!isHost && !myTurn && <p>{t.waiting}</p>}
-                  </>
-                )}
-              </div>
-            </>
-          )}
-          <button className="text-button" type="button" disabled={busy} onClick={exitRoom}>{t.exit}</button>
         </div>
       )}
 
