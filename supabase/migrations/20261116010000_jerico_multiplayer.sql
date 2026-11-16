@@ -34,9 +34,7 @@ alter table public.jerico_room_players enable row level security;
 
 create or replace function private.jerico_is_room_member(p_room_id uuid)
 returns boolean language sql stable security definer set search_path=pg_catalog, public, auth
-as $
-  select exists(select 1 from public.jerico_room_players where room_id=p_room_id and user_id=auth.uid())
-$;
+as $$2$;
 
 drop policy if exists "room members can read their room" on public.jerico_rooms;
 create policy "room members can read their room" on public.jerico_rooms
