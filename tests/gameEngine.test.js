@@ -93,10 +93,13 @@ test('la posición del jugador sigue la curva SVG final de Egipto a Jericó', ()
     assert.deepEqual(getJourneyMapPosition(steps), expected);
   }
   const curveMidpoint = getJourneyMapPosition(3);
+  assert.deepEqual(curveMidpoint, { x: 21.63, y: 55.15 });
   assert.ok(curveMidpoint.x > boundaries[0][1].x);
   assert.ok(curveMidpoint.x < boundaries[1][1].x);
   assert.ok(curveMidpoint.y > boundaries[0][1].y);
   assert.ok(curveMidpoint.y < boundaries[1][1].y);
+  // The final section must continue along the drawn trail and land on its last circle.
+  assert.deepEqual(getJourneyMapPosition(27), { x: 69.78, y: 49.55 });
   assert.deepEqual(getJourneyMapPosition(-10), getJourneyMapPosition(0));
   assert.deepEqual(getJourneyMapPosition(100), getJourneyMapPosition(30));
 });
