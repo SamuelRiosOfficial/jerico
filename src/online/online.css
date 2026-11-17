@@ -530,3 +530,19 @@
     max-width: 55vw;
   }
 }
+
+/* Keep the online victory panel at the same full content width as normal mode. */
+.online-game-root .victory-screen {
+  align-self: stretch;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1360px;
+  min-width: 0;
+}
+
+.online-game-root .victory-overlay {
+  box-sizing: border-box;
+  width: min(690px, 92%);
+  max-width: 100%;
+  min-width: 0;
+}
